@@ -1,0 +1,355 @@
+{% extends "crppdmt/base_site.html" %}
+{% load i18n admin_static %}
+{% load set_context_var %}
+{% load get_context_var %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "crppdmt/css/forms.css" %}"/>{% endblock %}
+
+{% block coltype %}colM{% endblock %}
+
+{% block bodyclass %}{{ assessment.name }} change-form{% endblock %}
+
+{% if not is_popup %}
+{% block breadcrumbs %}
+
+<div class="breadcrumbs">
+    <a href="{% url 'index' %}">Home</a> &rsaquo;
+    {{ section.name }}
+</div>
+{% endblock %}
+{% endif %}
+
+
+{% block content %}
+<div id="content-main">
+
+
+<div class="module">
+    <table style="width:100%">
+        <caption class="title_indexcard">
+            <div class="section">Request:  {{ request_name }} </div>
+            <div style="float:right;padding-right:18px;"></div>
+        </caption>
+    </table>
+</div>
+
+
+<form name="crppdmtform" action="" method="post" id="{{ request.supervisor.user.username }}_form" onsubmit="enableDisabledSelects();return true;">{% csrf_token %}{% block form_top %}{% endblock %}
+<div>
+{{ formset.management_form }}
+<!-- to render errors div-->
+        {% if formset.errors %}
+        <div class="">
+        <p class="errornote">
+            <!-- num_errors calculat en view -->
+            {% if num_errors|length == 1 %}{% trans "Please correct the error below." %}{% else %}{% trans "Please correct the errors below." %}{% endif %}
+
+            <!-- prints model errors, right style -->
+            {% for dict in formset.errors %}
+                {% for key, value in dict.items %}
+                    {% if key == '__all__' %}
+                    <li>{{ value }}</li>
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+        </p>
+
+            <!-- it prints all errors, field errors included-->
+            {% for dict in formset.errors %}
+            {% if forloop.first%}
+            {% for error in dict.values %}
+            <li>{{ error }}</li>
+            {% endfor %}
+            {% endif %}
+            {% endfor %}
+
+
+        </div>
+        {% endif %}
+
+<fieldset class="module aligned">
+<!--  to render formsetv -->
+        {% for form in formset %}
+        {%comment%}
+            preparing the form to be printed
+            need to print form.id to avoid errors in post request
+            rest of hiden fields
+        {%endcomment%}
+        {{form.id}}
+        {{form.name.as_hidden}}
+        {{form.requesting_agency.as_hidden}}
+        {{form.date_of_closure_of_request.as_hidden}}
+
+            <div class="module" style="float:left;width:33%;">
+            <table style="width:100%;">
+            <caption>
+                <div class="section">Basic Information</div>
+            </caption>
+            <tr>
+                <td>
+                    {{form.project_name.errors}}
+                    <span class="required" style="display:inline;">{{ form.project_name.label_tag }}{{ form.project_name }}</span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.project_code.errors}}
+                    <div class="required" style="display:inline;">{{ form.project_code.label_tag }}{{ form.project_code }}</div>
+
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.project_document.errors}}
+                    <span class="required">{{ form.project_document.label_tag }}</span>
+                    {{ form.project_document }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.country.errors}}
+                    <span class="required">{{ form.country.label_tag }}</span>
+                    {{ form.country }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.duty_station.errors}}
+                    <span class="required">{{ form.duty_station.label_tag }}</span>
+                    {{ form.duty_station }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.requested_date_of_deployment.errors}}
+                    <span class="required">{{ form.requested_date_of_deployment.label_tag }}</span>
+                    {{ form.requested_date_of_deployment }}
+                    <span class="datetimeshortcuts"></span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.security_phase_in_duty_station.errors}}
+                    <span class="required">{{ form.security_phase_in_duty_station.label_tag }}</span>
+                    {{ form.security_phase_in_duty_station }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.requested_length_of_deployment.errors}}
+                    <span class="required">{{ form.requested_length_of_deployment.label_tag }}</span>
+                    {{ form.requested_length_of_deployment }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.first_request.errors}}
+                    <span class="required">{{ form.first_request.label_tag }}{{ form.first_request }}</span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.extension.errors}}
+                    <span class="required">{{ form.extension.label_tag }}</span>
+                    {{ form.extension }}
+                </td>
+            </tr>
+        </table>
+        </div>
+
+        <div class="module" style="float:left;width:33%;margin-left:10px;">
+            <table style="width:100%;">
+            <caption>
+                <div class="section">People</div>
+            </caption>
+            <tr>
+                <td>
+                    {{form.request_creator.errors}}
+                    <span class="required">{{ form.request_creator.label_tag }}</span>
+                    {% load selected_option_text%}
+                        {% selected_option_text form.request_creator form.request_creator.value|default_if_none:1 %}
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    {{form.country_representative.errors}}
+                    <span class="required">{{ form.country_representative.label_tag }}</span>
+                    {{ form.country_representative }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.supervisor.errors}}
+                    <span class="required">{{ form.supervisor.label_tag }}</span>
+                    {{ form.supervisor }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.agency_hq_focal_point.errors}}
+                    <span class="required">{{ form.agency_hq_focal_point.label_tag }}</span>
+                    {{ form.agency_hq_focal_point }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.agency_field_focal_point.errors}}
+                    <span class="required">{{ form.agency_field_focal_point.label_tag }}</span>
+                    {{ form.agency_field_focal_point }}
+                </td>
+            </tr>
+            </table>
+        </div>
+
+        <div class="module" style="float:right;width:32%;margin-left:10px;">
+            <table style="width:100%;">
+            <caption>
+                <div class="section">Control Information</div>
+            </caption>
+            <tr>
+                <td>
+                    {{form.status.errors}}
+                    <span class="required">{{ form.status.label_tag }}</span>
+                    {% load selected_option_text%}
+                        {% selected_option_text form.status form.status.value|default_if_none:1 %}
+                    {{form.status}}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.date_of_request_sent.errors}}
+                    <span class="required">{{ form.date_of_request_sent.label_tag }}</span>
+                    {{ form.date_of_request_sent.value|default_if_none:'-' }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.date_of_approval_of_candidates.errors}}
+                    <span class="required">{{ form.date_of_approval_of_candidates.label_tag }}</span>
+                    {{ form.date_of_approval_of_candidates.value|default_if_none:'-' }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.desired_date_of_acceptance_from_agency.errors}}
+                    <span class="required">{{ form.desired_date_of_acceptance_from_agency.label_tag }}</span>
+                    {{ form.desired_date_of_acceptance_from_agency }}
+                    <span class="datetimeshortcuts"></span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.date_of_deployment_reported_from_agency.errors}}
+                    <span class="required">{{ form.date_of_deployment_reported_from_agency.label_tag }}</span>
+                    {{ form.date_of_deployment_reported_from_agency }}
+                    <span class="datetimeshortcuts"></span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.effective_date_of_deployment.errors}}
+                    <span class="required">{{ form.effective_date_of_deployment.label_tag }}</span>
+                    {{ form.effective_date_of_deployment }}
+                    <span class="datetimeshortcuts"></span>
+                </td>
+            </tr>
+            </table>
+        </div>
+
+
+        <div style="clear:both;"></div>
+
+        <div class="module" style="float:left;width:100%;;">
+            <table style="width:100%;">
+            <caption>
+                <div class="section">ToR</div>
+            </caption>
+            <tr>
+                <td style="width:40%;">
+                    {{form.background_information.errors}}
+                    {{ form.background_information.label_tag }}
+                    {{ form.background_information }}
+                    <span class="help">{{ BACKGROUND_INFORMATION_HELP_TEXT }}</span>
+                </td>
+                <td style="width:40%;">
+                    {{form.objectives_and_scope.errors}}
+                    {{ form.objectives_and_scope.label_tag }}
+                    {{ form.objectives_and_scope }}
+                </td>
+            </tr>
+            <tr>
+                <td style="width:40%;">
+                    {{form.expert_profile.errors}}
+                    {{ form.expert_profile.label_tag }}
+                    {{ form.expert_profile }}
+                </td>
+                <td style="width:40%;">
+                    {{form.expected_outputs.errors}}
+                    {{ form.expected_outputs.label_tag }}
+                    {{ form.expected_outputs }}
+                </td>
+            </tr>
+            <tr>
+                <td style="width:40%;">
+                    {{form.main_duties_and_responsibilities.errors}}
+                    {{ form.main_duties_and_responsibilities.label_tag }}
+                    {{ form.main_duties_and_responsibilities }}
+                </td>
+                <td style="width:40%;">
+                    {{form.other_relevant_information.errors}}
+                    {{ form.other_relevant_information.label_tag }}
+                    {{ form.other_relevant_information }}
+                </td>
+            </tr>
+            </table>
+        </div>
+        {% endfor %}
+
+
+        <!--
+        {% for form in formset %}
+
+        <div class="form-row {% if not field.is_readonly and field.errors %} errors{% endif %} field-{{ field.name }}">
+        {% for field in form %}
+            {% if field.is_hidden %}
+                <div class="">
+                    {{ field }}
+                </div>
+            {% else %}
+            <div class="form-row {% if not field.is_readonly and field.errors %} errors{% endif %} field-{{ field.name }}">
+                {% if field.errors|length_is:'1' %}{{ field.errors }}{% endif %}
+                <div{% if not line.fields|length_is:'1' %} class="field-box{% if field.field.name %} field-{{ field.name }}{% endif %}{% if not field.is_readonly and field.errors %} errors{% endif %}"{% elif field.is_checkbox %} class="checkbox-row"{% endif %}>
+                    {% if field.field.required %}<span class="required">{% endif %}{{ field.label_tag }}{% if field.field.required %}</span>{% endif %}
+                    {{ field }}
+                    {% if field.is_datetime %}
+                        <span class="datetimeshortcuts"></span>
+                    {% endif %}
+
+
+
+
+                    {% if field.field.help_text %}
+                        <p class="help">{{ field.field.help_text|safe }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% endif %}
+        {% endfor %}
+        </div>
+    {% endfor %}
+    -->
+
+</fieldset>
+</div> <!-- form div -->
+
+<div class="submit-row">
+    <input class="default" type="submit" name="_save" value="Save"></input>
+</div> <!-- submit row div -->
+
+</div> <!-- content.main -->
+{% endblock %}
+<script>
+
+</script>

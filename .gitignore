@@ -1,0 +1,37 @@
+env
+staticfiles
+
+# exclude .idea directory
+/.db_utils
+
+# ignore .dump files
+*.dump
+
+# ignore heroku .env file
+*.env
+
+# ignore .pyc files
+*.pyc
+
+# exclude .DS_Store
+.DS_Store
+
+# exclude .idea directory
+/.idea
+
+# exclude .RHistory
+.Rhistory
+
+# exclude db.sqlite3
+db.sqlite3
+
+# ignore log files
+*.log*
+
+# ignore pdf files
+*.pdf
+
+# ignore jpg files
+*.jpg
+
+

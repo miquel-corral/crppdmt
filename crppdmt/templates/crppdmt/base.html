@@ -1,0 +1,118 @@
+{% load admin_static %}{% load firstof from future %}<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:"en-us" }}" {% if LANGUAGE_BIDI %}dir="rtl"{% endif %}>
+<head>
+<title>{% block title %}{% endblock %}</title>
+<link rel="stylesheet" type="text/css" href="{% block stylesheet %}{% static "crppdmt/css/base.css" %}{% endblock %}" />
+<link rel="stylesheet" type="text/css" href="{% static "crppdmt/css/forms.css" %}" />
+<!--
+<link rel="stylesheet" type="text/css" href="{% static "crppdmt/css/global.css" %}" />
+-->
+<link rel="stylesheet" type="text/css" href="{% static "crppdmt/css/widgets.css" %}" />
+<link rel="stylesheet" type="text/css" href="{% static "crppdmt/css/changelists.css" %}" />
+{% block extrastyle %}{% endblock %}
+<!--[if lte IE 7]><link rel="stylesheet" type="text/css" href="{% block stylesheet_ie %}{% static "crppdmt/css/ie.css" %}{% endblock %}" /><![endif]-->
+{% if LANGUAGE_BIDI %}<link rel="stylesheet" type="text/css" href="{% block stylesheet_rtl %}{% static "crppdmt/css/rtl.css" %}{% endblock %}" />{% endif %}
+<script type="text/javascript">window.__admin_media_prefix__ = "{% filter escapejs %}{% static "crppdmt/" %}{% endfilter %}";</script>
+{% block extrahead %}{{ block.super }}
+<!--
+<link rel="stylesheet" type="text/css" href="{% static "admin/css/widgets.css" %}" />
+
+
+
+
+<link rel="stylesheet" type="text/css" href={% static "admin/css/base.css" %}/>
+<link rel="stylesheet" type="text/css" href={% static "admin/css/global.css" %}/>
+<link rel="stylesheet" type="text/css" href={% static "admin/css/widgets.css" %}/>
+-->
+<script type="text/javascript"
+    src="/crppdmt/jsi18n/"></script>
+<script type="text/javascript"
+    src="{% static 'admin/js/core.js' %}"></script>
+<script type="text/javascript"
+    src="{% static 'admin/js/admin/RelatedObjectLookups.js' %}"></script>
+<script type="text/javascript"
+    src="{% static 'admin/js/jquery.js' %}"></script>
+<script type="text/javascript"
+    src="{% static 'admin/js/jquery.init.js' %}"></script>
+<script type="text/javascript"
+    src="{% static 'admin/js/actions.js' %}"></script>
+<script type="text/javascript"
+    src="{% static 'admin/js/calendar.js' %}"></script>
+<script type="text/javascript"
+    src="{% static 'admin/js/admin/DateTimeShortcuts.js' %}"></script>
+
+<script type="text/javascript"
+    src="{% static 'crppdmt/js/crppdmt.js' %}"></script>
+
+
+{{ form.media }}
+{% endblock %}
+</script>
+{% block blockbots %}<meta name="robots" content="NONE,NOARCHIVE" />{% endblock %}
+{% if form %}{{form.media}}{% endif %}
+</head>
+{% load i18n %}
+
+<body class="{% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}" onload="bindSelectFirstRequest();">
+
+<!-- Container -->
+<div id="container">
+
+    {% if not is_popup %}
+    <!-- Header -->
+    <div id="header">
+        <div id="branding">
+        {% block branding %}{% endblock %}
+        {%if not is_logout and not is_login%}{% block latest_update %}{% endblock %}{%endif%}
+        </div>
+        {% if user.is_active and not is_logout and not is_login%}
+        <div id="user-tools">
+            {% trans 'Welcome,' %}
+            <strong>{% firstof user.get_short_name user.get_username %}</strong>.&nbsp;
+            {% block userlinks %}
+                <a href="{% url 'my_change_password' %}">Change password</a>&nbsp;
+                <a href="{% url 'logout' %}">{% trans 'Log out' %}</a>
+            {% endblock %}
+        </div>
+        {% endif %}
+        {% block nav-global %}{% endblock %}
+    </div>
+    <!-- END Header -->
+    {% block breadcrumbs %}
+    <div class="breadcrumbs">
+    <a href="{% url 'crppdmt:index' %}">{% trans 'Home' %}</a>
+    {% if title %} &rsaquo; {{ title }}{% endif %}
+    </div>
+    {% endblock %}
+    {% endif %}
+
+    {% block messages %}
+        {% if messages %}
+        <ul class="messagelist">{% for message in messages %}
+          <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message|capfirst }}</li>
+        {% endfor %}</ul>
+        {% endif %}
+    {% endblock messages %}
+
+    <!-- Content -->
+    <div id="content" class="{% block coltype %}colM{% endblock %}">
+        {% block pretitle %}{% endblock %}
+        {% block content_title %}{% if title %}<h1>{{ title }}</h1>{% endif %}{% endblock %}
+        {% block content %}
+        {% block object-tools %}{% endblock %}
+        {{ content }}
+        {% endblock %}
+        {% block sidebar %}{% endblock %}
+        <br class="clear" />
+    </div>
+    <!-- END Content -->
+    {% if not is_logout %}
+    {% block footer %}<div id="footer"><h4><a href="{% url 'my_copyright' %}">Copyright © 2015</a>, City Resilience Profiling Programme</h4></div>{% endblock %}
+    {% endif %}
+</div>
+<!-- END Container -->
+<script language="javascript" type="text/javascript">
+setFocusFirstElemForm();
+</script>
+</body>
+</html>

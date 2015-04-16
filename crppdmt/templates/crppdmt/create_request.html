@@ -1,0 +1,242 @@
+{% extends "crppdmt/base_site.html" %}
+{% load i18n admin_static %}
+{% load set_context_var %}
+{% load get_context_var %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "crppdmt/css/forms.css" %}"/>{% endblock %}
+
+{% block coltype %}colM{% endblock %}
+
+{% block bodyclass %}{{ assessment.name }} change-form{% endblock %}
+
+{% if not is_popup %}
+{% block breadcrumbs %}
+
+<div class="breadcrumbs">
+    <a href="{% url 'index' %}">Home</a> &rsaquo;
+    {{ section.name }}
+</div>
+{% endblock %}
+{% endif %}
+
+
+{% block content %}
+<div id="content-main">
+
+
+<div class="module">
+    <table style="width:100%">
+        <caption class="title_indexcard">
+            <div class="section">New Expert Request. Request Creator: {{person.name}} </div>
+            <div style="float:right;padding-right:18px;"></div>
+        </caption>
+    </table>
+</div>
+
+
+<form name="crppdmtform" action="" method="post" id="{{ request.supervisor.user.username }}_form" enctype="multipart/form-data">{% csrf_token %}{% block form_top %}{% endblock %}
+<div>
+{{ formset.management_form }}
+<!-- to render errors div-->
+        {% if formset.errors %}
+        <div class="">
+        <p class="errornote">
+            <!-- num_errors calculat en view -->
+            {% if num_errors|length == 1 %}{% trans "Please correct the error below." %}{% else %}{% trans "Please correct the errors below." %}{% endif %}
+
+            <!-- prints model errors, right style -->
+            <!-- TODO: Delete -->
+
+            {% comment %}
+            {% for dict in formset.errors %}
+                {% for key, value in dict.items %}
+                    {% if key == '__all__' %}
+                    <li>{{ value }}</li>
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+
+            {% endcomment %}
+
+            <!-- it prints all errors, field errors included-->
+            {% for dict in formset.errors %}
+                {% if forloop.first%}
+                    {% for error in dict.values %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+
+
+        </p>
+
+        </div>
+        {% endif %}
+
+<fieldset class="module aligned">
+<!--  to render formsetv -->
+        {% for form in formset %}
+        {%comment%}
+            preparing the form to be printed
+            need to print form.id to avoid errors in post request
+            rest of hiden fields
+        {%endcomment%}
+        {{form.id}}
+        {{ form.request_creator.as_hidden }}
+        {{ form.name.as_hidden }}
+        {{ form.status.as_hidden }}
+        {{ form.requesting_agency.as_hidden }}
+        {{ form.date_of_closure_of_request.as_hidden }}
+
+        {% for field in form %}
+            {% if field.errors %}
+                {{field.label_tag}}
+                {{field.errors}}
+            {% endif %}
+        {% endfor %}
+
+        <div class="module" style="float:left;width:49%;">
+            <table style="width:100%;">
+            <caption>
+                <div class="section">Project Information</div>
+            </caption>
+            <tr>
+                <td>
+                    {{form.expert_profile_type.errors}}
+                    <span class="required" style="display:inline;">{{ form.expert_profile_type.label_tag }}{{ form.expert_profile_type }}</span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.project_name.errors}}
+                    <span class="required" style="display:inline;">{{ form.project_name.label_tag }}{{ form.project_name }}</span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.project_code.errors}}
+                    <div class="required" style="display:inline;">{{ form.project_code.label_tag }}{{ form.project_code }}</div>
+
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.project_document.errors}}
+                    <span class="required">{{ form.project_document.label_tag }}</span>
+                    {{ form.project_document }}
+                </td>
+            </tr>
+            </table>
+        </div>
+
+
+
+       <div class="module" style="float:right;width:49%;">
+       <table style="width:100%;">
+            <caption>
+                <div class="section">Basic Information</div>
+            </caption>
+            <tr>
+                <td>
+                    {{form.country.errors}}
+                    <span class="required">{{ form.country.label_tag }}</span>
+                    {{ form.country }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.duty_station.errors}}
+                    <span class="required">{{ form.duty_station.label_tag }}</span>
+                    {{ form.duty_station }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.requested_date_of_deployment.errors}}
+                    <span class="required">{{ form.requested_date_of_deployment.label_tag }}</span>
+                    {{ form.requested_date_of_deployment }}
+                    <span class="datetimeshortcuts"></span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.security_phase_in_duty_station.errors}}
+                    <span class="required">{{ form.security_phase_in_duty_station.label_tag }}</span>
+                    {{ form.security_phase_in_duty_station }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.requested_length_of_deployment.errors}}
+                    <span class="required">{{ form.requested_length_of_deployment.label_tag }}</span>
+                    {{ form.requested_length_of_deployment }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.first_request.errors}}
+                    <span class="required">{{ form.first_request.label_tag }}{{ form.first_request }}</span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.extension.errors}}
+                    <span class="required">{{ form.extension.label_tag }}</span>
+                    {{ form.extension }}
+                </td>
+            </tr>
+        </table>
+        </div>
+
+           <div class="module" style="width:49%;float:left;">
+            <table style="width:100%;">
+            <caption>
+                <div class="section">People</div>
+            </caption>
+            <tr>
+                <td>
+                    {{form.supervisor.errors}}
+                    <span class="required">{{ form.supervisor.label_tag }}</span>
+                    {{ form.supervisor }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.country_representative.errors}}
+                    <span class="required">{{ form.country_representative.label_tag }}</span>
+                    {{ form.country_representative }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.agency_hq_focal_point.errors}}
+                    <span class="required">{{ form.agency_hq_focal_point.label_tag }}</span>&nbsp;<span class="help">{{ IF_OTHER_THAN_SUPERVISOR_HELP_TEXT }}</span>
+                    {{ form.agency_hq_focal_point }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.agency_field_focal_point.errors}}
+                    <span class="required">{{ form.agency_field_focal_point.label_tag }}</span>&nbsp;<span class="help">{{ IF_OTHER_THAN_SUPERVISOR_HELP_TEXT }}</span>
+                    {{ form.agency_field_focal_point }}
+                </td>
+            </tr>
+            </table>
+       </div>
+
+
+        {% endfor %}
+
+
+</fieldset>
+</div> <!-- form div -->
+
+<div class="submit-row">
+    <input class="default" type="submit" name="_save" value="Save"></input>
+</div> <!-- submit row div -->
+
+</div> <!-- content.main -->
+{% endblock %}
+
+
+

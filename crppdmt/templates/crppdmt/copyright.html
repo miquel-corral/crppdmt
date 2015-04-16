@@ -1,0 +1,83 @@
+{% extends "crppdmt/base_site.html" %}
+{% load i18n admin_static %}
+{% load set_context_var %}
+{% load get_context_var %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "crppdmt/css/forms.css" %}"/>{% endblock %}
+
+{% block coltype %}colM{% endblock %}
+
+{% block bodyclass %}{{ assessment.name }} change-form{% endblock %}
+
+{% if not is_popup %}
+{% block breadcrumbs %}
+
+<div class="breadcrumbs">
+    <a href="{% url 'index' %}">{{ index_card.city }}</a> &rsaquo; Copyright
+</div>
+{% endblock %}
+{% endif %}
+
+
+{% block content %}
+<div id="content-main">
+
+
+<div class="module">
+    <table style="width:100%">
+        <caption>
+            <div class="section">{{ index_card.city }} &rsaquo; Copyright</div>
+            <div style="float:right;padding-right:18px;"></div>
+        </caption>
+    </table>
+</div>
+
+
+<div>
+<h2>What we do with the information we gather</h2>
+
+We require this information to understand your city and to provide you with a better service, and in particular for the following reasons:
+
+<h3>City Resilience Profiling Programme Objectives</h3>
+
+The City Resilience Profiling Programme (CRPP) has the objective to generate urban resilience profiles, indicators and standards to measure urban resilience.
+
+The information you provide about your city is under the scope of the MoU signed between the city and UN-Habitat and CRPP.
+
+CRPP will use the information about your city to generate your city urban resilience profile and indicators. This information might be published in restricted domains always under your consideration.
+
+
+<h3>Internal record keeping.</h3>
+
+We may use the information to improve our communications, products and services.
+
+We may periodically send communication emails about new products, events, articles or other information which we think you may find interesting using the email address which you have provided.
+
+
+<h3>Security</h3>
+We are committed to ensuring that your information is secure. In order to prevent unauthorised access or disclosure, we have put in place suitable physical, electronic and managerial procedures to safeguard and secure the information we collect online.
+
+
+<h2>Terms and conditions</h2>
+
+All materials submitted will become property of the CRPP programme.<br>
+The programme is granted to a limited, non-exclusive, royalty-free and worldwide license to reproduce, distribute, edit, adapt or create derivative works from the materials submitted.<br>
+By providing Application Materials the city warrants the programme that the city has the right to provide the information submitted, that the city is the source of all Materials and that Materials do not infringe upon or violate the rights of any person or entity, neither any law or regulation. The city indemnifies from any loss, damage and expense caused by any claim, action or judgement arising from the breach of these warranties.<br>
+The city is allowed to use the results of the CRPP assessment in the city, but it is not allowed to disseminate or share the contents and methodologies of the CRPP and its assessments in urban resilience.<br>
+
+
+<h2>How we use cookies</h2>
+
+A cookie is a small file which asks permission to be placed on your computer's hard drive. Once you agree, the file is added and the cookie helps analyse web traffic or lets you know when you visit a particular site. Cookies allow web applications to respond to you as an individual. The web application can tailor its operations to your needs, likes and dislikes by gathering and remembering information about your preferences.<br>
+We use traffic log cookies to identify which pages are being used. This helps us analyse data about web page traffic and improve our website in order to tailor it to user needs. We only use this information for statistical analysis purposes and then the data is removed from the system.<br>
+Overall, cookies help us provide you with a better website, by enabling us to monitor which pages you find useful and which you do not. A cookie in no way gives us access to your computer or any information about you, other than the data you choose to share with us.<br>
+You can choose to accept or decline cookies. Most web browsers automatically accept cookies, but you can usually modify your browser setting to decline cookies if you prefer. This may prevent you from taking full advantage of the website.<br>
+
+</div>
+
+
+</div> <!-- content.main -->
+{% endblock %}
+<script>
+
+</script>

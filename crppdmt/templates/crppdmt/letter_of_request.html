@@ -1,0 +1,169 @@
+{% extends "easy_pdf/base.html" %}
+
+{% load staticfiles %}
+
+
+{% block extra_style %}
+    <style type="text/css">
+        body {
+            font-family: "Helvetica", "sans-serif";
+            color: #333333;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div id="content">
+        <div id="header">
+            <table style="width:80%;font-size:4;">
+                <tr>
+                    <td style="align:right;">
+                        <img align="right" src="{{ BASE_DIR }}/crppdmt/static/crppdmt/img/norcap_logo.jpg" alt="My image"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align:center;font-weight:bold;">REQUEST FOR PERSONNEL FROM NRC's EMERGENCY STANDBY ROSTER</td>
+                </tr>
+                <tr>
+                    <td style="text-align:center;font-weight:bold;">NORCAP</td>
+                </tr>
+            </table>
+        </div>
+        <br>
+        <div id="basic_info">
+            <table style="width:80%;">
+                <tr>
+                    <td style="width:25%;font-weight:bold;" colspan="4">&nbsp;&nbsp;Basic Information</td>
+                </tr>
+                <tr style="border:1px solid black;">
+                    <td style="width:25%;padding:2px;vertical-align:middle;">Requesting Agency</td>
+                    <td style="width:25%;padding:2px;vertical-align:middle;">{{ expert_request.requesting_agency }}</td>
+                    <td style="width:25%;padding:2px;vertical-align:middle;">Country</td>
+                    <td style="width:25%;padding:2px;vertical-align:middle;">{{ expert_request.country }}</td>
+                </tr>
+                <tr style="border:1px solid black;">
+                    <td style="width:25%;padding:2px;vertical-align:middle;">Duty Station</td>
+                    <td style="width:25%;padding:2px;vertical-align:middle;">{{ expert_request.duty_station }}</td>
+                    <td style="width:25%;padding:2px;vertical-align:middle;">Security phase in country/duty station</td>
+                    <td style="width:25%;padding:2px;vertical-align:middle;">{{ expert_request.security_phase }}</td>
+                </tr>
+                <tr style="border:1px solid black;">
+                    <td style="width:25%;padding:2px;vertical-align:middle;">Requested date of deployment</td>
+                    <td style="width:25%;padding:2px;vertical-align:middle;">{{ expert_request.requested_date_of_deployment }}</td>
+                    <td style="width:25%;padding:2px;vertical-align:middle;">Requested length of deployment</td>
+                    <td style="width:25%;padding:2px;vertical-align:middle;">{{ expert_request.requested_length_of_deployment }}</td>
+                </tr>
+                <tr style="border:1px solid black;">
+                    <td style="width:25%;padding:2px;vertical-align:middle;">First Request<br>(indicate with yes/no)</td>
+                    <td style="width:25%;padding:2px;vertical-align:middle;">{{ expert_request.first_request }}</td>
+                    <td style="width:25%;padding:2px;vertical-align:middle;">Extension <br> (indicate with No. of extension 1,2,3)</td>
+                    <td style="width:25%;padding:2px;vertical-align:middle;">{{ expert_request.extension }}</td>
+                </tr>
+            </table>
+        </div>
+        <br>
+        <div id="people">
+            <table style="width:80%;">
+                <tr>
+                    <td style="width:25%;" colspan="2">&nbsp;&nbsp;Please provide name, title, telephone number and email address</td>
+                </tr>
+                <tr style="border:1px solid black;">
+                    <td style="width:50%;padding:2px;vertical-align:middle;">Country Representative of requesting agency</td>
+                    <td style="width:50%;padding:2px;vertical-align:middle;">
+                        {{ expert_request.country_representative.name|default_if_none:'' }}<br>
+                        {{ expert_request.country_representative.title|default_if_none:'' }}<br>
+                        {{ expert_request.country_representative.phone_no|default_if_none:''}}<br>
+                        {{ expert_request.country_representative.email|default_if_none:'' }}
+                    </td>
+                </tr>
+                <tr style="border:1px solid black;">
+                    <td style="width:50%;padding:2px;vertical-align:middle;">Supervisor of secondee</td>
+                    <td style="width:50%;padding:2px;vertical-align:middle;">
+                        {{ expert_request.supervisor.name|default_if_none:'' }}<br>
+                        {{ expert_request.supervisor.title|default_if_none:'' }}<br>
+                        {{ expert_request.supervisor.phone_no|default_if_none:''}}<br>
+                        {{ expert_request.supervisor.email|default_if_none:'' }}
+                    </td>
+                </tr>
+                <tr style="border:1px solid black;">
+                    <td style="width:50%;padding:2px;vertical-align:middle;">Agency HQ Focal Point<br>(for pre-departure breafing)</td>
+                    <td style="width:50%;padding:2px;vertical-align:middle;">
+                        {{ expert_request.agency_hq_focal_point.name|default_if_none:'' }}<br>
+                        {{ expert_request.agency_hq_focal_point.title|default_if_none:'' }}<br>
+                        {{ expert_request.agency_hq_focal_point.phone_no|default_if_none:''}}<br>
+                        {{ expert_request.agency_hq_focal_point.email|default_if_none:'' }}
+                    </td>
+                </tr>
+                <tr style="border:1px solid black;">
+                    <td style="width:50%;padding:2px;vertical-align:middle;">Agency Field Focal Point<br>contact for visa, security clearance, airport pick-up, hotel booking, etc. (if other than supervisor)</td>
+                    <td style="width:50%;padding:2px;vertical-align:middle;">
+                        {{ expert_request.agency_field_focal_point.name|default_if_none:'' }}<br>
+                        {{ expert_request.agency_field_focal_point.title|default_if_none:'' }}<br>
+                        {{ expert_request.agency_field_focal_point.phone_no|default_if_none:''}}<br>
+                        {{ expert_request.agency_field_focal_point.email|default_if_none:'' }}
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <br>
+        <div id="background_info">
+            <table style="width:80%;">
+                <tr>
+                    <td style="width:25%;font-weight:bold;" colspan="2">&nbsp;&nbsp;Background information/reason for request/extension</td>
+                </tr>
+                <tr style="border:1px solid black;">
+                    <td style="width:50%;padding:2px;vertical-align:middle;">
+                        <ul>
+                            <li>Current situation in country</li>
+                            <li>Existing programme strategies and mechanism</li>
+                            <li>Current internal staffing capacity</li>
+                            <li>Staffing plans</li>
+                            <li>Other relevant information</li>
+                        </ul>
+                    </td>
+                    <td style="width:50%;padding:2px;vertical-align:middle;">{{ expert_request.background_information|default_if_none:'' }}</td>
+                </tr>
+            </table>
+        </div>
+        <br>
+        <div id="tor">
+            <table style="width:80%;">
+                <tr>
+                    <td style="width:25%;font-weight:bold;" colspan="2">&nbsp;&nbsp;Terms of Reference for the Stand-by personnel</td>
+                </tr>
+                <tr style="border:1px solid black;">
+                    <td style="width:50%;padding:2px;vertical-align:middle;">
+                        <ul>
+                            <li>Title and level of requested personnel</li>
+                            <li>Objectives and expected output</li>
+                            <li>Main duties and responsibilities</li>
+                            <li>Reporting and supervision</li>
+                        </ul>
+                    </td>
+                    <td style="width:50%;padding:2px;vertical-align:middle;">
+                        {{ expert_request.expert_profile|default_if_none:'' }}<br>
+                        {{ expert_request.objectives_and_scope|default_if_none:'' }}<br>
+                        {{ expert_request.main_duties_and_responsibilities|default_if_none:'' }}
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <br>
+        <div id="tor">
+            <table style="width:80%;">
+                <tr>
+                    <td style="width:25%;font-weight:bold;" colspan="2">&nbsp;&nbsp;Other relevant information</td>
+                </tr>
+                <tr style="border:1px solid black;">
+                    <td style="width:50%;padding:2px;vertical-align:middle;">
+                        Practical information - banking, access to ATMs, housing - private or compound, transport arrangements for after work, is there a car pool, access to drivers for afternoon/evening, will the secondee be allowed to use UN cars, can he/she use taxi's, bus?
+                    </td>
+                    <td style="width:50%;padding:2px;vertical-align:middle;">
+                        {{ expert_request.other_relevant_information|default_if_none:''}}
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+{% endblock %}

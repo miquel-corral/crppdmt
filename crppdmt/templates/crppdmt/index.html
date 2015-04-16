@@ -1,0 +1,98 @@
+{% extends "crppdmt/base_site.html" %}
+{% load i18n admin_static %}
+
+{% load is_true %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "crppdmt/css/dashboard.css" %}" />{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+
+<div id="list" style="float:left;width:75%;">
+   {% if request_list %}
+    <div class="module request">
+        <table style="width:100%;">
+            <thead>
+            <tr style="width:100%;">
+                <th style="width:20%;">Project Name</th>
+                <th style="width:15%;">Project Code</th>
+                <th style="width:20%;">Request</td>
+                <th style="width:15%;">Request Status</th>
+                <th style="width:15%;">Alerts</th>
+                <th style="width:15%;">Actions</th>
+            </tr>
+            </thead>
+            {% for request in request_list.all %}
+                <tr class="section-{{ section.object_name|lower }}" style="width:100%;">
+                    <td style="width:20%;">{{ request.project_name }}</td>
+                    <td style="width:15%;">{{ request.project_code }}</td>
+                    <td style="width:20%;"><a href="{% url 'edit_request' request_id=request.id%}">{{ request.name }}</a></td>
+                    <td style="width:15%;">{{ request.status.name }}</td>
+                    <td style="width:15%;">Alerts</td>
+                    <td style="width:15%;">
+                        {% if request.supervisor == person or request.request_creator = person %}
+                        <a href="{% url 'edit_request' request_id=request.id%}" style="display:inline;"><img src="{% static 'crppdmt/img/icon_changelink.gif' %}" alt="ToR"/></a></a>
+                        {% endif %}
+                        <a href="{% url 'generate_letter_pdf' expert_request_id=request.id%}" target="top" style="display: inline;"><img src="{% static 'crppdmt/img/pdf.png' %}" alt="Letter of Request"/></a>
+                        <a href="{% url 'generate_tor_pdf' expert_request_id=request.id%}" target="top" style="display: inline;"><img src="{% static 'crppdmt/img/pdf.png' %}" alt="ToR"/></a>
+                    </td>
+                </tr>
+             {% endfor %}
+        </table>
+    </div>
+   {% else %}
+     Empty list
+   {% endif %}
+    <br>
+
+
+    USER:{{user.username}}
+    <br>
+    PERSON:{{person.user.username}}
+
+</div>
+
+<div id="col_right" style="float:right;width:20%;margin-right:15px;">
+    <div class="module unh-docs">
+        <table style="width:100%;">
+        <caption class="title-unh-docs">
+            <div class="section">Actions</div>
+            <div style="float:right;padding-right:18px;"></div>
+        </caption>
+        <tr><td>{% if person.can_create %}<a class="addlink" href="{% url 'new_request' %}">New Request</a>{% endif %}</td></tr>
+        </table>
+
+
+        <table style="width:100%;">
+        <caption class="title-unh-docs">
+            <div class="section">Documentation UN-HABITAT</div>
+            <div style="float:right;padding-right:18px;"></div>
+        </caption>
+        <tr><td><a href="https://www.dropbox.com/s/1lk09p053zsy8nh/UN-Habitat%20Emergency%20Protocol.pdf?dl=0" target="top">Emergency Protocol</a></td></tr>
+
+
+        {% for doc in unh_docs.all %}
+            <tr class="section-{{ section.object_name|lower }}">
+                <th scope="row">
+                    {{ doc.name }}
+                </th>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+            </tr>
+         {% endfor %}
+        </table>
+    </div>
+</div>
+</div>
+
+{% endblock %}
+
+{% block sidebar %}
+{% endblock %}

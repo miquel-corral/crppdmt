@@ -1,0 +1,134 @@
+{% extends "easy_pdf/base.html" %}
+
+{% load staticfiles %}
+
+
+{% block extra_style %}
+    <style type="text/css">
+        body {
+            font-family: "Helvetica", "sans-serif";
+            color: #333333;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div id="content">
+        <div id="header">
+            <table style="width:80%;font-size:4;">
+                <tr>
+                    <td style="text-align:center;font-weight:bold;">United Nations Human Settlements Programme (UN-HABITAT)</td>
+                </tr>
+                <tr>
+                    <td style="text-align:center;font-weight:bold;">Terms of Reference: {{ expert_request.name }}</td>
+                </tr>
+            </table>
+        </div>
+        <br>
+        <div id="basic_info">
+            <table style="width:90%;">
+                <tr style="">
+                    <td style="width:15%;padding:2px;vertical-align:middle;font-weight:bold;">Post</td>
+                    <td style="padding:2px;vertical-align:middle;">{{ expert_request.expert_profile_type }}</td>
+                </tr>
+                <tr style="">
+                    <td style="width:15%;padding:2px;vertical-align:middle;font-weight:bold;">Duty Station</td>
+                    <td style="padding:2px;vertical-align:middle;">{{ expert_request.duty_station }}</td>
+                </tr>
+                    <td style="width:15%;padding:2px;vertical-align:middle;font-weight:bold;">Term</td>
+                    <td style="padding:2px;vertical-align:middle;">{{ expert_request.requested_length_of_deployment }}</td>
+                </tr>
+            </table>
+        </div>
+        <br>
+
+        <div id="background_info">
+            <table style="width:80%;">
+                <tr>
+                    <td style="font-weight:bold;">Background:</td>
+                </tr>
+                <tr>
+                    <td style="vertical-align:middle;">
+                        {{ expert_request.background_information|default_if_none:'' }}
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <br>
+
+        <div id="objectives">
+            <table style="width:80%;">
+                <tr>
+                    <td style="font-weight:bold;">Objectives and scope:</td>
+                </tr>
+                <tr>
+                    <td style="vertical-align:middle;">
+                        {{ expert_request.objectives_and_scope|default_if_none:'' }}
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <br>
+
+
+
+        <div id="key_duties">
+            <table style="width:80%;">
+                <tr>
+                    <td style="font-weight:bold;">Key Duties:</td>
+                </tr>
+                <tr>
+                    <td style="vertical-align:middle;">
+                        {{ expert_request.main_duties_and_responsibilities|default_if_none:'' }}
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <br>
+
+        <div id="other_duties">
+            <table style="width:80%;">
+                <tr>
+                    <td style="font-weight:bold;">Other Duties:</td>
+                </tr>
+                <tr>
+                    <td style="vertical-align:middle;">
+                        This job is intended as a guide and is not intended to provide an exhaustive list of activities and areas of responsibility. The incumbent will be expected to undertake other tasks and roles on a needs basis and as directed by the Emergency Coordinator.
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <br>
+
+       <div id="expected_outputs">
+            <table style="width:80%;">
+                <tr>
+                    <td style="font-weight:bold;" >Expected outputs:</td>
+                </tr>
+                <tr>
+                    <td style="vertical-align:middle;">
+                        {{ expert_request.expected_outputs|default_if_none:'' }}
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <br>
+
+
+        <div id="qualification">
+            <table style="width:80%;">
+                <tr>
+                    <td style="font-weight:bold;">Qualifications:</td>
+                </tr>
+                <tr>
+                    <td style="vertical-align:middle;">
+                        {{ expert_request.expert_profile|default_if_none:'' }}
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <br>
+
+    </div>
+
+{% endblock %}
