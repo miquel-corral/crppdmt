@@ -2,7 +2,7 @@
 import sys, time, os
 
 from django.http import HttpResponse
-from django.template import RequestContext, loader
+from django.template import RequestContext, loader, Context
 from django.shortcuts import redirect, render_to_response
 from django.contrib.auth import authenticate, login, logout
 from django.template.response import TemplateResponse
@@ -12,21 +12,24 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import ensure_csrf_cookie
+from django.core.paginator import Paginator
+from django.core import serializers
 
 from easy_pdf.views import PDFTemplateView
 from easy_pdf.rendering import render_to_pdf_response
 
-from crppdmt.settings import BASE_DIR
+from crppdmt.settings import *
 
-from crppdmt.models import Person, ExpertRequest, RequestStatus
+from crppdmt.models import Person, ExpertRequest, RequestStatus, TraceAction
 
-from crppdmt.forms import  CreateRequest
+from crppdmt.forms import CreateRequest
 
 from crppdmt.constants import *
 
 from crppdmt.shelter_tor import *
 
 from crppdmt.my_ftp import *
+from crppdmt.my_mail import *
 
 @ensure_csrf_cookie
 def my_login(request):
@@ -110,6 +113,12 @@ def index(request):
     request_list = None
     user = None
     person = None
+    supervisor_list = None
+    creator_list = None
+    country_rep_list = None
+    field_fp_list = None
+    hq_fp_list = None
+    expert_list = None
 
     # get username from session
     username = request.session.get('username')
@@ -142,20 +151,40 @@ def index(request):
                 request_list = request_list | expert_list
 
         # concatenate like this only works when querysets from the same model
-        #request_list = supervisor_list | creator_list | country_rep_list | field_fp_list | hq_fp_list | expert_list
+        if supervisor_list is not None:
+            request_list = supervisor_list
+        if creator_list is not None:
+            request_list = request_list | creator_list
+        if country_rep_list is not None:
+            request_list = request_list | country_rep_list
+        if field_fp_list is not None:
+            request_list = request_list | field_fp_list
+        if hq_fp_list is not None:
+            request_list = request_list | hq_fp_list
+        if expert_list is not None:
+            request_list = request_list | expert_list
     except:
         #return redirect('my_login')
         raise Exception(sys.exc_info())
 
+    paginator = Paginator(request_list, 15)  # Limit items per page
+    page = request.GET.get('page')
+    try:
+        requests_paginated = paginator.page(page)
+    except:
+        print("Unexpected error:", sys.exc_info())
+        requests_paginated = paginator.page(1)
 
     template = loader.get_template('crppdmt/index.html')
     context = RequestContext(request, {
-        'request_list': request_list,
+        'request_list': requests_paginated,
         'username': username,
         'user': user,
         'person': person,
     })
     return HttpResponse(template.render(context))
+
+
 
 
 def my_copyright(request):
@@ -181,7 +210,7 @@ def my_copyright(request):
 
 @ensure_csrf_cookie
 @login_required
-def expert_request(request, request_id=None):
+def edit_request(request, request_id=None):
     """
     View for the request page
     :param request:
@@ -189,6 +218,8 @@ def expert_request(request, request_id=None):
     :return:
     """
     query_set = None
+    expert_request = ExpertRequest.objects.get(id=request_id)
+
     request_form_set = modelformset_factory(ExpertRequest, max_num=1, exclude=[], \
             widgets={'requested_date_of_deployment': forms.TextInput(attrs={'class': 'vDateField'}),
                 'desired_date_of_response': forms.TextInput(attrs={'class': 'vDateField'}),
@@ -196,6 +227,7 @@ def expert_request(request, request_id=None):
                 'desired_date_of_acceptance_from_agency': forms.TextInput(attrs={'class': 'vDateField'}),
                 'date_of_deployment_reported_from_agency': forms.TextInput(attrs={'class': 'vDateField'}),
                 'effective_date_of_deployment': forms.TextInput(attrs={'class': 'vDateField'}),
+                'project_document': forms.FileInput(),
                 })
     if request.method == 'POST':
         formset = request_form_set(request.POST, request.FILES)
@@ -212,20 +244,9 @@ def expert_request(request, request_id=None):
         #set_form_hidden_fields(formset, fields_to_show)
 
 
-    # presentation stuff
-    if query_set:
-        # to print request name in form caption
-        request_name = query_set[0].name
-        # to set value for status if not set
-        my_request = query_set[0]
-        my_request.status = RequestStatus.objects.all()[0]
-        my_request.save()
-    else:
-        request_name = "New Request"
-        formset[0].fields['status'].initial=1
-
-    return render_to_response("crppdmt/dmt_request.html",
-                              {"formset": formset, "request_name":request_name, \
+    return render_to_response("crppdmt/edit_request.html",
+                              {"formset": formset,
+                               "expert_request": expert_request,
                                "BACKGROUND_INFORMATION_HELP_TEXT":BACKGROUND_INFORMATION_HELP_TEXT},
                               context_instance=RequestContext(request))
 
@@ -241,7 +262,8 @@ def create_request(request, request_id=None):
     """
     person = get_person(request)
     query_set = None
-    request_form_set = modelformset_factory(ExpertRequest, max_num=1, form=CreateRequest)
+    request_form_set = modelformset_factory(ExpertRequest, max_num=1, form=CreateRequest, exclude=[])
+    send_to_supervision = False
 
     if request.method == 'POST':
         formset = request_form_set(request.POST, request.FILES)
@@ -260,11 +282,26 @@ def create_request(request, request_id=None):
             expert_request.name = expert_request.project_name + "_" + expert_request.expert_profile_type.name + \
                 "_" + time.strftime("%Y%m%d%H%M%S")
 
-            # save expert request instance
-            formset.save()
+            # send to supervisor. Tricky validation in python
+            if formset[0].fields['send_to_supervisor'] and str(formset[0].fields['send_to_supervisor']) == 'True':
+                # save expert request instance
+                formset.save()
+                # TODO: redirect to general checklist page
+                expert_request.status = RequestStatus.objects.get(name="Supervision")
+                send_to_supervision = True
+            else:
+                # save expert request instance
+                formset.save()
 
             # upload file to ftp. OBS: after save to avoid problems with document name (duplicates)
-            upload_project_file(expert_request.name, str(expert_request.project_document))
+            upload_project_document(expert_request.name, str(expert_request.project_document))
+
+            # send email to supervisor
+            if send_to_supervision:
+                send_request_email_to_supervisor(expert_request)
+
+            # trace action
+            trace_action("CREATE REQUEST", expert_request)
 
             return redirect("/index/", context_instance=RequestContext(request))
         else:
@@ -292,6 +329,16 @@ def create_request(request, request_id=None):
                               {"formset": formset, "person": person,
                                "IF_OTHER_THAN_SUPERVISOR_HELP_TEXT": IF_OTHER_THAN_SUPERVISOR_HELP_TEXT },
                               context_instance=RequestContext(request))
+
+def retrieve_request(request, request_name, file_name):
+    """
+    Retrieves file from ftp
+    :param request:
+    :param request_name:
+    :param file_name:
+    :return:
+    """
+
 
 
 def test(request):
@@ -334,6 +381,27 @@ def generate_tor_pdf(request, expert_request_id):
             }
 
     return render_to_pdf_response(request, "crppdmt/tor.html", context, filename=None, encoding=u'utf-8')
+
+
+def retrieve_file(request, remote_folder, remote_file):
+    """
+    retrieve_file
+    :param request:
+    :param expert_request_id:
+    :return:
+    """
+
+    # get the file
+    file_content = get_ftp_file_content(remote_folder, remote_file)
+    if file_content is None:
+        print("file_content is null!!")  # TODO: redirect to error page
+    else:
+        # return the file
+        response = HttpResponse(file_content, content_type='application/pdf')
+        response['Content-Disposition'] = 'inline;filename=' + remote_file
+        return response
+
+
 
 
 ############################################################
@@ -436,16 +504,57 @@ def get_person_by_username(username):
         return None
 
 
-def upload_project_file(request_name, document_name):
+def upload_project_document(request_name, document_name):
 
     # remove document in local file system
     try:
         my_ftp = MyFTP()
-        my_ftp.upload_project_file(request_name, document_name)
-        os.remove(str(expert_request.project_document))
+        my_ftp.upload_file(document_name, request_name, document_name)
+        os.remove(document_name)
     except:
         print("Error uploading project file: " + document_name)
-        pass # silent remove
+        pass  # silent remove
+
+
+def get_ftp_file_content(remote_folder, remote_file):
+    file_content = None
+    try:
+        my_ftp = MyFTP()
+        file_content = my_ftp.get_binary_file(remote_folder, remote_file)
+    except:
+        print("Error getting ftp file: " + remote_file)
+        pass  # silent remove
+    finally:
+        return file_content
+
+
+def send_request_email_to_supervisor(expert_request):
+    try:
+        my_mail = MyMail()
+        subject = "DMT - New Expert Request to Validate"
+        html_template = loader.get_template('crppdmt/email/supervisor.html')
+        html_content = html_template.render(Context())
+        text_template = loader.get_template('crppdmt/email/supervisor.txt')
+        text_content = text_template.render(Context())
+        my_mail.send_mail(subject, html_content, text_content, [expert_request.supervisor.user.email])
+    except:
+        print("Error sending email to supervisor. Request: " + expert_request.name)
+        print("Error: " + str(sys.exc_info()))
+        pass  # silent remove
+    finally:
+        pass
+
+
+def trace_action(action_name, expert_request):
+    try:
+        new_log = TraceAction()
+        new_log.name = action_name
+        new_log.description = serializers.serialize('xml', [expert_request])
+        new_log.request = expert_request
+        new_log.save()
+    except:
+        print("Error tracing object: " + expert_request.name)
+        print("Error: " + str(sys.exc_info()))
 
 
 

@@ -20,7 +20,7 @@ django.setup()
 
 from django.contrib.auth.models import User, Group
 from crppdmt.models import *
-from crppdmt.my_ftp import MyFTP
+from crppdmt.my_old_ftp import MyFTP
 
 def load_users_file():
     """
@@ -193,20 +193,31 @@ def load_people():
     print("load_people. End.")
 
 
-def test():
-    initial = ['1', '2']
-    second = ['3','4']
-    print ("Initial: " + str(initial))
-    print ("Second: " + str(second))
-    initial.extend(second)
-    print("Initial extended: " + str(initial))
+def load_general_checklist():
+    """
+    load general checklist questions file
+    """
+    print("load_general_checklist. Start...")
+    file_path = settings.BASE_DIR + "/files/general_checklist.tsv"
+    data_reader = csv.reader(open(file_path), dialect='excel-tab')
+    data_reader.next()  # to skip column headers
+    for row in data_reader:
+        question = GeneralCheckList()
+        question.article_description = row[0].strip()
+        question.article_number = row[1].strip()
+        question.duties_and_responsibilities = row[2].strip()
+        try:
+            question.save()
+        except:
+            print("Unexpected error:", sys.exc_info())
+    print("load_general_checklist. End.")
 
-def test_ftp():
-    my_FTP = MyFTP()
-    my_FTP.upload_project_file("TEST_DIR", "requirements.txt")
+
+
+
+
 
 if __name__ == "__main__":
-    test_ftp()
     """
     load_entity_single_field_name("roles.tsv", Role)
     load_entity_single_field_name("organizations.tsv", Organization)
@@ -219,6 +230,8 @@ if __name__ == "__main__":
     load_entity_single_field_name("expert_profile_type.tsv", ExpertProfileType)
     load_requests()
     """
+    load_general_checklist()
+
 
 
 

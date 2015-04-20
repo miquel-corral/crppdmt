@@ -29,7 +29,7 @@ urlpatterns = patterns('',
     url(r'^my_copyright/$', 'crppdmt.views.my_copyright', name='my_copyright'),
 
     # url to request edit page
-    url(r'^request/(?P<request_id>\d+)/$', 'crppdmt.views.expert_request', name='edit_request'),
+    url(r'^request/(?P<request_id>\d+)/$', 'crppdmt.views.edit_request', name='edit_request'),
 
     # url to new request page
     url(r'^create_request/', 'crppdmt.views.create_request', name='new_request'),
@@ -39,6 +39,11 @@ urlpatterns = patterns('',
 
     #url to generate ToR PDF
     url(r'^tor_pdf/(?P<expert_request_id>\d+)/$', 'crppdmt.views.generate_tor_pdf', name='generate_tor_pdf'),
+
+    #url to retrieve file from ftp
+    url(r'^retrieve_file/(?P<remote_folder>[^/]+)/(?P<remote_file>[^/]+)/', 'crppdmt.views.retrieve_file', name='retrieve_file'),
+
+
 
 
     #url to test page

@@ -4,14 +4,14 @@ from django import forms
 from constants import *
 from crppdmt.models import ExpertRequest, Person, Role
 
-
-class CreateRequest(forms.ModelForm):
-
+class BasicRequest(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
-        super(CreateRequest, self).__init__(*args, **kwargs)
+        super(BasicRequest, self).__init__(*args, **kwargs)
+
         # Date widget for requested date of deployment
         self.fields['requested_date_of_deployment'].widget = forms.TextInput(attrs={'class': 'vDateField'})
+
         # ClearableFileInput widget for upload file field
         self.fields['project_document'].widget = forms.ClearableFileInput()
 
@@ -27,15 +27,20 @@ class CreateRequest(forms.ModelForm):
         self.fields['agency_field_focal_point'].queryset = Person.objects.filter(roles__name=
                                                                                  ROLES["ROLE_FIELD_FOCAL_POINT"])
 
+    class Meta:
+        model = ExpertRequest
         # exclude fields
         exclude = ['background_information', 'objectives_and_scope', 'expert_profile', 'expected_outputs',
                    'main_duties_and_responsibilities', 'other_relevant_information', 'date_of_request_sent',
                    'date_of_approval_of_candidates', 'desired_date_of_acceptance_from_agency',
                    'date_of_deployment_reported_from_agency', 'effective_date_of_deployment',
-                   'date_of_closure_of_request']
+                   'date_of_closure_of_request', 'date_sent_to_supervisor', 'date_sent_to_validation']
 
-    class Meta:
-        model = ExpertRequest
+
+
+class CreateRequest(BasicRequest):
+    send_to_supervisor = forms.BooleanField(required=False, initial=False)  # initial force always return boolean field
+
 
 
 

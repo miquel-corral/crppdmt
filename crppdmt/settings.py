@@ -30,6 +30,8 @@ else:
 
 TEMPLATE_DEBUG = True
 
+TEMPLATE_DIRS = (BASE_DIR + "/templates/crppdmt",)
+
 ALLOWED_HOSTS = []
 
 
@@ -109,3 +111,16 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, '../crppdmt/static'),
 )
 
+# email settings
+EMAIL_HOST = 'mail.cityresilience.org'
+EMAIL_HOST_USER = 'miguel.corral@cityresilience.org'
+EMAIL_HOST_PASSWORD = 'miquel03'
+DEFAULT_FROM_EMAIL = 'miguel.corral@cityresilience.org'
+SERVER_EMAIL = 'miguel.corral@cityresilience.org'
+EMAIL_PORT = 25
+EMAIL_USE_TLS = False
+
+# date input formats
+DATE_INPUT_FORMATS = (
+    '%d/%m/%Y',  # '25/10/2006'
+)

@@ -1,6 +1,7 @@
 import django.db.models
 from django.contrib.auth.models import User, Group
 from django.core.exceptions import ValidationError
+from crppdmt.validators import *
 
 from crppdmt.constants import CHOICES_YES_NO, CHOICES_DUTIES, CHOICES_RECOMMENDATION, CHOICES_CONTACT_FREQUENCY, ROLES
 
@@ -106,14 +107,16 @@ class ExpertRequest(BasicName):
     date_of_deployment_reported_from_agency = django.db.models.DateField(null=True, blank=True)
     effective_date_of_deployment = django.db.models.DateField(null=True, blank=True)
     date_of_closure_of_request = django.db.models.DateField(null=True, blank=True)
+    date_sent_to_supervisor = django.db.models.DateField(null=True, blank=True)
+    date_sent_to_validation = django.db.models.DateField(null=True, blank=True)
     # basic information
     project_name = django.db.models.CharField(max_length=100, null=False, blank=False)
     project_code = django.db.models.CharField("Project/Budget code", max_length=100, null=False, blank=False)
-    project_document = django.db.models.FileField(null=True, blank=True)
+    project_document = django.db.models.FileField(null=True, blank=True, validators=[validate_file_extension, validate_file_size])
     requesting_agency = django.db.models.CharField(max_length=100, null=False, blank=False, default="UN-HABITAT")
     country = django.db.models.CharField(max_length=250, null=False, blank=False)
     duty_station = django.db.models.CharField(max_length=250, null=False, blank=False)
-    requested_date_of_deployment = django.db.models.DateField(null=False, blank=False)
+    requested_date_of_deployment = django.db.models.DateField(null=False, blank=False, validators=[validate_date_greater_than_today])
     security_phase_in_duty_station = django.db.models.CharField(max_length=50, null=False, blank=False, default="NA")
     requested_length_of_deployment = django.db.models.CharField(max_length=50, null=False, blank=False)
     first_request = django.db.models.CharField(max_length=5, choices=CHOICES_YES_NO, null=False, blank=False)
@@ -133,6 +136,7 @@ class ExpertRequest(BasicName):
     expected_outputs = django.db.models.TextField(null=True, blank=True)
     main_duties_and_responsibilities = django.db.models.TextField(null=True, blank=True)
     other_relevant_information = django.db.models.TextField(null=True, blank=True)
+
 
     def clean(self):
         # Control supervisor and country representative not the same person
@@ -228,6 +232,7 @@ class PER(Common):
     competence_development = django.db.models.TextField(null=True, blank=True)
 
 
+
 class AlertType(BasicName):
     """
     Represents an alert type
@@ -260,3 +265,22 @@ class Statistic(Common):
     number_of_requests = django.db.models.IntegerField(blank=False, null=False)
     number_of_missions_closed = django.db.models.IntegerField(blank=False, null=False)
     number_of_missions_closed_no_issues = django.db.models.IntegerField(blank=False, null=False)
+
+
+class GeneralCheckList(Common):
+    """
+    Represents questions of general check list
+    """
+    article_description = django.db.models.CharField(max_length=250, null=True, blank=True)
+    article_number = django.db.models.CharField(max_length=250, null=True, blank=True)
+    duties_and_responsibilities = django.db.models.TextField(null=False, blank=False)
+
+
+class TraceAction(Common):
+    """
+    Represents an action traced by the system
+    """
+    action = django.db.models.CharField(max_length=50, null=False, blank=False)
+    description = django.db.models.TextField(null=False, blank=False)
+    request = django.db.models.ForeignKey(ExpertRequest)
+
