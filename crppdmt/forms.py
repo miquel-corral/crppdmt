@@ -4,16 +4,16 @@ from django import forms
 from constants import *
 from crppdmt.models import ExpertRequest, Person, Role
 
-class BasicRequest(forms.ModelForm):
+class BasicRequestForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
-        super(BasicRequest, self).__init__(*args, **kwargs)
+        super(BasicRequestForm, self).__init__(*args, **kwargs)
 
         # Date widget for requested date of deployment
         self.fields['requested_date_of_deployment'].widget = forms.TextInput(attrs={'class': 'vDateField'})
 
         # ClearableFileInput widget for upload file field
-        self.fields['project_document'].widget = forms.ClearableFileInput()
+        self.fields['project_document'].widget = forms.FileInput()
 
         # filter people with role supervisor
         self.fields['supervisor'].queryset = Person.objects.filter(roles__name=ROLES["ROLE_SUPERVISOR"])
@@ -37,10 +37,17 @@ class BasicRequest(forms.ModelForm):
                    'date_of_closure_of_request', 'date_sent_to_supervisor', 'date_sent_to_validation']
 
 
+class CreateRequestForm(BasicRequestForm):
+    #send_to_supervisor = forms.BooleanField(required=False, initial=False)  # initial force always return boolean field
+    pass
 
-class CreateRequest(BasicRequest):
+
+class EditRequestForm(BasicRequestForm):
     send_to_supervisor = forms.BooleanField(required=False, initial=False)  # initial force always return boolean field
 
+
+class GeneralCheckListForm(forms.Form):
+    check_field = forms.BooleanField(required=True, initial=False, label="Acknowledgment of the above commitments")  # initial force always return boolean field
 
 
 

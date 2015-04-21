@@ -140,8 +140,17 @@ class ExpertRequest(BasicName):
 
     def clean(self):
         # Control supervisor and country representative not the same person
-        if self.supervisor == self.country_representative:
-            raise ValidationError('Country Representative and Supervisor must be different.')
+        if hasattr(self, 'supervisor') and hasattr(self, 'country_representative'):
+            if self.supervisor == self.country_representative:
+                raise ValidationError('Country Representative and Supervisor must be different.')
+
+    def has_no_empty_text_fields(self):
+        if str(self.expected_outputs) or str(self.background_information) or str(self.objectives_and_scope) or \
+            str(self.expert_profile) or str(self.main_duties_and_responsibilities) or \
+                        str(self.other_relevant_information) == '':
+            return False;
+        return True;
+
 
 class Duty(BasicName):
     """
@@ -282,5 +291,5 @@ class TraceAction(Common):
     """
     action = django.db.models.CharField(max_length=50, null=False, blank=False)
     description = django.db.models.TextField(null=False, blank=False)
-    request = django.db.models.ForeignKey(ExpertRequest)
-
+    expert_request = django.db.models.ForeignKey(ExpertRequest)
+    person = django.db.models.ForeignKey(Person)

@@ -46,9 +46,6 @@
             {% if num_errors|length == 1 %}{% trans "Please correct the error below." %}{% else %}{% trans "Please correct the errors below." %}{% endif %}
 
             <!-- prints model errors, right style -->
-            <!-- TODO: Delete -->
-
-            {% comment %}
             {% for dict in formset.errors %}
                 {% for key, value in dict.items %}
                     {% if key == '__all__' %}
@@ -57,8 +54,7 @@
                 {% endfor %}
             {% endfor %}
 
-            {% endcomment %}
-
+            {% comment %}
             <!-- it prints all errors, field errors included-->
             {% for dict in formset.errors %}
                 {% if forloop.first%}
@@ -67,7 +63,7 @@
                     {% endfor %}
                 {% endif %}
             {% endfor %}
-
+            {% endcomment %}
 
         </p>
 
@@ -85,6 +81,7 @@
         {{form.id}}
         {{ form.request_creator.as_hidden }}
         {{ form.name.as_hidden }}
+        {{ form.status.as_hidden }}
         {{ form.requesting_agency.as_hidden }}
         {{ form.date_of_closure_of_request.as_hidden }}
 
@@ -95,6 +92,8 @@
             {% endif %}
         {% endfor %}
 
+        {% if form.non_field_errors %} {{ form.non_field_errors}} {% endif %}
+
         <div class="module" style="float:left;width:49%;">
             <table style="width:100%;">
             <caption>
@@ -103,7 +102,7 @@
             <tr>
                 <td>
                     {{form.expert_profile_type.errors}}
-                    <span class="required" style="display:inline;">{{ form.expert_profile_type.label_tag }}{{ form.expert_profile_type }}</span>
+                    <span class="required" style="display:inline;">{{ form.expert_profile_type.label_tag }}{{ expert_request.expert_profile_type.name }}</span>
                 </td>
             </tr>
             <tr>
@@ -124,9 +123,10 @@
                     {{form.project_document.errors}}
                     <span class="required">{{ form.project_document.label_tag }}</span>
                     {% if expert_request.project_document %}
-                        <a href="{% url 'retrieve_file' remote_folder=expert_request.name remote_file=expert_request.project_document|get_filename  %}" target="top">{{ expert_request.project_document }}</a>
+                        <a href="{% url 'retrieve_file' remote_folder=expert_request.name remote_file=expert_request.project_document|get_filename  %}" target="top">{{ expert_request.project_document }}</a><br>
                     {% endif %}
-                    {{ form.project_document }}
+                    {{ form.project_document }}<br>
+                    <span class="helptext">Please provide PDF files not bigger than 2MB.</span>
                 </td>
             </tr>
             </table>
@@ -143,9 +143,7 @@
                 <td>
                     {{form.status.errors}}
                     <span class="required">{{ form.status.label_tag }}</span>
-                    {% load selected_option_text%}
-                        {% selected_option_text form.status form.status.value|default_if_none:'Preparation' %}
-
+                    {{ expert_request.status.name }}
                 </td>
             </tr>
             <tr>
@@ -167,7 +165,8 @@
                     {{form.requested_date_of_deployment.errors}}
                     <span class="required">{{ form.requested_date_of_deployment.label_tag }}</span>
                     {{ form.requested_date_of_deployment }}
-                    <span class="datetimeshortcuts"></span>
+                    <span class="datetimeshortcuts"></span><br>
+                    <span class="helptext">Date format: YYYY-MM-DD</span>
                 </td>
             </tr>
             <tr>
@@ -282,6 +281,33 @@
             </tr>
             </table>
         </div>
+
+        <div style="clear:both;"></div>
+
+      <div style="width:100%;">
+            <table style="width:100%;">
+                <tr>
+                    <td colspan="2" style="text-align:right;">
+                        {{ form.send_to_supervisor.errors }}
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width:88%;"></td>
+                    <td class="required" style="width:10%;text-align:right;vertical-align:middle;">
+                        {% if expert_request.status.name = 'Preparation' %}
+                            Send to Supervisor
+                        {% endif %}
+                        {% if expert_request.status.name = 'Supervision' %}
+                            Send to Validation
+                        {% endif %}
+                    </td>
+                    <td style="width:2%;vertical-align:middle;">
+                        {{ form.send_to_supervisor }}
+                    </td>
+                </tr>
+            </table>
+       </div>
+
 
         {% endfor %}
 

@@ -48,8 +48,12 @@ IF_OTHER_THAN_SUPERVISOR_HELP_TEXT = "Do not inform if same as supervisor"
 
 PROFILE_SHELTER = "Shelter"
 
-
-
+################################################
+#
+# Presentation
+#
+################################################
+ITEMS_PER_PAGE = 15
 
 
 

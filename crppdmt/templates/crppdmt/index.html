@@ -35,7 +35,7 @@
             <tr class="section-{{ section.object_name|lower }}" style="width:100%;">
                     <td style="width:20%;">{{ request.project_name }}</td>
                     <td style="width:15%;">{{ request.project_code }}</td>
-                    <td style="width:20%;"><a href="{% url 'edit_request' request_id=request.id%}">{{ request.name }}</a></td>
+                    <td style="width:20%;">{{ request.name }}</td>
                     <td style="width:15%;">{{ request.status.name }}</td>
                     <td style="width:15%;">Alerts</td>
                     <td style="width:15%;">

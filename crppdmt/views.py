@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-import sys, time, os
+import sys
+import time
+import os
+import datetime
 
 from django.http import HttpResponse
 from django.template import RequestContext, loader, Context
@@ -20,9 +23,9 @@ from easy_pdf.rendering import render_to_pdf_response
 
 from crppdmt.settings import *
 
-from crppdmt.models import Person, ExpertRequest, RequestStatus, TraceAction
+from crppdmt.models import Person, ExpertRequest, GeneralCheckList, TraceAction, RequestStatus
 
-from crppdmt.forms import CreateRequest
+from crppdmt.forms import CreateRequestForm, EditRequestForm, GeneralCheckListForm
 
 from crppdmt.constants import *
 
@@ -167,7 +170,7 @@ def index(request):
         #return redirect('my_login')
         raise Exception(sys.exc_info())
 
-    paginator = Paginator(request_list, 15)  # Limit items per page
+    paginator = Paginator(request_list, ITEMS_PER_PAGE)  # Limit items per page
     page = request.GET.get('page')
     try:
         requests_paginated = paginator.page(page)
@@ -218,9 +221,12 @@ def edit_request(request, request_id=None):
     :return:
     """
     query_set = None
+    # get expert request
     expert_request = ExpertRequest.objects.get(id=request_id)
-
-    request_form_set = modelformset_factory(ExpertRequest, max_num=1, exclude=[], \
+    # get person
+    person = get_person(request)
+    # formset
+    request_form_set = modelformset_factory(ExpertRequest, form=EditRequestForm, max_num=1, exclude=[], \
             widgets={'requested_date_of_deployment': forms.TextInput(attrs={'class': 'vDateField'}),
                 'desired_date_of_response': forms.TextInput(attrs={'class': 'vDateField'}),
                 'date_of_approval_of_candidates': forms.TextInput(attrs={'class': 'vDateField'}),
@@ -229,19 +235,63 @@ def edit_request(request, request_id=None):
                 'effective_date_of_deployment': forms.TextInput(attrs={'class': 'vDateField'}),
                 'project_document': forms.FileInput(),
                 })
+
     if request.method == 'POST':
         formset = request_form_set(request.POST, request.FILES)
         if formset.is_valid():
+            # get instance
+            expert_request = formset[0].save(commit=False)
+            # control HQ and field focal point informed
+            if not expert_request.agency_hq_focal_point:
+                    expert_request.agency_hq_focal_point = expert_request.supervisor
+            if not expert_request.agency_field_focal_point:
+                    expert_request.agency_field_focal_point = expert_request.supervisor
+
+            if expert_request.project_document:
+                # upload file to ftp. OBS: after save to avoid problems with document name (duplicates)
+                upload_project_document(expert_request.name, str(expert_request.project_document))
+
+            # save form
             formset.save()
-            return redirect("/index/", context_instance=RequestContext(request))
+            # trace action
+            trace_action("EDIT REQUEST", expert_request, person)
+            # check send to supervisor. Tricky validation in python. Check Action!!!
+            if formset[0].cleaned_data['send_to_supervisor'] and formset[0].cleaned_data['send_to_supervisor'] is True:
+                # redirect to general check list page
+                if expert_request.status.name == 'Preparation':
+                    return redirect("/general_checklist/to_supervisor/" + str(expert_request.id),
+                                    context_instance=RequestContext(request))
+                if expert_request.status.name == 'Supervision':
+                    return redirect("/general_checklist/to_validation/" + str(expert_request.id),
+                                    context_instance=RequestContext(request))
+            else:
+                # return to request list
+                return redirect("/index", context_instance=RequestContext(request))
+                """
+                # validate no empty fields
+                if expert_request.has_no_empty_text_fields():
+                    # save expert request instance
+                    formset.save()
+                    # trace action
+                    trace_action("SEND TO SUPERVISOR", expert_request, person)
+                    # redirect to general checklist page
+                    return redirect("/general_checklist/to_supervision/" + str(expert_request.id), context_instance=RequestContext(request))
+                else:
+                    formset.errors[0]['Text Fields']='All text fields must be informed .'
+            else:
+                # Save changes
+                formset.save()
+                # trace action
+                trace_action("EDIT REQUEST", expert_request, person)
+                # return to request list
+                return redirect("/index", context_instance=RequestContext(request))
+                """
         else:
             if format(len(formset.errors) > 0):
                 num_errors = len(formset.errors[0])
-            #set_form_hidden_fields(formset, fields_to_show)
     else:
         query_set = ExpertRequest.objects.filter(pk=request_id)
         formset = request_form_set(queryset=query_set)
-        #set_form_hidden_fields(formset, fields_to_show)
 
 
     return render_to_response("crppdmt/edit_request.html",
@@ -262,7 +312,7 @@ def create_request(request, request_id=None):
     """
     person = get_person(request)
     query_set = None
-    request_form_set = modelformset_factory(ExpertRequest, max_num=1, form=CreateRequest, exclude=[])
+    request_form_set = modelformset_factory(ExpertRequest, max_num=1, form=CreateRequestForm, exclude=[])
     send_to_supervision = False
 
     if request.method == 'POST':
@@ -282,37 +332,23 @@ def create_request(request, request_id=None):
             expert_request.name = expert_request.project_name + "_" + expert_request.expert_profile_type.name + \
                 "_" + time.strftime("%Y%m%d%H%M%S")
 
-            # send to supervisor. Tricky validation in python
-            if formset[0].fields['send_to_supervisor'] and str(formset[0].fields['send_to_supervisor']) == 'True':
-                # save expert request instance
-                formset.save()
-                # TODO: redirect to general checklist page
-                expert_request.status = RequestStatus.objects.get(name="Supervision")
-                send_to_supervision = True
-            else:
-                # save expert request instance
-                formset.save()
-
             # upload file to ftp. OBS: after save to avoid problems with document name (duplicates)
             upload_project_document(expert_request.name, str(expert_request.project_document))
 
-            # send email to supervisor
-            if send_to_supervision:
-                send_request_email_to_supervisor(expert_request)
+            # save expert request
+            formset.save()
 
             # trace action
-            trace_action("CREATE REQUEST", expert_request)
+            trace_action("CREATE REQUEST", expert_request, person)
 
             return redirect("/index/", context_instance=RequestContext(request))
         else:
             if format(len(formset.errors) > 0):
                 num_errors = len(formset.errors[0])
-            #set_form_hidden_fields(formset, fields_to_show)
     else:
         query_set = ExpertRequest.objects.filter(pk=request_id)
         formset = request_form_set(queryset=query_set)
 
-        #set_form_hidden_fields(formset, fields_to_show)
 
     # initial values
     if not query_set:
@@ -330,14 +366,96 @@ def create_request(request, request_id=None):
                                "IF_OTHER_THAN_SUPERVISOR_HELP_TEXT": IF_OTHER_THAN_SUPERVISOR_HELP_TEXT },
                               context_instance=RequestContext(request))
 
-def retrieve_request(request, request_name, file_name):
+@ensure_csrf_cookie
+@login_required
+def general_checklist(request, action, expert_request_id):
     """
-    Retrieves file from ftp
+    View to present general checklist page
     :param request:
-    :param request_name:
-    :param file_name:
+    :param action:
+    :param expert_request_id:
     :return:
     """
+
+    print("general_checklist. action: " + action);
+
+    # get expert request
+    expert_request = ExpertRequest.objects.get(id=expert_request_id)
+
+    # get person
+    person = get_person(request)
+
+    # access control
+    if expert_request.status.name == "Supervision" and \
+            (expert_request.supervisor == person or expert_request.request_creator == person):
+        pass
+    else:
+        pass  #TODO: redirect to control access page
+
+
+    # get check list
+    all_items = GeneralCheckList.objects.all().order_by('id')
+    # error required ack
+    error_required_ack = False
+    if request.method == 'POST':
+        my_form = GeneralCheckListForm(request.POST)
+
+        if my_form.is_valid():
+            # get request
+            expert_request = ExpertRequest.objects.get(id=expert_request_id)
+            # get value of action
+            print("action: " + action)
+
+            # settings per action
+            if action == "to_supervisor":
+                expert_request.date_sent_to_supervisor = datetime.datetime.date(datetime.datetime.now())
+                expert_request.status = RequestStatus.objects.get(name="Supervision")
+                # update expert request
+                expert_request.save()
+                # send email to supervisor
+                send_request_email_to(expert_request, "Supervisor")
+                # trace action
+                trace_action("REQUEST TO SUPERVISOR", expert_request, person)
+
+            if action == "to_validation":
+                expert_request.date_sent_to_validation = datetime.datetime.date(datetime.datetime.now())
+                expert_request.status = RequestStatus.objects.get(name="Validation")
+                # update expert request
+                expert_request.save()
+                # send email to validator
+                send_request_email_to(expert_request, "Validator")
+                # trace action
+                trace_action("REQUEST TO VALIDATOR", expert_request, person)
+
+
+            # back to request list page
+            return redirect("/index/", context_instance=RequestContext(request))
+        else:
+            error_required_ack = True
+    else:
+        # empty form
+        my_form = GeneralCheckListForm()
+
+
+    paginator = Paginator(all_items, ITEMS_PER_PAGE)  # Limit items per page
+    page = request.GET.get('page')
+    try:
+        item_list = paginator.page(page)
+    except:
+        print("Unexpected error:", sys.exc_info())
+        item_list = paginator.page(1)
+
+    return render_to_response("crppdmt/general_checklist.html",
+                              {"item_list": item_list,
+                               "person": person,
+                               "form": my_form,
+                               "action": action,
+                               "expert_request_id": expert_request_id,
+                               "expert_request_name": expert_request.name,
+                               "error_required_ack":error_required_ack},
+                              context_instance=RequestContext(request))
+
+
 
 
 
@@ -528,15 +646,22 @@ def get_ftp_file_content(remote_folder, remote_file):
         return file_content
 
 
-def send_request_email_to_supervisor(expert_request):
+def send_request_email_to(expert_request, action):
     try:
         my_mail = MyMail()
         subject = "DMT - New Expert Request to Validate"
         html_template = loader.get_template('crppdmt/email/supervisor.html')
-        html_content = html_template.render(Context())
+        html_content = html_template.render(Context({'request_name': expert_request.name,}))
         text_template = loader.get_template('crppdmt/email/supervisor.txt')
-        text_content = text_template.render(Context())
-        my_mail.send_mail(subject, html_content, text_content, [expert_request.supervisor.user.email])
+        text_content = text_template.render(Context({'request_name': expert_request.name,}))
+        recipients = [expert_request.supervisor.user.email]
+        if action == "Supervision":
+            if expert_request.supervisor is not expert_request.request_creator:
+                recipients = recipients + [expert_request.request_creator.user.email]
+        if action == "Validation":
+            recipients = recipients + [expert_request.country_representative.user.email]
+        # send email
+        my_mail.send_mail(subject, html_content, text_content, recipients)
     except:
         print("Error sending email to supervisor. Request: " + expert_request.name)
         print("Error: " + str(sys.exc_info()))
@@ -545,12 +670,16 @@ def send_request_email_to_supervisor(expert_request):
         pass
 
 
-def trace_action(action_name, expert_request):
+def trace_action(action_name, expert_request, person):
     try:
+        print("Expert requ.name: " + expert_request.name)
         new_log = TraceAction()
-        new_log.name = action_name
+        new_log.action = action_name
+        new_log.expert_request = expert_request
+        print("new_log.expert_request: " + new_log.expert_request.name)
         new_log.description = serializers.serialize('xml', [expert_request])
-        new_log.request = expert_request
+        print("Expert requ.name: " + expert_request.name)
+        new_log.person = person
         new_log.save()
     except:
         print("Error tracing object: " + expert_request.name)

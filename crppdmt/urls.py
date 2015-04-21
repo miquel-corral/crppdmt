@@ -43,6 +43,9 @@ urlpatterns = patterns('',
     #url to retrieve file from ftp
     url(r'^retrieve_file/(?P<remote_folder>[^/]+)/(?P<remote_file>[^/]+)/', 'crppdmt.views.retrieve_file', name='retrieve_file'),
 
+    # url to general checklist page
+    url(r'^general_checklist/(?P<action>[^/]+)/(?P<expert_request_id>\d+)/$', 'crppdmt.views.general_checklist', name='general_checklist'),
+
 
 
 

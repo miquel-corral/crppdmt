@@ -1,0 +1,129 @@
+{% extends "crppdmt/base_site.html" %}
+{% load i18n admin_static %}
+
+{% load is_true %}
+
+{% load admin_list %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "crppdmt/css/dashboard.css" %}" />{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}dashboard{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'index' %}">Home</a> &rsaquo; {{ expert_request_name }} &rsaquo; {% if action == 'to_supervisor' %} Send to Supervisor {% endif %}
+</div>
+{% endblock %}
+
+
+{% block content %}
+<div id="content-main">
+
+<div id="explanation" style="margin-bottom:10px;">
+    <strong>MOU Check List, read carefully and apply as required to request and identify a NORCAP Expert.<br>
+    Notice that this policy apply pre-deployment, during deployment and post-deployment.
+    <strong>
+</div>
+
+<div id="list" style="float:left;width:75%;">
+
+    <div class="module request">
+        <table style="width:100%;">
+            <thead>
+            <tr style="width:100%;">
+                <th style="width:20%;">Description</th>
+                <th style="width:15%;">Article</th>
+                <th style="width:20%;">Duties and responsibilities</td>
+            </tr>
+            </thead>
+            {% if item_list %}
+            {% for item in item_list %}
+            <tr class="section-{{ section.object_name|lower }}" style="width:100%;">
+                    <td style="width:20%;"><div style="word-wrap: break-word;white-space: pre-wrap;white-space: -webkit-pre-wrap;">{{ item.article_description }}</div></td>
+                    <td style="width:10%;"><div style="word-wrap: break-word;white-space: pre-wrap;white-space: -webkit-pre-wrap;">{{ item.article_number }}</div></td>
+                    <td style="width:70%;"><div style="word-wrap: break-word;white-space: pre-wrap;white-space: -webkit-pre-wrap;">{{ item.duties_and_responsibilities }}</div></td>
+            </tr>
+            {% endfor %}
+        </table>
+            {% if item_list.paginator %}
+                <p class="paginator">
+                        {% if item_list.has_previous %}
+                        <span class="">
+                            <a href="?page={{ item_list.previous_page_number }}"> Previous </a>
+                        </span>
+                        {% endif %}
+
+                        <span class="this-page">
+                            Page {{ item_list.number }} of {{ item_list.paginator.num_pages }}.
+                        </span>
+
+                        {% if item_list.has_next %}
+                        <span class="">
+                            <a href="?page={{ item_list.next_page_number }}"> Next </a>
+                        </span>
+                        {% endif %}
+                </p>
+            {% endif %}
+            {% else %}
+        <table style="width:100%;">
+            <tr class="section-{{ section.object_name|lower }}" style="width:100%;">
+                <td colspan="3">No related items found.</td>
+            </tr>
+        </table>
+            {% endif %}
+    </div>
+
+    <form name="crppdmtform" action="" method="post" id="{{ expert_request_id }}_form" enctype="multipart/form-data">{% csrf_token %}{% block form_top %}{% endblock %}
+        <table style="width:100%;">
+            <tr>
+                <td width="72%"></td>
+                <td colspan="2" style="width:28%;text-align:right;">{{ form.check_field.errors }}</td>
+            </tr>
+            <tr>
+                <td colspan="2" class="required" style="width:98%;text-align:right;vertical-align:middle;">
+                    {% if action == 'to_supervisor' %}
+                        Send to Supervisor
+                    {% endif %}
+                    {% if action == 'to_validation' %}
+                        Send to Validation
+                    {% endif %}
+                </td>
+                <td style="width:2%;" >
+                    {{ form.check_field }}
+                </td>
+            </tr>
+        </table>
+
+
+    <div class="submit-row">
+        {% if action == 'to_supervisor' %}
+            <input class="default" type="submit" name="_save" value="Send to Supervisor" required="True"></input>
+        {% endif %}
+        {% if action == 'to_validation' %}
+            <input class="default" type="submit" name="_save" value="Send to Validation" required="True"></input>
+        {% endif %}
+    </div>
+    </form>
+
+
+
+
+
+    <br>
+
+
+    USER:{{user.username}}
+    <br>
+    PERSON:{{person.user.username}}
+
+</div>
+
+
+</div>
+
+{% endblock %}
+
+{% block sidebar %}
+{% endblock %}
