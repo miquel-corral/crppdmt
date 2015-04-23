@@ -1,12 +1,7 @@
 import sys
 from ftpretty import ftpretty
+from settings_private import *
 
-# FTP Details
-FTP_HOST = "citiresilience.org"
-FTP_USER = "citiresilience"
-FTP_PASS = "Mike2003"
-FTP_PORT = 21
-FTP_BASE_DIR = "crppdmtfiles"
 
 
 class MyFTP():
@@ -61,3 +56,8 @@ class MyFTP():
             if f:
                 f.close()
             return contents
+
+
+        git filter-branch --force --index-filter \
+'git rm --cached --ignore-unmatch Rakefile' \
+--prune-empty --tag-name-filter cat -- --all

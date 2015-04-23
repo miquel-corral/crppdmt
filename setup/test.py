@@ -2,6 +2,7 @@
 
 import sys
 import os
+import hashlib
 from django.conf import settings
 from django.template import Context, loader
 from easy_pdf.rendering import render_to_pdf_response, render_to_pdf
@@ -64,11 +65,16 @@ def test_render_to_pdf():
         #letter_pdf = render_to_pdf('crppdmt/letter_of_request.html', context)
 
 
+def test_encryption():
+    # encrypt password
+    print(hashlib.sha224("password").hexdigest());
+
 
 
 if __name__ == "__main__":
     #test_ftp()
     #test_mail()
     #test_expert_request()
-    test_render_to_pdf()
+    #test_render_to_pdf()
+    test_encryption()
 

@@ -110,6 +110,7 @@ class ExpertRequest(BasicName):
     date_sent_to_supervisor = django.db.models.DateField(null=True, blank=True)
     date_sent_to_validation = django.db.models.DateField(null=True, blank=True)
     # basic information
+    title = django.db.models.CharField(max_length=100, null=False, blank=False)
     project_name = django.db.models.CharField(max_length=100, null=False, blank=False)
     project_code = django.db.models.CharField("Project/Budget code", max_length=100, null=False, blank=False)
     project_document = django.db.models.FileField(null=True, blank=True, validators=[validate_file_extension, validate_file_size])

@@ -676,6 +676,7 @@ def upload_project_document(request_name, document_name):
         os.remove(document_name)
     except:
         print("Error uploading project file: " + document_name)
+        print(sys.exc_info())
         pass  # silent remove
 
 

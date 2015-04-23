@@ -124,6 +124,7 @@
                     <span class="required" style="display:inline;">{{ form.expert_profile_type.label_tag }}{{ expert_request.expert_profile_type.name }}</span>
                 </td>
             </tr>
+
             <tr>
                 <td>
                     {{form.project_name.errors}}
@@ -163,6 +164,12 @@
                     {{form.status.errors}}
                     <span class="required">{{ form.status.label_tag }}</span>
                     {{ expert_request.status.name }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.title.errors}}
+                    <span class="required" style="display:inline;">{{ form.title.label_tag }}{{ form.title }}</span>
                 </td>
             </tr>
             <tr>

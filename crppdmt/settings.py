@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
+from settings_private import *
+
 # Control execution environment
 deploy_env = os.environ.get('DEPLOY_ENV','LOCAL')
 

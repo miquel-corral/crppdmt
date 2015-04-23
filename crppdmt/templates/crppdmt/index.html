@@ -22,23 +22,27 @@
         <table style="width:100%;">
             <thead>
             <tr style="width:100%;">
-                <th style="width:20%;">Project Name</th>
-                <th style="width:15%;">Project Code</th>
-                <th style="width:20%;">Request</td>
-                <th style="width:15%;">Request Status</th>
-                <th style="width:15%;">Alerts</th>
-                <th style="width:15%;">Actions</th>
+                <th style="width:12%;">Title</th>
+                <th style="width:12%;">Project Name</th>
+                <th style="width:12%;">Project Code</th>
+                <th style="width:12%;">Duty Station</td>
+                <th style="width:12%;">Date of Request</td>
+                <th style="width:12%;">Request Status</th>
+                <th style="width:12%;">Alerts</th>
+                <th style="width:16%;">Actions</th>
             </tr>
             </thead>
             {% if request_list %}
             {% for request in request_list %}
             <tr class="section-{{ section.object_name|lower }}" style="width:100%;">
-                    <td style="width:20%;">{{ request.project_name }}</td>
-                    <td style="width:15%;">{{ request.project_code }}</td>
-                    <td style="width:20%;">{{ request.name }}</td>
-                    <td style="width:15%;">{{ request.status.name }}</td>
-                    <td style="width:15%;">Alerts</td>
-                    <td style="width:15%;">
+                    <td style="width:12%;">{{ request.title }}</td>
+                    <td style="width:12%;">{{ request.project_name }}</td>
+                    <td style="width:12%;">{{ request.project_code }}</td>
+                    <td style="width:12%;">{{ request.duty_station }}</td>
+                    <td style="width:12%;">{{ request.date_of_request_sent|default_if_none:'' }}</td>
+                    <td style="width:12%;">{{ request.status.name }}</td>
+                    <td style="width:16%;"></td>
+                    <td style="">
                         {% if request.request_creator == person and request.status.name == "Preparation" %}
                             <a href="{% url 'edit_request' request_id=request.id%}" style="display:inline;"><img src="{% static 'crppdmt/img/icon_changelink.gif' %}" alt="Edit"/></a></a>
                         {% endif %}
