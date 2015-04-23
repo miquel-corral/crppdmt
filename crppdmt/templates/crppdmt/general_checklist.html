@@ -13,7 +13,9 @@
 
 {% block breadcrumbs %}
 <div class="breadcrumbs">
-    <a href="{% url 'index' %}">Home</a> &rsaquo; {{ expert_request_name }} &rsaquo; {% if action == 'to_supervisor' %} Send to Supervisor {% endif %}
+    <a href="{% url 'index' %}">Home</a> &rsaquo; {{ expert_request_name }} &rsaquo;
+    {% if action == ACTION_TO_SUPERVISOR %} Send to Supervisor {% endif %}
+    {% if action == ACTION_TO_VALIDATION %} Send to Validation {% endif %}
 </div>
 {% endblock %}
 
@@ -83,12 +85,7 @@
             </tr>
             <tr>
                 <td colspan="2" class="required" style="width:98%;text-align:right;vertical-align:middle;">
-                    {% if action == 'to_supervisor' %}
-                        Send to Supervisor
-                    {% endif %}
-                    {% if action == 'to_validation' %}
-                        Send to Validation
-                    {% endif %}
+                    Acknowledgement of the above commitments
                 </td>
                 <td style="width:2%;" >
                     {{ form.check_field }}
@@ -98,10 +95,10 @@
 
 
     <div class="submit-row">
-        {% if action == 'to_supervisor' %}
+        {% if action == ACTION_TO_SUPERVISOR %}
             <input class="default" type="submit" name="_save" value="Send to Supervisor" required="True"></input>
         {% endif %}
-        {% if action == 'to_validation' %}
+        {% if action == ACTION_TO_VALIDATION %}
             <input class="default" type="submit" name="_save" value="Send to Validation" required="True"></input>
         {% endif %}
     </div>

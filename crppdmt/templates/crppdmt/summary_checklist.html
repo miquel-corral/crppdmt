@@ -1,0 +1,110 @@
+{% extends "crppdmt/base_site.html" %}
+{% load i18n admin_static %}
+
+{% load is_true %}
+
+{% load admin_list %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "crppdmt/css/dashboard.css" %}" />{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}dashboard{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'index' %}">Home</a> &rsaquo; {{ expert_request_name }} &rsaquo; Validation
+</div>
+{% endblock %}
+
+
+{% block content %}
+<div id="content-main">
+
+<div id="explanation" style="margin-bottom:10px;">
+    <strong>Summary of Responsibilities Country/Regional Offices of UN-Habitat under MOU NORCAP/UN-Habitat.<br>
+    Notice that this policy apply pre-deployment, during deployment and post-deployment.
+    <strong>
+</div>
+
+<div id="list" style="float:left;width:75%;">
+
+    <div class="module request">
+        <table style="width:100%;">
+            <thead>
+            <tr style="width:100%;">
+                <th style="width:20%;">Subject</th>
+                <th style="width:20%;">Responsibilities</td>
+            </tr>
+            </thead>
+            {% if summary_literals %}
+                <tr class="section-{{ section.object_name|lower }}" style="width:100%;">
+                        <td style="width:20%;"><div style="word-wrap: break-word;white-space: pre-wrap;white-space: -webkit-pre-wrap;">{{ summary_literals.SUMMARY_TRANSPORTATION_TITLE }}</div></td>
+                        <td style="width:70%;"><div style="word-wrap: break-word;white-space: pre-wrap;white-space: -webkit-pre-wrap;">{{ summary_literals.SUMMARY_TRANSPORTATION_DESC }}</div></td>
+                </tr>
+                <tr class="section-{{ section.object_name|lower }}" style="width:100%;">
+                        <td style="width:20%;"><div style="word-wrap: break-word;white-space: pre-wrap;white-space: -webkit-pre-wrap;">{{ summary_literals.SUMMARY_UNDERTAKING_TITLE }}</div></td>
+                        <td style="width:70%;"><div style="word-wrap: break-word;white-space: pre-wrap;white-space: -webkit-pre-wrap;">{{ summary_literals.SUMMARY_UNDERTAKING_DESC }}</div></td>
+                </tr>
+                <tr class="section-{{ section.object_name|lower }}" style="width:100%;">
+                        <td style="width:20%;"><div style="word-wrap: break-word;white-space: pre-wrap;white-space: -webkit-pre-wrap;">{{ summary_literals.SUMMARY_BRIEFING_UPON_ARRIVAL_TITLE }}</div></td>
+                        <td style="width:70%;"><div style="word-wrap: break-word;white-space: pre-wrap;white-space: -webkit-pre-wrap;">{{ summary_literals.SUMMARY_BRIEFING_UPON_ARRIVAL_DESC }}</div></td>
+                </tr>
+                <tr class="section-{{ section.object_name|lower }}" style="width:100%;">
+                        <td style="width:20%;"><div style="word-wrap: break-word;white-space: pre-wrap;white-space: -webkit-pre-wrap;">{{ summary_literals.SUMMARY_PER_TITLE }}</div></td>
+                        <td style="width:70%;"><div style="word-wrap: break-word;white-space: pre-wrap;white-space: -webkit-pre-wrap;">{{ summary_literals.SUMMARY_PER_DESC }}</div></td>
+                </tr>
+                <tr class="section-{{ section.object_name|lower }}" style="width:100%;">
+                        <td style="width:20%;"><div style="word-wrap: break-word;white-space: pre-wrap;white-space: -webkit-pre-wrap;">{{ summary_literals.SUMMARY_AFTER_DEPLOYMENT_TITLE }}</div></td>
+                        <td style="width:70%;"><div style="word-wrap: break-word;white-space: pre-wrap;white-space: -webkit-pre-wrap;">{{ summary_literals.SUMMARY_AFTER_DEPLOYMENT_DESC }}</div></td>
+                </tr>
+            {% else %}
+            <tr class="section-{{ section.object_name|lower }}" style="width:100%;">
+                <td colspan="3">No related items found.</td>
+            </tr>
+            {% endif %}
+        </table>
+    </div>
+
+    <form name="crppdmtform" action="" method="post" id="{{ expert_request_id }}_form" enctype="multipart/form-data">{% csrf_token %}{% block form_top %}{% endblock %}
+        <table style="width:100%;">
+            <tr>
+                <td style="width:70%;"></td>
+                <td colspan="2" style="width:30%;text-align:right;">{{ form.validate_request.errors }}</td>
+            </tr>
+            <tr>
+                <td colspan="2" class="required" style="width:98%;text-align:right;vertical-align:middle;">
+                    {{ form.validate_request.label_tag }}
+                </td>
+                <td style="width:2%;" >
+                    {{ form.validate_request }}
+                </td>
+            </tr>
+        </table>
+
+
+    <div class="submit-row">
+            <input class="default" type="submit" name="_save" value="Validate" required="True"></input>
+    </div>
+    </form>
+
+
+
+
+
+    <br>
+
+
+    USER:{{user.username}}
+    <br>
+    PERSON:{{person.user.username}}
+
+</div>
+
+
+</div>
+
+{% endblock %}
+
+{% block sidebar %}
+{% endblock %}

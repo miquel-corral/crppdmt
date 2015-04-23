@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 ############################################
 #
 # Constants file for Shelter Experts ToR

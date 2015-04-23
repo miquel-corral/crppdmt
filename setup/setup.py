@@ -213,12 +213,8 @@ def load_general_checklist():
     print("load_general_checklist. End.")
 
 
-
-
-
-
 if __name__ == "__main__":
-    """
+
     load_entity_single_field_name("roles.tsv", Role)
     load_entity_single_field_name("organizations.tsv", Organization)
     load_users_file()
@@ -229,8 +225,8 @@ if __name__ == "__main__":
     load_entity_single_field_name("request_status.tsv", RequestStatus)
     load_entity_single_field_name("expert_profile_type.tsv", ExpertProfileType)
     load_requests()
-    """
     load_general_checklist()
+
 
 
 

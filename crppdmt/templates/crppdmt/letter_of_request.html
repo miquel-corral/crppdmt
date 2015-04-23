@@ -121,7 +121,7 @@
                             <li>Other relevant information</li>
                         </ul>
                     </td>
-                    <td style="width:50%;padding:2px;vertical-align:middle;">{{ expert_request.background_information|default_if_none:'' }}</td>
+                    <td style="width:50%;padding:2px;vertical-align:middle;">{{ expert_request.background_information|default_if_none:''|linebreaksbr }}</td>
                 </tr>
             </table>
         </div>
@@ -141,9 +141,9 @@
                         </ul>
                     </td>
                     <td style="width:50%;padding:2px;vertical-align:middle;">
-                        {{ expert_request.expert_profile|default_if_none:'' }}<br>
-                        {{ expert_request.objectives_and_scope|default_if_none:'' }}<br>
-                        {{ expert_request.main_duties_and_responsibilities|default_if_none:'' }}
+                        {{ expert_request.expert_profile|default_if_none:''|linebreaksbr }}<br>
+                        {{ expert_request.objectives_and_scope|default_if_none:''|linebreaksbr }}<br>
+                        {{ expert_request.main_duties_and_responsibilities|default_if_none:''|linebreaksbr }}
                     </td>
                 </tr>
             </table>
@@ -159,7 +159,7 @@
                         Practical information - banking, access to ATMs, housing - private or compound, transport arrangements for after work, is there a car pool, access to drivers for afternoon/evening, will the secondee be allowed to use UN cars, can he/she use taxi's, bus?
                     </td>
                     <td style="width:50%;padding:2px;vertical-align:middle;">
-                        {{ expert_request.other_relevant_information|default_if_none:''}}
+                        {{ expert_request.other_relevant_information|default_if_none:''|linebreaksbr}}
                     </td>
                 </tr>
             </table>

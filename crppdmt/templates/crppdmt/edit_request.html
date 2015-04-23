@@ -45,14 +45,30 @@
             <!-- num_errors calculat en view -->
             {% if num_errors|length == 1 %}{% trans "Please correct the error below." %}{% else %}{% trans "Please correct the errors below." %}{% endif %}
 
-            <!-- prints model errors, right style -->
+            <!-- prints validation ToR fields filled -->
+            {% comment %}
             {% for dict in formset.errors %}
                 {% for key, value in dict.items %}
-                    {% if key == '__all__' %}
+                    {% if key == ToR_FIELDS %}
+                    <ul class="errorlist">
                     <li>{{ value }}</li>
+                    </ul>
                     {% endif %}
                 {% endfor %}
             {% endfor %}
+            {% endcomment %}
+
+            <!-- prints model errors, right style -->
+            {% for dict in formset.errors %}
+                {% for key, value in dict.items %}
+                    {% if key == '__all__' or key == ToR_FIELDS %}
+                    <ul class="errorlist">
+                    <li>{{ value }}</li>
+                    </ul>
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+
 
             {% comment %}
             <!-- it prints all errors, field errors included-->
@@ -84,13 +100,16 @@
         {{ form.status.as_hidden }}
         {{ form.requesting_agency.as_hidden }}
         {{ form.date_of_closure_of_request.as_hidden }}
+        {{ form.expert_profile_type.as_hidden }}
 
+        {% comment %}
         {% for field in form %}
             {% if field.errors %}
                 {{field.label_tag}}
                 {{field.errors}}
             {% endif %}
         {% endfor %}
+        {% endcomment %}
 
         {% if form.non_field_errors %} {{ form.non_field_errors}} {% endif %}
 

@@ -19,13 +19,13 @@ from django.core.paginator import Paginator
 from django.core import serializers
 
 from easy_pdf.views import PDFTemplateView
-from easy_pdf.rendering import render_to_pdf_response
+from easy_pdf.rendering import render_to_pdf_response, render_to_pdf
 
 from crppdmt.settings import *
 
 from crppdmt.models import Person, ExpertRequest, GeneralCheckList, TraceAction, RequestStatus
 
-from crppdmt.forms import CreateRequestForm, EditRequestForm, GeneralCheckListForm
+from crppdmt.forms import CreateRequestForm, EditRequestForm, GeneralCheckListForm, SummaryCheckListForm
 
 from crppdmt.constants import *
 
@@ -33,6 +33,8 @@ from crppdmt.shelter_tor import *
 
 from crppdmt.my_ftp import *
 from crppdmt.my_mail import *
+
+import crppdmt.summary_checklist
 
 @ensure_csrf_cookie
 def my_login(request):
@@ -134,22 +136,22 @@ def index(request):
         request_list = ExpertRequest.objects.filter(expert=None)  ## Dirty to get empty QuerySet
 
         for role in person.roles.all():  # everyone has at least one role
-            if role.name == ROLES["ROLE_SUPERVISOR"]:
+            if role.name == ROLES[ROLE_SUPERVISOR_ITEM]:
                 supervisor_list = ExpertRequest.objects.filter(supervisor=person)
                 request_list = request_list | supervisor_list
-            if role.name == ROLES["ROLE_CREATOR"]:
+            if role.name == ROLES[ROLE_CREATOR_ITEM]:
                 creator_list = ExpertRequest.objects.filter(request_creator=person)
                 request_list = request_list | creator_list
-            if role.name == ROLES["ROLE_COUNTRY_REPRESENTATIVE"]:
+            if role.name == ROLES[ROLE_COUNTRY_REPRESENTATIVE_ITEM]:
                 country_rep_list = ExpertRequest.objects.filter(country_representative=person)
                 request_list = request_list | country_rep_list
-            if role.name == ROLES["ROLE_FIELD_FOCAL_POINT"]:
+            if role.name == ROLES[ROLE_FIELD_FOCAL_POINT_ITEM]:
                 field_fp_list = ExpertRequest.objects.filter(field_focal_point=person)
                 request_list = request_list | field_fp_list
-            if role.name == ROLES["ROLE_HQ_FOCAL_POINT"]:
+            if role.name == ROLES[ROLE_HQ_FOCAL_POINT_ITEM]:
                 hq_fp_list = ExpertRequest.objects.filter(hq_focal_point=person)
                 request_list = request_list | hq_fp_list
-            if role.name == ROLES["ROLE_EXPERT"]:
+            if role.name == ROLES[ROLE_EXPERT_ITEM]:
                 expert_list = ExpertRequest.objects.filter(expert=person)
                 request_list = request_list | expert_list
 
@@ -254,38 +256,22 @@ def edit_request(request, request_id=None):
             # save form
             formset.save()
             # trace action
-            trace_action("EDIT REQUEST", expert_request, person)
+            trace_action(TRACE_EDIT_REQUEST, expert_request, person)
             # check send to supervisor. Tricky validation in python. Check Action!!!
             if formset[0].cleaned_data['send_to_supervisor'] and formset[0].cleaned_data['send_to_supervisor'] is True:
                 # redirect to general check list page
-                if expert_request.status.name == 'Preparation':
+                if expert_request.status.name == STATUS_PREPARATION:
                     return redirect("/general_checklist/to_supervisor/" + str(expert_request.id),
                                     context_instance=RequestContext(request))
-                if expert_request.status.name == 'Supervision':
-                    return redirect("/general_checklist/to_validation/" + str(expert_request.id),
+                if expert_request.status.name == STATUS_SUPERVISION:
+                    if expert_request.has_no_empty_text_fields():
+                        return redirect("/general_checklist/to_validation/" + str(expert_request.id),
                                     context_instance=RequestContext(request))
+                    else:
+                        formset.errors[0][ToR_FIELDS] = ToR_FIELDS_VALIDATION_ERROR
             else:
                 # return to request list
                 return redirect("/index", context_instance=RequestContext(request))
-                """
-                # validate no empty fields
-                if expert_request.has_no_empty_text_fields():
-                    # save expert request instance
-                    formset.save()
-                    # trace action
-                    trace_action("SEND TO SUPERVISOR", expert_request, person)
-                    # redirect to general checklist page
-                    return redirect("/general_checklist/to_supervision/" + str(expert_request.id), context_instance=RequestContext(request))
-                else:
-                    formset.errors[0]['Text Fields']='All text fields must be informed .'
-            else:
-                # Save changes
-                formset.save()
-                # trace action
-                trace_action("EDIT REQUEST", expert_request, person)
-                # return to request list
-                return redirect("/index", context_instance=RequestContext(request))
-                """
         else:
             if format(len(formset.errors) > 0):
                 num_errors = len(formset.errors[0])
@@ -297,7 +283,8 @@ def edit_request(request, request_id=None):
     return render_to_response("crppdmt/edit_request.html",
                               {"formset": formset,
                                "expert_request": expert_request,
-                               "BACKGROUND_INFORMATION_HELP_TEXT":BACKGROUND_INFORMATION_HELP_TEXT},
+                               "BACKGROUND_INFORMATION_HELP_TEXT": BACKGROUND_INFORMATION_HELP_TEXT,
+                               "ToR_FIELDS": ToR_FIELDS},
                               context_instance=RequestContext(request))
 
 
@@ -339,7 +326,7 @@ def create_request(request, request_id=None):
             formset.save()
 
             # trace action
-            trace_action("CREATE REQUEST", expert_request, person)
+            trace_action(TRACE_CREATE_REQUEST, expert_request, person)
 
             return redirect("/index/", context_instance=RequestContext(request))
         else:
@@ -376,9 +363,6 @@ def general_checklist(request, action, expert_request_id):
     :param expert_request_id:
     :return:
     """
-
-    print("general_checklist. action: " + action);
-
     # get expert request
     expert_request = ExpertRequest.objects.get(id=expert_request_id)
 
@@ -401,31 +385,26 @@ def general_checklist(request, action, expert_request_id):
         my_form = GeneralCheckListForm(request.POST)
 
         if my_form.is_valid():
-            # get request
-            expert_request = ExpertRequest.objects.get(id=expert_request_id)
-            # get value of action
-            print("action: " + action)
-
             # settings per action
-            if action == "to_supervisor":
+            if action == ACTION_TO_SUPERVISOR:
                 expert_request.date_sent_to_supervisor = datetime.datetime.date(datetime.datetime.now())
                 expert_request.status = RequestStatus.objects.get(name="Supervision")
                 # update expert request
                 expert_request.save()
                 # send email to supervisor
-                send_request_email_to(expert_request, "Supervisor")
+                send_request_email_to(expert_request, MAIL_REQUEST_TO_REVIEW)
                 # trace action
-                trace_action("REQUEST TO SUPERVISOR", expert_request, person)
+                trace_action(TRACE_REQUEST_TO_SUPERVISOR, expert_request, person)
 
-            if action == "to_validation":
+            if action == ACTION_TO_VALIDATION:
                 expert_request.date_sent_to_validation = datetime.datetime.date(datetime.datetime.now())
                 expert_request.status = RequestStatus.objects.get(name="Validation")
                 # update expert request
                 expert_request.save()
                 # send email to validator
-                send_request_email_to(expert_request, "Validator")
+                send_request_email_to(expert_request, MAIL_REQUEST_TO_VALIDATE)
                 # trace action
-                trace_action("REQUEST TO VALIDATOR", expert_request, person)
+                trace_action(TRACE_REQUEST_TO_VALIDATION, expert_request, person)
 
 
             # back to request list page
@@ -450,12 +429,78 @@ def general_checklist(request, action, expert_request_id):
                                "person": person,
                                "form": my_form,
                                "action": action,
+                               "ACTION_TO_SUPERVISOR": ACTION_TO_SUPERVISOR,
+                               "ACTION_TO_VALIDATION": ACTION_TO_VALIDATION,
                                "expert_request_id": expert_request_id,
                                "expert_request_name": expert_request.name,
                                "error_required_ack":error_required_ack},
                               context_instance=RequestContext(request))
 
+@ensure_csrf_cookie
+@login_required
+def summary_checklist(request, expert_request_id):
+    """
+    View to validate a request (and send to partner organization)
+    :param request:
+    :param expert_request_id:
+    :return:
+    """
+    # get expert request
+    expert_request = ExpertRequest.objects.get(id=expert_request_id)
+    # get person
+    person = get_person(request)
 
+    if request.method == 'POST':
+        my_form = SummaryCheckListForm(request.POST)
+
+        if my_form.is_valid():
+            # actions if validated
+            if my_form.cleaned_data['validate_request'] and my_form.cleaned_data['validate_request'] is True:
+                # change status
+                expert_request.status = RequestStatus.objects.get(name=STATUS_CANDIDATE_APPROVAL)
+                # save request
+                expert_request.save()
+                # trace
+                trace_action(TRACE_VALIDATED_REQUEST,expert_request, person)
+                # send email to validator and supervisor
+                send_request_email_to(expert_request, MAIL_REQUEST_VALIDATED_SUPERVISOR)
+                # trace
+                trace_action(TRACE_VALIDATED_REQUEST_TO_SUPERVISOR,expert_request, person)
+                # send email to NORCAP
+                send_request_email_to(expert_request, MAIL_REQUEST_VALIDATED_NORCAP)
+                # trace
+                trace_action(TRACE_VALIDATED_REQUEST_TO_NORCAP,expert_request, person)
+            """
+            # actions if not
+            if my_form.cleaned_data['validate_request'] and my_form.cleaned_data['validate_request'] is False:
+                # change status
+                expert_request.status = RequestStatus.objects.get(name=STATUS_VALIDATION)
+                # save request
+                expert_request.save()
+                # trace
+                trace_action(TRACE_NOT_VALIDATED_REQUEST,expert_request, person)
+                # send email to validator and supervisor
+                send_request_email_to(expert_request, MAIL_REQUEST_NOT_VALIDATED)
+                # trace
+                trace_action(TRACE_NOT_VALIDATED_REQUEST,expert_request, person)
+            """
+
+            # back to request list page
+            return redirect("/index/", context_instance=RequestContext(request))
+        else:
+            pass
+    else:
+        # empty form
+        my_form = SummaryCheckListForm()
+
+
+    return render_to_response("crppdmt/summary_checklist.html",
+                              {"person": person,
+                               "form": my_form,
+                               "expert_request_id": expert_request_id,
+                               "expert_request_name": expert_request.name ,
+                               "summary_literals": crppdmt.summary_checklist ,},
+                               context_instance=RequestContext(request))
 
 
 
@@ -498,7 +543,7 @@ def generate_tor_pdf(request, expert_request_id):
                'BASE_DIR': BASE_DIR,
             }
 
-    return render_to_pdf_response(request, "crppdmt/tor.html", context, filename=None, encoding=u'utf-8')
+    return render_to_pdf_response(request, "crppdmt/tor.html", context, filename=None)
 
 
 def retrieve_file(request, remote_folder, remote_file):
@@ -649,21 +694,55 @@ def get_ftp_file_content(remote_folder, remote_file):
 def send_request_email_to(expert_request, action):
     try:
         my_mail = MyMail()
-        subject = "DMT - New Expert Request to Validate"
-        html_template = loader.get_template('crppdmt/email/supervisor.html')
-        html_content = html_template.render(Context({'request_name': expert_request.name,}))
-        text_template = loader.get_template('crppdmt/email/supervisor.txt')
-        text_content = text_template.render(Context({'request_name': expert_request.name,}))
         recipients = [expert_request.supervisor.user.email]
-        if action == "Supervision":
+
+        if action == MAIL_REQUEST_TO_REVIEW:
+            subject = "DMT - New Expert Request to Review"
+            html_template = loader.get_template('crppdmt/email/review.html')
+            html_content = html_template.render(Context({'request_name': expert_request.name,}))
+            text_template = loader.get_template('crppdmt/email/review.txt')
+            text_content = text_template.render(Context({'request_name': expert_request.name,}))
             if expert_request.supervisor is not expert_request.request_creator:
                 recipients = recipients + [expert_request.request_creator.user.email]
-        if action == "Validation":
-            recipients = recipients + [expert_request.country_representative.user.email]
-        # send email
-        my_mail.send_mail(subject, html_content, text_content, recipients)
+            # send email
+            my_mail.send_mail(subject, html_content, text_content, recipients, expert_request)
+
+        if action == MAIL_REQUEST_TO_VALIDATE:
+            subject = "DMT - New Expert Request to Validate"
+            html_template = loader.get_template('crppdmt/email/validate.html')
+            html_content = html_template.render(Context({'request_name': expert_request.name,}))
+            text_template = loader.get_template('crppdmt/email/validate.txt')
+            text_content = text_template.render(Context({'request_name': expert_request.name,}))
+            if expert_request.country_representative is not expert_request.supervisor:
+                recipients = recipients + [expert_request.country_representative.user.email]
+            # send email
+            my_mail.send_mail(subject, html_content, text_content, recipients, expert_request)
+
+        if action == MAIL_REQUEST_VALIDATED_SUPERVISOR:
+            subject = "DMT - New Expert Request Validated"
+            html_template = loader.get_template('crppdmt/email/validated.html')
+            html_content = html_template.render(Context({'request_name': expert_request.name,}))
+            text_template = loader.get_template('crppdmt/email/validated.txt')
+            text_content = text_template.render(Context({'request_name': expert_request.name,}))
+            if expert_request.country_representative is not expert_request.supervisor:
+                recipients = recipients + [expert_request.country_representative.user.email]
+            # send email
+            my_mail.send_mail(subject, html_content, text_content, recipients, expert_request)
+
+        if action == MAIL_REQUEST_VALIDATED_NORCAP:
+            subject = "UN-Habitat - New Expert Request"
+            html_template = loader.get_template('crppdmt/email/norcap.html')
+            html_content = html_template.render(Context({'request_name': expert_request.name,}))
+            text_template = loader.get_template('crppdmt/email/norcap.txt')
+            text_content = text_template.render(Context({'request_name': expert_request.name,}))
+            if expert_request.country_representative is not expert_request.supervisor:
+                recipients = recipients + [expert_request.country_representative.user.email]
+            recipients = recipients + [EMAIL_ADDRESS_NORCAP]
+            # send email
+            my_mail.send_mail(subject, html_content, text_content, recipients, expert_request, attach_tor=True,
+                              attach_letter=True)
     except:
-        print("Error sending email to supervisor. Request: " + expert_request.name)
+        print("Error sending email. Request: " + expert_request.name + ", ACTION: " + action)
         print("Error: " + str(sys.exc_info()))
         pass  # silent remove
     finally:
@@ -672,13 +751,10 @@ def send_request_email_to(expert_request, action):
 
 def trace_action(action_name, expert_request, person):
     try:
-        print("Expert requ.name: " + expert_request.name)
         new_log = TraceAction()
         new_log.action = action_name
         new_log.expert_request = expert_request
-        print("new_log.expert_request: " + new_log.expert_request.name)
         new_log.description = serializers.serialize('xml', [expert_request])
-        print("Expert requ.name: " + expert_request.name)
         new_log.person = person
         new_log.save()
     except:

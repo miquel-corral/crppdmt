@@ -16,16 +16,16 @@ class BasicRequestForm(forms.ModelForm):
         self.fields['project_document'].widget = forms.FileInput()
 
         # filter people with role supervisor
-        self.fields['supervisor'].queryset = Person.objects.filter(roles__name=ROLES["ROLE_SUPERVISOR"])
+        self.fields['supervisor'].queryset = Person.objects.filter(roles__name=ROLES[ROLE_SUPERVISOR_ITEM])
         # filter people with role country representative
         self.fields['country_representative'].queryset = Person.objects.filter(roles__name=
-                                                                               ROLES["ROLE_COUNTRY_REPRESENTATIVE"])
+                                                                               ROLES[ROLE_COUNTRY_REPRESENTATIVE_ITEM])
         # filter people with role HQ focal point
         self.fields['agency_hq_focal_point'].queryset = Person.objects.filter(roles__name=
-                                                                              ROLES["ROLE_HQ_FOCAL_POINT"])
+                                                                              ROLES[ROLE_HQ_FOCAL_POINT_ITEM])
         # filter people with role Field focal point
         self.fields['agency_field_focal_point'].queryset = Person.objects.filter(roles__name=
-                                                                                 ROLES["ROLE_FIELD_FOCAL_POINT"])
+                                                                                 ROLES[ROLE_FIELD_FOCAL_POINT_ITEM])
 
     class Meta:
         model = ExpertRequest
@@ -47,8 +47,12 @@ class EditRequestForm(BasicRequestForm):
 
 
 class GeneralCheckListForm(forms.Form):
-    check_field = forms.BooleanField(required=True, initial=False, label="Acknowledgment of the above commitments")  # initial force always return boolean field
+    # initial force always return boolean field
+    check_field = forms.BooleanField(required=True, initial=False, label="Acknowledgment of the above commitments")
 
+class SummaryCheckListForm(forms.Form):
+    # initial force always return boolean field
+    validate_request = forms.BooleanField(required=True, initial=False, label="Acknowledgment of the above commitments")
 
 
 

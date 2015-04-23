@@ -3,7 +3,7 @@ from django.contrib.auth.models import User, Group
 from django.core.exceptions import ValidationError
 from crppdmt.validators import *
 
-from crppdmt.constants import CHOICES_YES_NO, CHOICES_DUTIES, CHOICES_RECOMMENDATION, CHOICES_CONTACT_FREQUENCY, ROLES
+from crppdmt.constants import *
 
 
 class Common(django.db.models.Model):
@@ -66,7 +66,7 @@ class Person(BasicName):
     def can_create(self):
         ret = False
         for role in self.roles.all():  # everyone has at least one role
-            if role.name == ROLES["ROLE_SUPERVISOR"] or role.name == ROLES["ROLE_CREATOR"]:
+            if role.name == ROLES[ROLE_SUPERVISOR_ITEM] or role.name == ROLES[ROLE_CREATOR_ITEM]:
                 ret = True
                 break
         return ret
@@ -74,7 +74,7 @@ class Person(BasicName):
     def can_validate(self):
         ret = False
         for role in self.roles.all():  # everyone has at least one role
-            if role.name == ROLES["ROLE_COUNTRY_REPRESENTATIVE"]:
+            if role.name == ROLES[ROLE_COUNTRY_REPRESENTATIVE_ITEM]:
                 ret = True
                 break
         return ret
@@ -145,11 +145,17 @@ class ExpertRequest(BasicName):
                 raise ValidationError('Country Representative and Supervisor must be different.')
 
     def has_no_empty_text_fields(self):
-        if str(self.expected_outputs) or str(self.background_information) or str(self.objectives_and_scope) or \
-            str(self.expert_profile) or str(self.main_duties_and_responsibilities) or \
-                        str(self.other_relevant_information) == '':
-            return False;
-        return True;
+        if self.background_information == '':
+            return False
+        if self.objectives_and_scope == '':
+            return False
+        if self.expert_profile == '':
+            return False
+        if self.main_duties_and_responsibilities == '':
+            return False
+        if self.other_relevant_information == '':
+            return False
+        return True
 
 
 class Duty(BasicName):
@@ -293,3 +299,4 @@ class TraceAction(Common):
     description = django.db.models.TextField(null=False, blank=False)
     expert_request = django.db.models.ForeignKey(ExpertRequest)
     person = django.db.models.ForeignKey(Person)
+

@@ -1,4 +1,4 @@
-The Expert Request {{ request_name }} is ready to be reviewed at http://XXX.XXX.XXX.
+The Expert Request {{ request_name }} is ready to be validated at {{ URL }}
 
 This is an automatic email. Please do not reply.
 

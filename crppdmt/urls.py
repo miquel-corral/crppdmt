@@ -46,6 +46,8 @@ urlpatterns = patterns('',
     # url to general checklist page
     url(r'^general_checklist/(?P<action>[^/]+)/(?P<expert_request_id>\d+)/$', 'crppdmt.views.general_checklist', name='general_checklist'),
 
+    # url to summary checklist page
+    url(r'^summary_checklist/(?P<expert_request_id>\d+)/$', 'crppdmt.views.summary_checklist', name='summary_checklist'),
 
 
 

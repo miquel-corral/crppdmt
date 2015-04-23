@@ -40,10 +40,13 @@
                     <td style="width:15%;">Alerts</td>
                     <td style="width:15%;">
                         {% if request.request_creator == person and request.status.name == "Preparation" %}
-                            <a href="{% url 'edit_request' request_id=request.id%}" style="display:inline;"><img src="{% static 'crppdmt/img/icon_changelink.gif' %}" alt="ToR"/></a></a>
+                            <a href="{% url 'edit_request' request_id=request.id%}" style="display:inline;"><img src="{% static 'crppdmt/img/icon_changelink.gif' %}" alt="Edit"/></a></a>
                         {% endif %}
                         {% if request.supervisor == person and request.status.name == "Supervision" %}
-                            <a href="{% url 'edit_request' request_id=request.id%}" style="display:inline;"><img src="{% static 'crppdmt/img/icon_changelink.gif' %}" alt="ToR"/></a></a>
+                            <a href="{% url 'edit_request' request_id=request.id%}" style="display:inline;"><img src="{% static 'crppdmt/img/icon_changelink.gif' %}" alt="Review"/></a></a>
+                        {% endif %}
+                        {% if request.country_representative == person and request.status.name = "Validation" %}
+                            <a href="{% url 'summary_checklist' expert_request_id=request.id%}" style="display:inline;"><img src="{% static 'crppdmt/img/icon_validate.png' %}" alt="Validate"/></a></a>
                         {% endif %}
                         <a href="{% url 'generate_letter_pdf' expert_request_id=request.id%}" target="top" style="display: inline;"><img src="{% static 'crppdmt/img/pdf.png' %}" alt="Letter of Request"/></a>
                         <a href="{% url 'generate_tor_pdf' expert_request_id=request.id%}" target="top" style="display: inline;"><img src="{% static 'crppdmt/img/pdf.png' %}" alt="ToR"/></a>
