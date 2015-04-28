@@ -243,7 +243,6 @@ if __name__ == "__main__":
     load_entity_single_field_name("alert_types.tsv", AlertType)
     load_entity_single_field_name("request_status.tsv", RequestStatus)
     load_entity_single_field_name("expert_profile_type.tsv", ExpertProfileType)
-    #load_requests()
     load_general_checklist()
     load_entity_single_field_name("countries.tsv", Country)
 
