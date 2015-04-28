@@ -579,7 +579,7 @@ def generate_tor_pdf(request, expert_request_id):
         return render_to_pdf_response(request, "crppdmt/pdf/tor.html", context, filename=None, encoding=u'utf-8')
     except:
         return render_to_response("crppdmt/error.html",
-                                  {"error_description": sys.exc_info(),},
+                                  {"error_description": sys.exc_info() + '\n' + sys.exc_traceback,},
                                   context_instance=RequestContext(request))
 
 
