@@ -12,6 +12,7 @@ from crppdmt.settings_private import *
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
 
 # Control execution environment
 deploy_env = os.environ.get('DEPLOY_ENV','LOCAL')
@@ -94,6 +95,8 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, './crppdmt/static/'),
 )
+
+STATIC_ROOT = os.path.join(PROJECT_PATH, 'staticfiles')
 
 # date input formats
 DATE_INPUT_FORMATS = (
