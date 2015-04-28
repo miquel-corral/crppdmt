@@ -573,7 +573,7 @@ def generate_tor_pdf(request, expert_request_id):
 
         context = {'expert_request': expert_request,
                    'pagesize': 'A4',
-                   'BASE_DIR': BASE_DIR,
+                   'BASE_DIR': os.path.join(BASE_DIR),
                    'test_env': test,
                 }
         return render_to_pdf_response(request, "crppdmt/pdf/tor.html", context, filename=None, encoding=u'utf-8')
