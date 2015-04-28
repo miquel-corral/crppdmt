@@ -545,7 +545,7 @@ def generate_letter_of_request_pdf(request, expert_request_id):
 
         context = {'expert_request': expert_request,
                    'pagesize': 'A4',
-                   'BASE_DIR': BASE_DIR,
+                   'BASE_DIR': os.path.join(BASE_DIR, './crppdmt/static/crppdmt/'),
                    'test_env': test,
                 }
         return render_to_pdf_response(request, "crppdmt/pdf/letter_of_request.html", context, filename=None, encoding=u'utf-8')
@@ -573,7 +573,7 @@ def generate_tor_pdf(request, expert_request_id):
 
         context = {'expert_request': expert_request,
                    'pagesize': 'A4',
-                   'BASE_DIR': os.path.join(BASE_DIR),
+                   'BASE_DIR': os.path.join(BASE_DIR, './static/crppdmt/'),
                    'test_env': test,
                 }
         return render_to_pdf_response(request, "crppdmt/pdf/tor.html", context, filename=None, encoding=u'utf-8')
