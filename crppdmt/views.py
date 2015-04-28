@@ -538,7 +538,7 @@ def generate_letter_of_request_pdf(request, expert_request_id):
     """
     try:
         expert_request = ExpertRequest.objects.get(pk=expert_request_id)
-
+        test = False
         deploy_env = os.environ.get('DEPLOY_ENV','LOCAL')
         if "HEROKU" != deploy_env:
             test = True
@@ -566,7 +566,7 @@ def generate_tor_pdf(request, expert_request_id):
     """
     try:
         expert_request = ExpertRequest.objects.get(pk=expert_request_id)
-
+        test = False
         deploy_env = os.environ.get('DEPLOY_ENV','LOCAL')
         if "HEROKU" != deploy_env:
             test = True
