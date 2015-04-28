@@ -7,12 +7,11 @@ https://docs.djangoproject.com/en/1.7/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.7/ref/settings/
 """
+from crppdmt.settings_private import *
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-
-from crppdmt.settings_private import *
 
 # Control execution environment
 deploy_env = os.environ.get('DEPLOY_ENV','LOCAL')
