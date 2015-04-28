@@ -44,16 +44,16 @@
                     <td style="width:16%;"></td>
                     <td style="">
                         {% if request.request_creator == person and request.status.name == "Preparation" %}
-                            <a href="{% url 'edit_request' request_id=request.id%}" style="display:inline;"><img src="{% static 'crppdmt/img/icon_changelink.gif' %}" alt="Edit"/></a></a>
+                            <a href="{% url 'edit_request' request_id=request.id%}" style="display:inline;"><img src="{% static 'crppdmt/img/icon_changelink.gif' %}" alt="Edit" title="Edit Request"/></a>
                         {% endif %}
                         {% if request.supervisor == person and request.status.name == "Supervision" %}
-                            <a href="{% url 'edit_request' request_id=request.id%}" style="display:inline;"><img src="{% static 'crppdmt/img/icon_changelink.gif' %}" alt="Review"/></a></a>
+                            <a href="{% url 'edit_request' request_id=request.id%}" style="display:inline;"><img src="{% static 'crppdmt/img/icon_changelink.gif' %}" alt="Review" title="Review Request"/></a>
                         {% endif %}
                         {% if request.country_representative == person and request.status.name = "Validation" %}
-                            <a href="{% url 'summary_checklist' expert_request_id=request.id%}" style="display:inline;"><img src="{% static 'crppdmt/img/icon_validate.png' %}" alt="Validate"/></a></a>
+                            <a href="{% url 'summary_checklist' expert_request_id=request.id%}" style="display:inline;"><img src="{% static 'crppdmt/img/icon_validate.png' %}" alt="Validate" title="Validate Request"/></a>
                         {% endif %}
-                        <a href="{% url 'generate_letter_pdf' expert_request_id=request.id%}" target="top" style="display: inline;"><img src="{% static 'crppdmt/img/pdf.png' %}" alt="Letter of Request"/></a>
-                        <a href="{% url 'generate_tor_pdf' expert_request_id=request.id%}" target="top" style="display: inline;"><img src="{% static 'crppdmt/img/pdf.png' %}" alt="ToR"/></a>
+                        <a href="{% url 'generate_letter_pdf' expert_request_id=request.id%}" target="_blank" style="display: inline;"><img src="{% static 'crppdmt/img/pdf.png' %}" alt="Letter of Request" title="Letter of Request"/></a>
+                        <a href="{% url 'generate_tor_pdf' expert_request_id=request.id%}" target="_blank" style="display: inline;"><img src="{% static 'crppdmt/img/pdf.png' %}" alt="ToR" title="ToR"/></a>
                     </td>
             </tr>
             {% endfor %}
@@ -90,11 +90,6 @@
 
     <br>
 
-
-    USER:{{user.username}}
-    <br>
-    PERSON:{{person.user.username}}
-
 </div>
 
 <div id="col_right" style="float:right;width:20%;margin-right:15px;">
@@ -104,28 +99,21 @@
             <div class="section">Actions</div>
             <div style="float:right;padding-right:18px;"></div>
         </caption>
-        <tr><td>{% if person.can_create %}<a class="addlink" href="{% url 'new_request' %}">New Request</a>{% endif %}</td></tr>
+        <tr><td>{% if person.can_create %}<a class="addlink" href="{% url 'new_request' %}" title="New Request">New Request</a>{% endif %}</td></tr>
         </table>
 
 
         <table style="width:100%;">
-        <caption class="title-unh-docs">
-            <div class="section">Documentation UN-HABITAT</div>
-            <div style="float:right;padding-right:18px;"></div>
-        </caption>
-        <tr><td><a href="https://www.dropbox.com/s/1lk09p053zsy8nh/UN-Habitat%20Emergency%20Protocol.pdf?dl=0" target="top">Emergency Protocol</a></td></tr>
-
-
-        {% for doc in unh_docs.all %}
-            <tr class="section-{{ section.object_name|lower }}">
-                <th scope="row">
-                    {{ doc.name }}
-                </th>
-                <td>&nbsp;</td>
-                <td>&nbsp;</td>
-                <td>&nbsp;</td>
-            </tr>
-         {% endfor %}
+            <caption class="title-unh-docs">
+                <div class="section">Documentation UN-HABITAT</div>
+                <div style="float:right;padding-right:18px;"></div>
+            </caption>
+            <tr><td><a href="{% url 'retrieve_file' remote_folder='UN-HABITAT' remote_file='MOU_NRC_UN-Habitat.pdf'  %}" target="blank">MoU NRC - UN-Habitat</a></td></tr>
+            <tr><td><a href="{% url 'retrieve_file' remote_folder='UN-HABITAT' remote_file='MOU_NRC_UN-Habitat_Checklist.pdf'  %}" target="blank">MoU NRC - UN-Habitat Checklist</a></td></tr>
+            <tr><td><a href="{% url 'retrieve_file' remote_folder='UN-HABITAT' remote_file='MOU_NRC_UN-Habitat_Summary.pdf'  %}" target="blank">MoU NRC - UN-Habitat Summary</a></td></tr>
+            <tr><td><a href="{% url 'retrieve_file' remote_folder='UN-HABITAT' remote_file='UN-Convention_Privileges_and_Immunities.pdf'  %}" target="blank">Privileges and Immunities</a></td></tr>
+            <tr><td><a href="{% url 'retrieve_file' remote_folder='UN-HABITAT' remote_file='Consultants_and_Individual_Contractors_ST-AI-1999-7.pdf'  %}" target="blank">Consultants and Individual Contractors</a></td></tr>
+            <tr><td><a href="{% url 'retrieve_file' remote_folder='UN-HABITAT' remote_file='Gratis_personnel_ST-AI-1999-6.pdf'  %}" target="blank">Gratis Personnel</a></td></tr>
         </table>
     </div>
 </div>

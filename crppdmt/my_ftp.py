@@ -56,8 +56,3 @@ class MyFTP():
             if f:
                 f.close()
             return contents
-
-
-        git filter-branch --force --index-filter \
-'git rm --cached --ignore-unmatch Rakefile' \
---prune-empty --tag-name-filter cat -- --all

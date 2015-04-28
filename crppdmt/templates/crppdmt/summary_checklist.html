@@ -27,36 +27,36 @@
     <strong>
 </div>
 
-<div id="list" style="float:left;width:75%;">
+<div id="list" style="float:left;width:97%;">
 
     <div class="module request">
         <table style="width:100%;">
             <thead>
             <tr style="width:100%;">
-                <th style="width:20%;">Subject</th>
-                <th style="width:20%;">Responsibilities</td>
+                <th style="width:15%;">Subject</th>
+                <th style="width:75%;">Responsibilities</td>
             </tr>
             </thead>
             {% if summary_literals %}
                 <tr class="section-{{ section.object_name|lower }}" style="width:100%;">
-                        <td style="width:20%;"><div style="word-wrap: break-word;white-space: pre-wrap;white-space: -webkit-pre-wrap;">{{ summary_literals.SUMMARY_TRANSPORTATION_TITLE }}</div></td>
-                        <td style="width:70%;"><div style="word-wrap: break-word;white-space: pre-wrap;white-space: -webkit-pre-wrap;">{{ summary_literals.SUMMARY_TRANSPORTATION_DESC }}</div></td>
+                        <td style="width:15%;"><div style="word-wrap: break-word;white-space: pre-wrap;white-space: -webkit-pre-wrap;">{{ summary_literals.SUMMARY_TRANSPORTATION_TITLE }}</div></td>
+                        <td style="width:75%;"><div style="word-wrap: break-word;white-space: pre-wrap;white-space: -webkit-pre-wrap;">{{ summary_literals.SUMMARY_TRANSPORTATION_DESC }}</div></td>
                 </tr>
                 <tr class="section-{{ section.object_name|lower }}" style="width:100%;">
-                        <td style="width:20%;"><div style="word-wrap: break-word;white-space: pre-wrap;white-space: -webkit-pre-wrap;">{{ summary_literals.SUMMARY_UNDERTAKING_TITLE }}</div></td>
-                        <td style="width:70%;"><div style="word-wrap: break-word;white-space: pre-wrap;white-space: -webkit-pre-wrap;">{{ summary_literals.SUMMARY_UNDERTAKING_DESC }}</div></td>
+                        <td style="width:15%;"><div style="word-wrap: break-word;white-space: pre-wrap;white-space: -webkit-pre-wrap;">{{ summary_literals.SUMMARY_UNDERTAKING_TITLE }}</div></td>
+                        <td style="width:75%;"><div style="word-wrap: break-word;white-space: pre-wrap;white-space: -webkit-pre-wrap;">{{ summary_literals.SUMMARY_UNDERTAKING_DESC }}</div></td>
                 </tr>
                 <tr class="section-{{ section.object_name|lower }}" style="width:100%;">
-                        <td style="width:20%;"><div style="word-wrap: break-word;white-space: pre-wrap;white-space: -webkit-pre-wrap;">{{ summary_literals.SUMMARY_BRIEFING_UPON_ARRIVAL_TITLE }}</div></td>
-                        <td style="width:70%;"><div style="word-wrap: break-word;white-space: pre-wrap;white-space: -webkit-pre-wrap;">{{ summary_literals.SUMMARY_BRIEFING_UPON_ARRIVAL_DESC }}</div></td>
+                        <td style="width:15%;"><div style="word-wrap: break-word;white-space: pre-wrap;white-space: -webkit-pre-wrap;">{{ summary_literals.SUMMARY_BRIEFING_UPON_ARRIVAL_TITLE }}</div></td>
+                        <td style="width:75%;"><div style="word-wrap: break-word;white-space: pre-wrap;white-space: -webkit-pre-wrap;">{{ summary_literals.SUMMARY_BRIEFING_UPON_ARRIVAL_DESC }}</div></td>
                 </tr>
                 <tr class="section-{{ section.object_name|lower }}" style="width:100%;">
-                        <td style="width:20%;"><div style="word-wrap: break-word;white-space: pre-wrap;white-space: -webkit-pre-wrap;">{{ summary_literals.SUMMARY_PER_TITLE }}</div></td>
-                        <td style="width:70%;"><div style="word-wrap: break-word;white-space: pre-wrap;white-space: -webkit-pre-wrap;">{{ summary_literals.SUMMARY_PER_DESC }}</div></td>
+                        <td style="width:15%;"><div style="word-wrap: break-word;white-space: pre-wrap;white-space: -webkit-pre-wrap;">{{ summary_literals.SUMMARY_PER_TITLE }}</div></td>
+                        <td style="width:75%;"><div style="word-wrap: break-word;white-space: pre-wrap;white-space: -webkit-pre-wrap;">{{ summary_literals.SUMMARY_PER_DESC }}</div></td>
                 </tr>
                 <tr class="section-{{ section.object_name|lower }}" style="width:100%;">
-                        <td style="width:20%;"><div style="word-wrap: break-word;white-space: pre-wrap;white-space: -webkit-pre-wrap;">{{ summary_literals.SUMMARY_AFTER_DEPLOYMENT_TITLE }}</div></td>
-                        <td style="width:70%;"><div style="word-wrap: break-word;white-space: pre-wrap;white-space: -webkit-pre-wrap;">{{ summary_literals.SUMMARY_AFTER_DEPLOYMENT_DESC }}</div></td>
+                        <td style="width:15%;"><div style="word-wrap: break-word;white-space: pre-wrap;white-space: -webkit-pre-wrap;">{{ summary_literals.SUMMARY_AFTER_DEPLOYMENT_TITLE }}</div></td>
+                        <td style="width:75%;"><div style="word-wrap: break-word;white-space: pre-wrap;white-space: -webkit-pre-wrap;">{{ summary_literals.SUMMARY_AFTER_DEPLOYMENT_DESC }}</div></td>
                 </tr>
             {% else %}
             <tr class="section-{{ section.object_name|lower }}" style="width:100%;">
@@ -88,16 +88,7 @@
     </div>
     </form>
 
-
-
-
-
     <br>
-
-
-    USER:{{user.username}}
-    <br>
-    PERSON:{{person.user.username}}
 
 </div>
 

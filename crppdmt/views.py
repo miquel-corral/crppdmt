@@ -115,79 +115,85 @@ def index(request):
     :param request:
     :return:
     """
-    request_list = None
-    user = None
-    person = None
-    supervisor_list = None
-    creator_list = None
-    country_rep_list = None
-    field_fp_list = None
-    hq_fp_list = None
-    expert_list = None
-
-    # get username from session
-    username = request.session.get('username')
-
-    if not username:
-        return redirect('my_login')
     try:
+        request_list = None
+        user = None
+        person = None
+        supervisor_list = None
+        creator_list = None
+        country_rep_list = None
+        field_fp_list = None
+        hq_fp_list = None
+        expert_list = None
+
+        # get username from session
+        username = request.session.get('username')
         person = get_person_by_username(username)
-        # get the requests/missions for each role
-        request_list = ExpertRequest.objects.filter(expert=None)  ## Dirty to get empty QuerySet
 
-        for role in person.roles.all():  # everyone has at least one role
-            if role.name == ROLES[ROLE_SUPERVISOR_ITEM]:
-                supervisor_list = ExpertRequest.objects.filter(supervisor=person)
-                request_list = request_list | supervisor_list
-            if role.name == ROLES[ROLE_CREATOR_ITEM]:
-                creator_list = ExpertRequest.objects.filter(request_creator=person)
+        if not username or not person:
+            return redirect('my_login')
+        try:
+
+            # get the requests/missions for each role
+            request_list = ExpertRequest.objects.filter(expert=None)  # Dirty to get empty QuerySet
+
+            for role in person.roles.all():  # everyone has at least one role
+                if role.name == ROLES[ROLE_SUPERVISOR_ITEM]:
+                    supervisor_list = ExpertRequest.objects.filter(supervisor=person)
+                    request_list = request_list | supervisor_list
+                if role.name == ROLES[ROLE_CREATOR_ITEM]:
+                    creator_list = ExpertRequest.objects.filter(request_creator=person)
+                    request_list = request_list | creator_list
+                if role.name == ROLES[ROLE_COUNTRY_REPRESENTATIVE_ITEM]:
+                    country_rep_list = ExpertRequest.objects.filter(country_representative=person)
+                    request_list = request_list | country_rep_list
+                if role.name == ROLES[ROLE_FIELD_FOCAL_POINT_ITEM]:
+                    field_fp_list = ExpertRequest.objects.filter(field_focal_point=person)
+                    request_list = request_list | field_fp_list
+                if role.name == ROLES[ROLE_HQ_FOCAL_POINT_ITEM]:
+                    hq_fp_list = ExpertRequest.objects.filter(hq_focal_point=person)
+                    request_list = request_list | hq_fp_list
+                if role.name == ROLES[ROLE_EXPERT_ITEM]:
+                    expert_list = ExpertRequest.objects.filter(expert=person)
+                    request_list = request_list | expert_list
+
+            # concatenate like this only works when querysets from the same model
+            if supervisor_list is not None:
+                request_list = supervisor_list
+            if creator_list is not None:
                 request_list = request_list | creator_list
-            if role.name == ROLES[ROLE_COUNTRY_REPRESENTATIVE_ITEM]:
-                country_rep_list = ExpertRequest.objects.filter(country_representative=person)
+            if country_rep_list is not None:
                 request_list = request_list | country_rep_list
-            if role.name == ROLES[ROLE_FIELD_FOCAL_POINT_ITEM]:
-                field_fp_list = ExpertRequest.objects.filter(field_focal_point=person)
+            if field_fp_list is not None:
                 request_list = request_list | field_fp_list
-            if role.name == ROLES[ROLE_HQ_FOCAL_POINT_ITEM]:
-                hq_fp_list = ExpertRequest.objects.filter(hq_focal_point=person)
+            if hq_fp_list is not None:
                 request_list = request_list | hq_fp_list
-            if role.name == ROLES[ROLE_EXPERT_ITEM]:
-                expert_list = ExpertRequest.objects.filter(expert=person)
+            if expert_list is not None:
                 request_list = request_list | expert_list
+        except:
+            #return redirect('my_login')
+            raise Exception(sys.exc_info())
 
-        # concatenate like this only works when querysets from the same model
-        if supervisor_list is not None:
-            request_list = supervisor_list
-        if creator_list is not None:
-            request_list = request_list | creator_list
-        if country_rep_list is not None:
-            request_list = request_list | country_rep_list
-        if field_fp_list is not None:
-            request_list = request_list | field_fp_list
-        if hq_fp_list is not None:
-            request_list = request_list | hq_fp_list
-        if expert_list is not None:
-            request_list = request_list | expert_list
+        paginator = Paginator(request_list, ITEMS_PER_PAGE)  # Limit items per page
+        page = request.GET.get('page')
+        try:
+            requests_paginated = paginator.page(page)
+        except:
+            print("Unexpected error:", sys.exc_info())
+            requests_paginated = paginator.page(1)
+
+        template = loader.get_template('crppdmt/index.html')
+        context = RequestContext(request, {
+            'request_list': requests_paginated,
+            'username': username,
+            'user': user,
+            'person': person,
+        })
+        return HttpResponse(template.render(context))
     except:
-        #return redirect('my_login')
-        raise Exception(sys.exc_info())
-
-    paginator = Paginator(request_list, ITEMS_PER_PAGE)  # Limit items per page
-    page = request.GET.get('page')
-    try:
-        requests_paginated = paginator.page(page)
-    except:
-        print("Unexpected error:", sys.exc_info())
-        requests_paginated = paginator.page(1)
-
-    template = loader.get_template('crppdmt/index.html')
-    context = RequestContext(request, {
-        'request_list': requests_paginated,
-        'username': username,
-        'user': user,
-        'person': person,
-    })
-    return HttpResponse(template.render(context))
+        return render_to_response("crppdmt/error.html",
+                                  {"error_description": sys.exc_info(),},
+                                  context_instance=RequestContext(request))
 
 
 
@@ -205,13 +211,14 @@ def my_copyright(request):
         #index_card = IndexCard.objects.get(username=username)
     except:
         index_card = None
-    template = loader.get_template('crppdmt/my_copyright.html')
+    template = loader.get_template('crppdmt/copyright.html')
     context = RequestContext(request, {
         'username': username,
         'index_card': index_card,
         'is_copyright': 'is_copyright',
     })
     return HttpResponse(template.render(context))
+
 
 @ensure_csrf_cookie
 @login_required
@@ -222,70 +229,75 @@ def edit_request(request, request_id=None):
     :param request_id:
     :return:
     """
-    query_set = None
-    # get expert request
-    expert_request = ExpertRequest.objects.get(id=request_id)
-    # get person
-    person = get_person(request)
-    # formset
-    request_form_set = modelformset_factory(ExpertRequest, form=EditRequestForm, max_num=1, exclude=[], \
-            widgets={'requested_date_of_deployment': forms.TextInput(attrs={'class': 'vDateField'}),
-                'desired_date_of_response': forms.TextInput(attrs={'class': 'vDateField'}),
-                'date_of_approval_of_candidates': forms.TextInput(attrs={'class': 'vDateField'}),
-                'desired_date_of_acceptance_from_agency': forms.TextInput(attrs={'class': 'vDateField'}),
-                'date_of_deployment_reported_from_agency': forms.TextInput(attrs={'class': 'vDateField'}),
-                'effective_date_of_deployment': forms.TextInput(attrs={'class': 'vDateField'}),
-                'project_document': forms.FileInput(),
-                })
+    try:
+        query_set = None
+        # get expert request
+        expert_request = ExpertRequest.objects.get(id=request_id)
+        # get person
+        person = get_person(request)
+        # formset
+        request_form_set = modelformset_factory(ExpertRequest, form=EditRequestForm, max_num=1, exclude=[], \
+                widgets={'requested_date_of_deployment': forms.TextInput(attrs={'class': 'vDateField'}),
+                    'desired_date_of_response': forms.TextInput(attrs={'class': 'vDateField'}),
+                    'date_of_approval_of_candidates': forms.TextInput(attrs={'class': 'vDateField'}),
+                    'desired_date_of_acceptance_from_agency': forms.TextInput(attrs={'class': 'vDateField'}),
+                    'date_of_deployment_reported_from_agency': forms.TextInput(attrs={'class': 'vDateField'}),
+                    'effective_date_of_deployment': forms.TextInput(attrs={'class': 'vDateField'}),
+                    'project_document': forms.FileInput(),
+                    })
 
-    if request.method == 'POST':
-        formset = request_form_set(request.POST, request.FILES)
-        if formset.is_valid():
-            # get instance
-            expert_request = formset[0].save(commit=False)
-            # control HQ and field focal point informed
-            if not expert_request.agency_hq_focal_point:
-                    expert_request.agency_hq_focal_point = expert_request.supervisor
-            if not expert_request.agency_field_focal_point:
-                    expert_request.agency_field_focal_point = expert_request.supervisor
+        if request.method == 'POST':
+            formset = request_form_set(request.POST, request.FILES)
+            if formset.is_valid():
+                # get instance
+                expert_request = formset[0].save(commit=False)
+                # control HQ and field focal point informed
+                if not expert_request.agency_hq_focal_point:
+                        expert_request.agency_hq_focal_point = expert_request.supervisor
+                if not expert_request.agency_field_focal_point:
+                        expert_request.agency_field_focal_point = expert_request.supervisor
 
-            if expert_request.project_document:
-                # upload file to ftp. OBS: after save to avoid problems with document name (duplicates)
-                upload_project_document(expert_request.name, str(expert_request.project_document))
+                if expert_request.project_document:
+                    # upload file to ftp. OBS: after save to avoid problems with document name (duplicates)
+                    upload_project_document(expert_request.name, str(expert_request.project_document))
 
-            # save form
-            formset.save()
-            # trace action
-            trace_action(TRACE_EDIT_REQUEST, expert_request, person)
-            # check send to supervisor. Tricky validation in python. Check Action!!!
-            if formset[0].cleaned_data['send_to_supervisor'] and formset[0].cleaned_data['send_to_supervisor'] is True:
-                # redirect to general check list page
-                if expert_request.status.name == STATUS_PREPARATION:
-                    return redirect("/general_checklist/to_supervisor/" + str(expert_request.id),
-                                    context_instance=RequestContext(request))
-                if expert_request.status.name == STATUS_SUPERVISION:
-                    if expert_request.has_no_empty_text_fields():
-                        return redirect("/general_checklist/to_validation/" + str(expert_request.id),
-                                    context_instance=RequestContext(request))
-                    else:
-                        formset.errors[0][ToR_FIELDS] = ToR_FIELDS_VALIDATION_ERROR
+                # save form
+                formset.save()
+                # trace action
+                trace_action(TRACE_EDIT_REQUEST, expert_request, person)
+                # check send to supervisor. Tricky validation in python. Check Action!!!
+                if formset[0].cleaned_data['send_to_supervisor'] and formset[0].cleaned_data['send_to_supervisor'] is True:
+                    # redirect to general check list page
+                    if expert_request.status.name == STATUS_PREPARATION:
+                        return redirect("/general_checklist/to_supervisor/" + str(expert_request.id),
+                                        context_instance=RequestContext(request))
+                    if expert_request.status.name == STATUS_SUPERVISION:
+                        if expert_request.has_no_empty_text_fields():
+                            return redirect("/general_checklist/to_validation/" + str(expert_request.id),
+                                        context_instance=RequestContext(request))
+                        else:
+                            formset.errors[0][ToR_FIELDS] = ToR_FIELDS_VALIDATION_ERROR
+                else:
+                    # return to request list
+                    return redirect("/index", context_instance=RequestContext(request))
             else:
-                # return to request list
-                return redirect("/index", context_instance=RequestContext(request))
+                if format(len(formset.errors) > 0):
+                    num_errors = len(formset.errors[0])
         else:
-            if format(len(formset.errors) > 0):
-                num_errors = len(formset.errors[0])
-    else:
-        query_set = ExpertRequest.objects.filter(pk=request_id)
-        formset = request_form_set(queryset=query_set)
+            query_set = ExpertRequest.objects.filter(pk=request_id)
+            formset = request_form_set(queryset=query_set)
 
+        return render_to_response("crppdmt/edit_request.html",
+                                  {"formset": formset,
+                                   "expert_request": expert_request,
+                                   "BACKGROUND_INFORMATION_HELP_TEXT": BACKGROUND_INFORMATION_HELP_TEXT,
+                                   "ToR_FIELDS": ToR_FIELDS},
+                                  context_instance=RequestContext(request))
+    except:
+        return render_to_response("crppdmt/error.html",
+                                  {"error_description": sys.exc_info(),},
+                                  context_instance=RequestContext(request))
 
-    return render_to_response("crppdmt/edit_request.html",
-                              {"formset": formset,
-                               "expert_request": expert_request,
-                               "BACKGROUND_INFORMATION_HELP_TEXT": BACKGROUND_INFORMATION_HELP_TEXT,
-                               "ToR_FIELDS": ToR_FIELDS},
-                              context_instance=RequestContext(request))
 
 
 @ensure_csrf_cookie
@@ -297,61 +309,67 @@ def create_request(request, request_id=None):
     :param request_id:
     :return:
     """
-    person = get_person(request)
-    query_set = None
-    request_form_set = modelformset_factory(ExpertRequest, max_num=1, form=CreateRequestForm, exclude=[])
-    send_to_supervision = False
+    try:
+        person = get_person(request)
+        query_set = None
+        request_form_set = modelformset_factory(ExpertRequest, max_num=1, form=CreateRequestForm, exclude=[])
+        send_to_supervision = False
 
-    if request.method == 'POST':
-        formset = request_form_set(request.POST, request.FILES)
+        if request.method == 'POST':
+            formset = request_form_set(request.POST, request.FILES)
 
-        if formset.is_valid():
-            # get instance
-            expert_request = formset[0].save(commit=False)
-            # control HQ and field focal point informed
-            if not expert_request.agency_hq_focal_point:
-                    expert_request.agency_hq_focal_point = expert_request.supervisor
-            if not expert_request.agency_field_focal_point:
-                    expert_request.agency_field_focal_point = expert_request.supervisor
-            # set template values
-            set_template_values(expert_request)
-            # set expert request name
-            expert_request.name = expert_request.project_name + "_" + expert_request.expert_profile_type.name + \
-                "_" + time.strftime("%Y%m%d%H%M%S")
+            if formset.is_valid():
+                # get instance
+                expert_request = formset[0].save(commit=False)
+                # control HQ and field focal point informed
+                if not expert_request.agency_hq_focal_point:
+                        expert_request.agency_hq_focal_point = expert_request.supervisor
+                if not expert_request.agency_field_focal_point:
+                        expert_request.agency_field_focal_point = expert_request.supervisor
+                # set template values
+                set_template_values(expert_request)
+                # set expert request name
+                expert_request.name = expert_request.project_name + "_" + expert_request.expert_profile_type.name + \
+                    "_" + time.strftime("%Y%m%d%H%M%S")
 
-            # upload file to ftp. OBS: after save to avoid problems with document name (duplicates)
-            upload_project_document(expert_request.name, str(expert_request.project_document))
+                # upload file to ftp. OBS: after save to avoid problems with document name (duplicates)
+                upload_project_document(expert_request.name, str(expert_request.project_document))
 
-            # save expert request
-            formset.save()
+                # save expert request
+                formset.save()
 
-            # trace action
-            trace_action(TRACE_CREATE_REQUEST, expert_request, person)
+                # trace action
+                trace_action(TRACE_CREATE_REQUEST, expert_request, person)
 
-            return redirect("/index/", context_instance=RequestContext(request))
+                return redirect("/index/", context_instance=RequestContext(request))
+            else:
+                if format(len(formset.errors) > 0):
+                    num_errors = len(formset.errors[0])
         else:
-            if format(len(formset.errors) > 0):
-                num_errors = len(formset.errors[0])
-    else:
-        query_set = ExpertRequest.objects.filter(pk=request_id)
-        formset = request_form_set(queryset=query_set)
+            query_set = ExpertRequest.objects.filter(pk=request_id)
+            formset = request_form_set(queryset=query_set)
 
 
-    # initial values
-    if not query_set:
-        # status: preparation
-        formset[0].fields['status'].initial = 1
-        # creator
-        formset[0].fields['request_creator'].initial = person.id
-        # requesting agency
-        formset[0].fields['requesting_agency'].initial = "UN-HABITAT"
-        # name. temporary value to not duplicate an so validate model form
-        formset[0].fields['name'].initial = time.strftime("%Y%m%d%H%M%S")
+        # initial values
+        if not query_set:
+            # status: preparation
+            formset[0].fields['status'].initial = 1
+            # creator
+            formset[0].fields['request_creator'].initial = person.id
+            # requesting agency
+            formset[0].fields['requesting_agency'].initial = "UN-HABITAT"
+            # name. temporary value to not duplicate an so validate model form
+            formset[0].fields['name'].initial = time.strftime("%Y%m%d%H%M%S")
 
-    return render_to_response("crppdmt/create_request.html",
-                              {"formset": formset, "person": person,
-                               "IF_OTHER_THAN_SUPERVISOR_HELP_TEXT": IF_OTHER_THAN_SUPERVISOR_HELP_TEXT },
-                              context_instance=RequestContext(request))
+        return render_to_response("crppdmt/create_request.html",
+                                  {"formset": formset, "person": person,
+                                   "IF_OTHER_THAN_SUPERVISOR_HELP_TEXT": IF_OTHER_THAN_SUPERVISOR_HELP_TEXT },
+                                  context_instance=RequestContext(request))
+    except:
+        return render_to_response("crppdmt/error.html",
+                                  {"error_description": sys.exc_info(),},
+                                  context_instance=RequestContext(request))
+
 
 @ensure_csrf_cookie
 @login_required
@@ -363,78 +381,84 @@ def general_checklist(request, action, expert_request_id):
     :param expert_request_id:
     :return:
     """
-    # get expert request
-    expert_request = ExpertRequest.objects.get(id=expert_request_id)
-
-    # get person
-    person = get_person(request)
-
-    # access control
-    if expert_request.status.name == "Supervision" and \
-            (expert_request.supervisor == person or expert_request.request_creator == person):
-        pass
-    else:
-        pass  #TODO: redirect to control access page
-
-
-    # get check list
-    all_items = GeneralCheckList.objects.all().order_by('id')
-    # error required ack
-    error_required_ack = False
-    if request.method == 'POST':
-        my_form = GeneralCheckListForm(request.POST)
-
-        if my_form.is_valid():
-            # settings per action
-            if action == ACTION_TO_SUPERVISOR:
-                expert_request.date_sent_to_supervisor = datetime.datetime.date(datetime.datetime.now())
-                expert_request.status = RequestStatus.objects.get(name="Supervision")
-                # update expert request
-                expert_request.save()
-                # send email to supervisor
-                send_request_email_to(expert_request, MAIL_REQUEST_TO_REVIEW)
-                # trace action
-                trace_action(TRACE_REQUEST_TO_SUPERVISOR, expert_request, person)
-
-            if action == ACTION_TO_VALIDATION:
-                expert_request.date_sent_to_validation = datetime.datetime.date(datetime.datetime.now())
-                expert_request.status = RequestStatus.objects.get(name="Validation")
-                # update expert request
-                expert_request.save()
-                # send email to validator
-                send_request_email_to(expert_request, MAIL_REQUEST_TO_VALIDATE)
-                # trace action
-                trace_action(TRACE_REQUEST_TO_VALIDATION, expert_request, person)
-
-
-            # back to request list page
-            return redirect("/index/", context_instance=RequestContext(request))
-        else:
-            error_required_ack = True
-    else:
-        # empty form
-        my_form = GeneralCheckListForm()
-
-
-    paginator = Paginator(all_items, ITEMS_PER_PAGE)  # Limit items per page
-    page = request.GET.get('page')
     try:
-        item_list = paginator.page(page)
-    except:
-        print("Unexpected error:", sys.exc_info())
-        item_list = paginator.page(1)
+        # get expert request
+        expert_request = ExpertRequest.objects.get(id=expert_request_id)
 
-    return render_to_response("crppdmt/general_checklist.html",
-                              {"item_list": item_list,
-                               "person": person,
-                               "form": my_form,
-                               "action": action,
-                               "ACTION_TO_SUPERVISOR": ACTION_TO_SUPERVISOR,
-                               "ACTION_TO_VALIDATION": ACTION_TO_VALIDATION,
-                               "expert_request_id": expert_request_id,
-                               "expert_request_name": expert_request.name,
-                               "error_required_ack":error_required_ack},
-                              context_instance=RequestContext(request))
+        # get person
+        person = get_person(request)
+
+        # access control
+        if expert_request.status.name == "Supervision" and \
+                (expert_request.supervisor == person or expert_request.request_creator == person):
+            pass
+        else:
+            pass  #TODO: redirect to control access page
+
+
+        # get check list
+        all_items = GeneralCheckList.objects.all().order_by('id')
+        # error required ack
+        error_required_ack = False
+        if request.method == 'POST':
+            my_form = GeneralCheckListForm(request.POST)
+
+            if my_form.is_valid():
+                # settings per action
+                if action == ACTION_TO_SUPERVISOR:
+                    expert_request.date_sent_to_supervisor = datetime.datetime.date(datetime.datetime.now())
+                    expert_request.status = RequestStatus.objects.get(name="Supervision")
+                    # update expert request
+                    expert_request.save()
+                    # send email to supervisor
+                    send_request_email_to(expert_request, MAIL_REQUEST_TO_REVIEW)
+                    # trace action
+                    trace_action(TRACE_REQUEST_TO_SUPERVISOR, expert_request, person)
+
+                if action == ACTION_TO_VALIDATION:
+                    expert_request.date_sent_to_validation = datetime.datetime.date(datetime.datetime.now())
+                    expert_request.status = RequestStatus.objects.get(name="Validation")
+                    # update expert request
+                    expert_request.save()
+                    # send email to validator
+                    send_request_email_to(expert_request, MAIL_REQUEST_TO_VALIDATE)
+                    # trace action
+                    trace_action(TRACE_REQUEST_TO_VALIDATION, expert_request, person)
+
+
+                # back to request list page
+                return redirect("/index/", context_instance=RequestContext(request))
+            else:
+                error_required_ack = True
+        else:
+            # empty form
+            my_form = GeneralCheckListForm()
+
+
+        paginator = Paginator(all_items, ITEMS_PER_PAGE)  # Limit items per page
+        page = request.GET.get('page')
+        try:
+            item_list = paginator.page(page)
+        except:
+            print("Unexpected error:", sys.exc_info())
+            item_list = paginator.page(1)
+
+        return render_to_response("crppdmt/general_checklist.html",
+                                  {"item_list": item_list,
+                                   "person": person,
+                                   "form": my_form,
+                                   "action": action,
+                                   "ACTION_TO_SUPERVISOR": ACTION_TO_SUPERVISOR,
+                                   "ACTION_TO_VALIDATION": ACTION_TO_VALIDATION,
+                                   "expert_request_id": expert_request_id,
+                                   "expert_request_name": expert_request.name,
+                                   "error_required_ack":error_required_ack},
+                                  context_instance=RequestContext(request))
+    except:
+        return render_to_response("crppdmt/error.html",
+                                  {"error_description": sys.exc_info(),},
+                                  context_instance=RequestContext(request))
+
 
 @ensure_csrf_cookie
 @login_required
@@ -445,62 +469,52 @@ def summary_checklist(request, expert_request_id):
     :param expert_request_id:
     :return:
     """
-    # get expert request
-    expert_request = ExpertRequest.objects.get(id=expert_request_id)
-    # get person
-    person = get_person(request)
+    try:
+        # get expert request
+        expert_request = ExpertRequest.objects.get(id=expert_request_id)
+        # get person
+        person = get_person(request)
 
-    if request.method == 'POST':
-        my_form = SummaryCheckListForm(request.POST)
+        if request.method == 'POST':
+            my_form = SummaryCheckListForm(request.POST)
 
-        if my_form.is_valid():
-            # actions if validated
-            if my_form.cleaned_data['validate_request'] and my_form.cleaned_data['validate_request'] is True:
-                # change status
-                expert_request.status = RequestStatus.objects.get(name=STATUS_CANDIDATE_APPROVAL)
-                # save request
-                expert_request.save()
-                # trace
-                trace_action(TRACE_VALIDATED_REQUEST,expert_request, person)
-                # send email to validator and supervisor
-                send_request_email_to(expert_request, MAIL_REQUEST_VALIDATED_SUPERVISOR)
-                # trace
-                trace_action(TRACE_VALIDATED_REQUEST_TO_SUPERVISOR,expert_request, person)
-                # send email to NORCAP
-                send_request_email_to(expert_request, MAIL_REQUEST_VALIDATED_NORCAP)
-                # trace
-                trace_action(TRACE_VALIDATED_REQUEST_TO_NORCAP,expert_request, person)
-            """
-            # actions if not
-            if my_form.cleaned_data['validate_request'] and my_form.cleaned_data['validate_request'] is False:
-                # change status
-                expert_request.status = RequestStatus.objects.get(name=STATUS_VALIDATION)
-                # save request
-                expert_request.save()
-                # trace
-                trace_action(TRACE_NOT_VALIDATED_REQUEST,expert_request, person)
-                # send email to validator and supervisor
-                send_request_email_to(expert_request, MAIL_REQUEST_NOT_VALIDATED)
-                # trace
-                trace_action(TRACE_NOT_VALIDATED_REQUEST,expert_request, person)
-            """
+            if my_form.is_valid():
+                # actions if validated
+                if my_form.cleaned_data['validate_request'] and my_form.cleaned_data['validate_request'] is True:
+                    # change status
+                    expert_request.status = RequestStatus.objects.get(name=STATUS_CANDIDATE_APPROVAL)
+                    # save request
+                    expert_request.save()
+                    # trace
+                    trace_action(TRACE_VALIDATED_REQUEST,expert_request, person)
+                    # send email to validator and supervisor
+                    send_request_email_to(expert_request, MAIL_REQUEST_VALIDATED_SUPERVISOR)
+                    # trace
+                    trace_action(TRACE_VALIDATED_REQUEST_TO_SUPERVISOR,expert_request, person)
+                    # send email to NORCAP
+                    send_request_email_to(expert_request, MAIL_REQUEST_VALIDATED_NORCAP)
+                    # trace
+                    trace_action(TRACE_VALIDATED_REQUEST_TO_NORCAP,expert_request, person)
 
-            # back to request list page
-            return redirect("/index/", context_instance=RequestContext(request))
+                # back to request list page
+                return redirect("/index/", context_instance=RequestContext(request))
+            else:
+                pass
         else:
-            pass
-    else:
-        # empty form
-        my_form = SummaryCheckListForm()
+            # empty form
+            my_form = SummaryCheckListForm()
 
-
-    return render_to_response("crppdmt/summary_checklist.html",
-                              {"person": person,
-                               "form": my_form,
-                               "expert_request_id": expert_request_id,
-                               "expert_request_name": expert_request.name ,
-                               "summary_literals": crppdmt.summary_checklist ,},
-                               context_instance=RequestContext(request))
+        return render_to_response("crppdmt/summary_checklist.html",
+                                  {"person": person,
+                                   "form": my_form,
+                                   "expert_request_id": expert_request_id,
+                                   "expert_request_name": expert_request.name ,
+                                   "summary_literals": crppdmt.summary_checklist ,},
+                                   context_instance=RequestContext(request))
+    except:
+        return render_to_response("crppdmt/error.html",
+                                  {"error_description": sys.exc_info(),},
+                                  context_instance=RequestContext(request))
 
 
 
@@ -513,7 +527,8 @@ def test(request):
     return render_to_response("crppdmt/test.html",
                               context_instance=RequestContext(request))
 
-
+@ensure_csrf_cookie
+@login_required
 def generate_letter_of_request_pdf(request, expert_request_id):
     """
     Generates letter of request PDF request
@@ -521,15 +536,27 @@ def generate_letter_of_request_pdf(request, expert_request_id):
     :param expert_request_id:
     :return:
     """
-    expert_request = ExpertRequest.objects.get(pk=expert_request_id)
-    context = {'expert_request': expert_request,
-               'pagesize': 'A4',
-               'BASE_DIR': BASE_DIR,
-            }
+    try:
+        expert_request = ExpertRequest.objects.get(pk=expert_request_id)
 
-    return render_to_pdf_response(request, "crppdmt/letter_of_request.html", context, filename=None, encoding=u'utf-8')
+        deploy_env = os.environ.get('DEPLOY_ENV','LOCAL')
+        if "HEROKU" != deploy_env:
+            test = True
+
+        context = {'expert_request': expert_request,
+                   'pagesize': 'A4',
+                   'BASE_DIR': BASE_DIR,
+                   'test_env': test,
+                }
+        return render_to_pdf_response(request, "crppdmt/pdf/letter_of_request.html", context, filename=None, encoding=u'utf-8')
+    except:
+        return render_to_response("crppdmt/error.html",
+                                  {"error_description": sys.exc_info(),},
+                                  context_instance=RequestContext(request))
 
 
+@ensure_csrf_cookie
+@login_required
 def generate_tor_pdf(request, expert_request_id):
     """
     Generates ToR PDF request
@@ -537,15 +564,27 @@ def generate_tor_pdf(request, expert_request_id):
     :param expert_request_id:
     :return:
     """
-    expert_request = ExpertRequest.objects.get(pk=expert_request_id)
-    context = {'expert_request': expert_request,
-               'pagesize': 'A4',
-               'BASE_DIR': BASE_DIR,
-            }
+    try:
+        expert_request = ExpertRequest.objects.get(pk=expert_request_id)
 
-    return render_to_pdf_response(request, "crppdmt/tor.html", context, filename=None)
+        deploy_env = os.environ.get('DEPLOY_ENV','LOCAL')
+        if "HEROKU" != deploy_env:
+            test = True
+
+        context = {'expert_request': expert_request,
+                   'pagesize': 'A4',
+                   'BASE_DIR': BASE_DIR,
+                   'test_env': test,
+                }
+        return render_to_pdf_response(request, "crppdmt/pdf/tor.html", context, filename=None)
+    except:
+        return render_to_response("crppdmt/error.html",
+                                  {"error_description": sys.exc_info(),},
+                                  context_instance=RequestContext(request))
 
 
+@ensure_csrf_cookie
+@login_required
 def retrieve_file(request, remote_folder, remote_file):
     """
     retrieve_file
@@ -553,51 +592,21 @@ def retrieve_file(request, remote_folder, remote_file):
     :param expert_request_id:
     :return:
     """
+    try:
+        # get the file
+        file_content = get_ftp_file_content(remote_folder, remote_file)
+        if file_content is None:
+            print("file_content is null!!")  # TODO: redirect to error page
+        else:
+            # return the file
+            response = HttpResponse(file_content, content_type='application/pdf')
+            response['Content-Disposition'] = 'inline;filename=' + remote_file
+            return response
+    except:
+        return render_to_response("crppdmt/error.html",
+                                  {"error_description": sys.exc_info(),},
+                                  context_instance=RequestContext(request))
 
-    # get the file
-    file_content = get_ftp_file_content(remote_folder, remote_file)
-    if file_content is None:
-        print("file_content is null!!")  # TODO: redirect to error page
-    else:
-        # return the file
-        response = HttpResponse(file_content, content_type='application/pdf')
-        response['Content-Disposition'] = 'inline;filename=' + remote_file
-        return response
-
-
-
-
-############################################################
-#
-# Class views
-#
-#############################################################
-
-
-class GenerateToRPDF(PDFTemplateView):
-    """
-    Generates PDF for ToR
-    """
-    template_name = "crppdmt/tor.html"
-    expert_request = ExpertRequest
-
-    def get_context_data(self, **kwargs):
-        return super(HelloPDFView, self).get_context_data(
-            pagesize="A4",
-            title="ToR",
-            **kwargs
-        )
-
-
-class HelloPDFView(PDFTemplateView):
-    template_name = "crppdmt/test_pdf.html"
-
-    def get_context_data(self, **kwargs):
-        return super(HelloPDFView, self).get_context_data(
-            pagesize="A4",
-            title="Hi there!",
-            **kwargs
-        )
 
 
 ############################################################

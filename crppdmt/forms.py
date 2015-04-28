@@ -2,7 +2,7 @@ import time
 
 from django import forms
 from constants import *
-from crppdmt.models import ExpertRequest, Person, Role
+from crppdmt.models import ExpertRequest, Person, Role, Organization
 
 class BasicRequestForm(forms.ModelForm):
 
@@ -26,6 +26,8 @@ class BasicRequestForm(forms.ModelForm):
         # filter people with role Field focal point
         self.fields['agency_field_focal_point'].queryset = Person.objects.filter(roles__name=
                                                                                  ROLES[ROLE_FIELD_FOCAL_POINT_ITEM])
+        # filter requested agencies: organizations with requested agency type
+        self.fields['requested_agency'].queryset = Organization.objects.filter(type=ORGANIZATION_TYPE_REQUESTED)
 
     class Meta:
         model = ExpertRequest
@@ -40,6 +42,7 @@ class BasicRequestForm(forms.ModelForm):
 class CreateRequestForm(BasicRequestForm):
     #send_to_supervisor = forms.BooleanField(required=False, initial=False)  # initial force always return boolean field
     pass
+
 
 
 class EditRequestForm(BasicRequestForm):

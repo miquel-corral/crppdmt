@@ -110,12 +110,6 @@
             </tr>
             <tr>
                 <td>
-                    {{form.title.errors}}
-                    <span class="required" style="display:inline;">{{ form.title.label_tag }}{{ form.title }}</span>
-                </td>
-            </tr>
-            <tr>
-                <td>
                     {{form.project_name.errors}}
                     <span class="required" style="display:inline;">{{ form.project_name.label_tag }}{{ form.project_name }}</span>
                 </td>
@@ -145,6 +139,20 @@
             <caption>
                 <div class="section">Basic Information</div>
             </caption>
+            <tr>
+                <td>
+                    {{form.requested_agency.errors}}
+                    <span class="required" style="display:inline;">
+                        {{ form.requested_agency.label_tag }}{{ form.requested_agency }}
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.title.errors}}
+                    <span class="required" style="display:inline;">{{ form.title.label_tag }}{{ form.title }}</span>
+                </td>
+            </tr>
             <tr>
                 <td>
                     {{form.country.errors}}

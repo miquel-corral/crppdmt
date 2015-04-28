@@ -57,7 +57,7 @@ def test_render_to_pdf():
         }
         #tor_template = loader.get_template('crppdmt/tor.html')
         #letter_template = loader.get_template('crppdmt/letter_of_request.html')
-        tor_pdf = render_to_pdf('crppdmt/tor.html', context)
+        tor_pdf = render_to_pdf('crppdmt/pdf/tor.html', context)
         tor_file = open("tor_file.pdf",'w')
         tor_file.write(tor_pdf)
         tor_file.close()

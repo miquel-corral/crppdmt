@@ -101,15 +101,15 @@
         {{ form.requesting_agency.as_hidden }}
         {{ form.date_of_closure_of_request.as_hidden }}
         {{ form.expert_profile_type.as_hidden }}
+        {{ form.requested_agency.as_hidden }}
 
-        {% comment %}
+
         {% for field in form %}
             {% if field.errors %}
                 {{field.label_tag}}
                 {{field.errors}}
             {% endif %}
         {% endfor %}
-        {% endcomment %}
 
         {% if form.non_field_errors %} {{ form.non_field_errors}} {% endif %}
 

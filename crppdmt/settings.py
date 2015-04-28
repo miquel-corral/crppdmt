@@ -65,24 +65,6 @@ ROOT_URLCONF = 'crppdmt.urls'
 WSGI_APPLICATION = 'crppdmt.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/1.7/ref/settings/#databases
-import dj_database_url
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'dmt',
-        'USER': 'miquel',
-        'PASSWORD': 'miquel03',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    },
-}
-
-if 'HEROKU' == deploy_env:
-    DATABASES['default'] = dj_database_url.config()
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.7/topics/i18n/

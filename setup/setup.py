@@ -213,10 +213,29 @@ def load_general_checklist():
     print("load_general_checklist. End.")
 
 
-if __name__ == "__main__":
+def load_organizations():
+    """
+    load organizations file
+    """
+    print("load_organizations. Start...")
+    file_path = settings.BASE_DIR + "/files/organizations.tsv"
+    data_reader = csv.reader(open(file_path), dialect='excel-tab')
+    data_reader.next()  # to skip column headers
+    for row in data_reader:
+        organization = Organization()
+        organization.name = row[0].strip()
+        organization.type = row[1].strip()
+        try:
+            organization.save()
+        except:
+            print("Unexpected error:", sys.exc_info())
+    print("load_organizations. End.")
 
+
+if __name__ == "__main__":
+    load_entity_single_field_name("countries.tsv", Role)
     load_entity_single_field_name("roles.tsv", Role)
-    load_entity_single_field_name("organizations.tsv", Organization)
+    load_organizations()
     load_users_file()
     load_people()
     load_entity_single_field_name("mission_status.tsv", MissionStatus)
@@ -226,6 +245,8 @@ if __name__ == "__main__":
     load_entity_single_field_name("expert_profile_type.tsv", ExpertProfileType)
     #load_requests()
     load_general_checklist()
+    load_entity_single_field_name("countries.tsv", Country)
+
 
 
 

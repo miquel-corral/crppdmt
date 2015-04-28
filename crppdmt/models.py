@@ -29,6 +29,11 @@ class BasicName(Common):
         abstract = True
 
 
+class Country(BasicName):
+    """
+    Represents countries
+    """
+
 class MissionStatus(BasicName):
     """
     Represents mission status
@@ -39,7 +44,7 @@ class Organization(BasicName):
     """
     Represents an organization in the system
     """
-
+    type = django.db.models.CharField(max_length=25, null=False, blank=False)
 
 class Role(BasicName):
     """
@@ -115,7 +120,8 @@ class ExpertRequest(BasicName):
     project_code = django.db.models.CharField("Project/Budget code", max_length=100, null=False, blank=False)
     project_document = django.db.models.FileField(null=True, blank=True, validators=[validate_file_extension, validate_file_size])
     requesting_agency = django.db.models.CharField(max_length=100, null=False, blank=False, default="UN-HABITAT")
-    country = django.db.models.CharField(max_length=250, null=False, blank=False)
+    requested_agency = django.db.models.ForeignKey(Organization, null=False, blank=False, default="NORCAP")
+    country = django.db.models.ForeignKey(Country, null=True, blank=True)
     duty_station = django.db.models.CharField(max_length=250, null=False, blank=False)
     requested_date_of_deployment = django.db.models.DateField(null=False, blank=False, validators=[validate_date_greater_than_today])
     security_phase_in_duty_station = django.db.models.CharField(max_length=50, null=False, blank=False, default="NA")
@@ -138,12 +144,14 @@ class ExpertRequest(BasicName):
     main_duties_and_responsibilities = django.db.models.TextField(null=True, blank=True)
     other_relevant_information = django.db.models.TextField(null=True, blank=True)
 
-
     def clean(self):
         # Control supervisor and country representative not the same person
+        # control deleted in order to have the possibility to have it open
+        """
         if hasattr(self, 'supervisor') and hasattr(self, 'country_representative'):
             if self.supervisor == self.country_representative:
                 raise ValidationError('Country Representative and Supervisor must be different.')
+        """
 
     def has_no_empty_text_fields(self):
         if self.background_information == '':

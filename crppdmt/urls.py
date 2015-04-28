@@ -1,9 +1,7 @@
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
+from django.contrib import auth
 import django.views.i18n
-
-
-from crppdmt.views import HelloPDFView
 
 urlpatterns = patterns('',
     # Examples:
@@ -18,6 +16,14 @@ urlpatterns = patterns('',
 
     # url to change password
     url(r'^accounts/change_password/$', 'crppdmt.views.my_change_password', name='my_change_password'),
+
+    # urls to manage the forgot password link
+    url(r'^admin/password_reset/$', 'django.contrib.auth.views.password_reset', name='password_reset'),
+
+    url(r'^password_reset/done/$', 'django.contrib.auth.views.password_reset_done', name='password_reset_done'),
+    url(r'^reset/(?P<uidb64>[^/]+)/(?P<token>[^/]+)/$', 'django.contrib.auth.views.password_reset_confirm', name='password_reset_confirm'),
+    url(r'^reset/done/$', 'django.contrib.auth.views.password_reset_complete',name='password_reset_complete'),
+    #(r'^admin/(.*)', admin.site.root),
 
     # base url
     url(r'^$', 'crppdmt.views.index', name='index'),
@@ -51,11 +57,14 @@ urlpatterns = patterns('',
 
 
 
+    # url entries for registration app
+    #(r'^accounts/', include('registration.urls')),
+
+    #url to error page
+    #url(r'^error/', 'crppdmt.views.error', name='error'),
+
     #url to test page
     url(r'^test/', 'crppdmt.views.test', name='test'),
-
-    #url to test pdf page
-    url(r'^hello.pdf$', HelloPDFView.as_view(), name='hello.pdf'),
 
     # url to admin app
     url(r'^admin/', include(admin.site.urls)),

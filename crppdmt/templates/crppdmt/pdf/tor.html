@@ -22,6 +22,11 @@
                 <tr>
                     <td style="text-align:center;font-weight:bold;">Terms of Reference: {{ expert_request.title }}</td>
                 </tr>
+                {%if test_env%}
+                <tr>
+                    <td style="text-align:center;font-weight:bold;font-size:7;color:red;"><br>THIS IS A TEST SAMPLE!<br></td>
+                </tr>
+                {%endif%}
             </table>
         </div>
         <br>
