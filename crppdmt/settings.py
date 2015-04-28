@@ -23,10 +23,14 @@ deploy_env = os.environ.get('DEPLOY_ENV','LOCAL')
 SECRET_KEY = 'urk$y)-v%z=65jf@e@7_zg*h=ne)s3c^&14plbw(#hrctdpxnm'
 
 # SECURITY WARNING: don't run with debug turned on in production!
+"""
 if "LOCAL" == deploy_env:
     DEBUG = True
 else:
     DEBUG = False
+"""
+
+DEBUG = True
 
 
 TEMPLATE_DEBUG = True
