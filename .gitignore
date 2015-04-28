@@ -15,6 +15,7 @@ settings_private.py
 
 # ignore .pyc files
 *.pyc
+!settings_private.pyc
 
 # exclude .DS_Store
 .DS_Store
