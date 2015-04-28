@@ -57,7 +57,7 @@ urlpatterns = patterns('',
     url(r'^summary_checklist/(?P<expert_request_id>\d+)/$', 'crppdmt.views.summary_checklist', name='summary_checklist'),
 
     # url for static files
-    url(r'^static/(?P.*)$', 'django.views.static.serve', {'document_root': STATIC_ROOT}),
+    url(r'^static/$', 'django.views.static.serve', {'document_root': STATIC_ROOT}),
 
 
     # url entries for registration app
