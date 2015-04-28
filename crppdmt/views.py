@@ -576,7 +576,7 @@ def generate_tor_pdf(request, expert_request_id):
                    'BASE_DIR': BASE_DIR,
                    'test_env': test,
                 }
-        return render_to_pdf_response(request, "crppdmt/pdf/tor.html", context, filename=None)
+        return render_to_pdf_response(request, "crppdmt/pdf/tor.html", context, filename=None, encoding=u'utf-8')
     except:
         return render_to_response("crppdmt/error.html",
                                   {"error_description": sys.exc_info(),},
