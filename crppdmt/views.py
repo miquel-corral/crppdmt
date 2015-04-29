@@ -545,7 +545,7 @@ def generate_letter_of_request_pdf(request, expert_request_id):
 
         context = {'expert_request': expert_request,
                    'pagesize': 'A4',
-                   'BASE_DIR': os.path.join(BASE_DIR, '/crppdmt/staticfiles/'),
+                   'BASE_DIR': os.path.join(BASE_DIR, '/crppdmt/static/'),
                    'test_env': test,
                 }
         return render_to_pdf_response(request, "crppdmt/pdf/letter_of_request.html", context, filename=None, encoding=u'utf-8')
