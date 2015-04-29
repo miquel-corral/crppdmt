@@ -61,10 +61,6 @@ urlpatterns = patterns('',
 
 
 
-
-    # url entries for registration app
-    #(r'^accounts/', include('registration.urls')),
-
     #url to error page
     #url(r'^error/', 'crppdmt.views.error', name='error'),
 
