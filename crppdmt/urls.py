@@ -56,11 +56,6 @@ urlpatterns = patterns('',
     # url to summary checklist page
     url(r'^summary_checklist/(?P<expert_request_id>\d+)/$', 'crppdmt.views.summary_checklist', name='summary_checklist'),
 
-    # url for static files
-    #url(r'^static/$', 'django.views.static.serve', {'document_root': STATIC_ROOT}),
-
-
-
     #url to error page
     #url(r'^error/', 'crppdmt.views.error', name='error'),
 
