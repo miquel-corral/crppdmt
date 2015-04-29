@@ -1,7 +1,6 @@
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
-from crppdmt.settings import STATIC_ROOT, STATIC_URL
-from django.conf.urls.static import static
+from crppdmt.settings import STATIC_ROOT
 from django.contrib import auth
 import django.views.i18n
 
@@ -59,6 +58,7 @@ urlpatterns = patterns('',
 
     # url for static files
     #url(r'^static/$', 'django.views.static.serve', {'document_root': STATIC_ROOT}),
+
 
 
 
