@@ -27,7 +27,7 @@ SECRET_KEY = 'urk$y)-v%z=65jf@e@7_zg*h=ne)s3c^&14plbw(#hrctdpxnm'
 if "LOCAL" == deploy_env:
     DEBUG = True
 else:
-    DEBUG = True
+    DEBUG = False
 
 
 
