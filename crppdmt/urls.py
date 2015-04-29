@@ -1,6 +1,7 @@
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
-from crppdmt.settings import STATIC_ROOT
+from crppdmt.settings import STATIC_ROOT, STATIC_URL
+from django.conf.urls.static import static
 from django.contrib import auth
 import django.views.i18n
 
@@ -57,7 +58,9 @@ urlpatterns = patterns('',
     url(r'^summary_checklist/(?P<expert_request_id>\d+)/$', 'crppdmt.views.summary_checklist', name='summary_checklist'),
 
     # url for static files
-    url(r'^static/$', 'django.views.static.serve', {'document_root': STATIC_ROOT}),
+    #url(r'^static/$', 'django.views.static.serve', {'document_root': STATIC_ROOT}),
+    static(STATIC_URL, document_root=STATIC_ROOT),
+
 
 
     # url entries for registration app
