@@ -153,18 +153,32 @@ class ExpertRequest(BasicName):
                 raise ValidationError('Country Representative and Supervisor must be different.')
         """
 
-    def has_no_empty_text_fields(self):
+    def has_empty_text_fields(self):
         if self.background_information == '':
-            return False
+            return True
         if self.objectives_and_scope == '':
-            return False
+            return True
         if self.expert_profile == '':
-            return False
+            return True
         if self.main_duties_and_responsibilities == '':
-            return False
+            return True
         if self.other_relevant_information == '':
-            return False
-        return True
+            return True
+        return False
+
+    def has_no_changed_text_fields(self):
+        if self.background_information == BACKGROUND_INFORMATION_HELP_TEXT + "\n" + PLEASE_DETAIL_HELP_TEXT:
+            return True
+        if self.objectives_and_scope == PLEASE_DETAIL_HELP_TEXT:
+            return True
+        if self.expert_profile == PLEASE_DETAIL_HELP_TEXT:
+            return True
+        if self.main_duties_and_responsibilities == PLEASE_DETAIL_HELP_TEXT:
+            return True
+        if self.other_relevant_information == PLEASE_DETAIL_HELP_TEXT:
+            return True
+        return False
+
 
 
 class Duty(BasicName):

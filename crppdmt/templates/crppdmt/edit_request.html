@@ -57,7 +57,6 @@
                 {% endfor %}
             {% endfor %}
             {% endcomment %}
-
             <!-- prints model errors, right style -->
             {% for dict in formset.errors %}
                 {% for key, value in dict.items %}
@@ -68,7 +67,6 @@
                     {% endif %}
                 {% endfor %}
             {% endfor %}
-
 
             {% comment %}
             <!-- it prints all errors, field errors included-->
@@ -103,13 +101,14 @@
         {{ form.expert_profile_type.as_hidden }}
         {{ form.requested_agency.as_hidden }}
 
-
+        {% comment %}
         {% for field in form %}
             {% if field.errors %}
                 {{field.label_tag}}
                 {{field.errors}}
             {% endif %}
         {% endfor %}
+        {% endcomment %}
 
         {% if form.non_field_errors %} {{ form.non_field_errors}} {% endif %}
 
@@ -142,10 +141,15 @@
                 <td>
                     {{form.project_document.errors}}
                     <span class="required">{{ form.project_document.label_tag }}</span>
+                    <input id="chooseFile" class="uploadFile" type="button" name="upload" value="Choose File"></input>
                     {% if expert_request.project_document %}
-                        <a href="{% url 'retrieve_file' remote_folder=expert_request.name remote_file=expert_request.project_document|get_filename  %}" target="top">{{ expert_request.project_document }}</a><br>
+                        <a id="linkFile" href="{% url 'retrieve_file' remote_folder=expert_request.name remote_file=expert_request.project_document|get_filename  %}" target="top">{{expert_request.project_document}}</a>
+                        <input id="labelFile" disabled style="display:none;"></input>
+                    {% else %}
+                        <input id="labelFile" disabled></input>
                     {% endif %}
-                    {{ form.project_document }}<br>
+                    {{ form.project_document }}
+                    <br>
                     <span class="helptext">Please provide PDF files not bigger than 2MB.</span>
                 </td>
             </tr>
@@ -273,11 +277,10 @@
                     {{form.background_information.errors}}
                     {{ form.background_information.label_tag }}
                     {{ form.background_information }}
-                    <span class="help">{{ BACKGROUND_INFORMATION_HELP_TEXT }}</span>
                 </td>
                 <td style="width:40%;">
                     {{form.objectives_and_scope.errors}}
-                    {{ form.objectives_and_scope.label_tag }}
+                    <label>Specific objectives assigned to expert</label>
                     {{ form.objectives_and_scope }}
                 </td>
             </tr>
@@ -320,12 +323,6 @@
                 <tr>
                     <td style="width:88%;"></td>
                     <td class="required" style="width:10%;text-align:right;vertical-align:middle;">
-                        {% if expert_request.status.name = 'Preparation' %}
-                            Send to Supervisor
-                        {% endif %}
-                        {% if expert_request.status.name = 'Supervision' %}
-                            Send to Validation
-                        {% endif %}
                     </td>
                     <td style="width:2%;vertical-align:middle;">
                         {{ form.send_to_supervisor }}
@@ -343,6 +340,13 @@
 
 <div class="submit-row">
     <input class="default" type="submit" name="_save" value="Save"></input>
+    &nbsp;&nbsp;
+    {% if expert_request.status.name = 'Preparation' %}
+        <input class="default" type="button" name="_save1" value="Save and Send to Supervisor" onclick="sendToSupervisorAndSave();"></input>
+    {% endif %}
+    {% if expert_request.status.name = 'Supervision' %}
+        <input class="default" type="button" name="_save1" value="Save and Send to Certifier" onclick="sendToSupervisorAndSave();"></input>
+    {% endif %}
 </div> <!-- submit row div -->
 
 </div> <!-- content.main -->

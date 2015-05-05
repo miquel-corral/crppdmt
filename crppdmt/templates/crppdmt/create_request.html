@@ -2,6 +2,7 @@
 {% load i18n admin_static %}
 {% load set_context_var %}
 {% load get_context_var %}
+{% load get_filename %}
 
 {% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "crppdmt/css/forms.css" %}"/>{% endblock %}
 
@@ -125,7 +126,15 @@
                 <td>
                     {{form.project_document.errors}}
                     <span class="required">{{ form.project_document.label_tag }}</span>
-                    {{ form.project_document }}<br>
+                    <input id="chooseFile" class="uploadFile" type="button" name="upload" value="Choose File"></input>
+                    {% if expert_request.project_document %}
+                        <a id="linkFile" href="{% url 'retrieve_file' remote_folder=expert_request.name remote_file=expert_request.project_document|get_filename  %}" target="top">{{expert_request.project_document}}</a>
+                        <input id="labelFile" disabled style="display:none;"></input>
+                    {% else %}
+                        <input id="labelFile" disabled></input>
+                    {% endif %}
+                    {{ form.project_document }}
+                    <br>
                     <span class="helptext">Please provide PDF files not bigger than 2MB.</span>
                 </td>
             </tr>

@@ -258,9 +258,12 @@ def edit_request(request, request_id=None):
                         expert_request.agency_field_focal_point = expert_request.supervisor
 
                 if expert_request.project_document:
-                    # upload file to ftp. OBS: after save to avoid problems with document name (duplicates)
-                    upload_project_document(expert_request.name, str(expert_request.project_document))
-
+                    # upload file to ftp. OBS: check existence of project doc. file to avoid errors if doc.
+                    # has not changed while modifying the request
+                    if os.path.isfile(str(expert_request.project_document)):
+                        upload_project_document(expert_request.name, str(expert_request.project_document))
+                    else:
+                        pass  # file not modified while editing the request
                 # save form
                 formset.save()
                 # trace action
@@ -272,11 +275,23 @@ def edit_request(request, request_id=None):
                         return redirect("/general_checklist/to_supervisor/" + str(expert_request.id),
                                         context_instance=RequestContext(request))
                     if expert_request.status.name == STATUS_SUPERVISION:
-                        if expert_request.has_no_empty_text_fields():
-                            return redirect("/general_checklist/to_validation/" + str(expert_request.id),
-                                        context_instance=RequestContext(request))
-                        else:
+                        if expert_request.has_empty_text_fields() or expert_request.has_no_changed_text_fields():
                             formset.errors[0][ToR_FIELDS] = ToR_FIELDS_VALIDATION_ERROR
+                        else:
+                            # ensure supervisor looks at checklist only if he was not the creator
+                            if expert_request.supervisor != expert_request.request_creator:
+                                return redirect("/general_checklist/to_validation/" + str(expert_request.id),
+                                        context_instance=RequestContext(request))
+                            # if not request goes directly to validation
+                            else:
+                                # change status
+                                expert_request.status = RequestStatus.objects.get(name=STATUS_VALIDATION)
+                                expert_request.save();
+                                # trace
+                                trace_action(TRACE_REQUEST_TO_VALIDATION, expert_request, person)
+                                # send email to validator
+                                send_request_email_to(expert_request, MAIL_REQUEST_TO_VALIDATE)
+                                return redirect("/index", context_instance=RequestContext(request))
                 else:
                     # return to request list
                     return redirect("/index", context_instance=RequestContext(request))
@@ -294,6 +309,7 @@ def edit_request(request, request_id=None):
                                    "ToR_FIELDS": ToR_FIELDS},
                                   context_instance=RequestContext(request))
     except:
+        raise
         return render_to_response("crppdmt/error.html",
                                   {"error_description": sys.exc_info(),},
                                   context_instance=RequestContext(request))
@@ -596,7 +612,7 @@ def retrieve_file(request, remote_folder, remote_file):
         # get the file
         file_content = get_ftp_file_content(remote_folder, remote_file)
         if file_content is None:
-            print("file_content is null!!")  # TODO: redirect to error page
+            raise Exception("file_content is null!!")
         else:
             # return the file
             response = HttpResponse(file_content, content_type='application/pdf')
@@ -657,6 +673,7 @@ def set_template_values(expert_request):
         expert_request.expected_outputs = SHELTER_EXPECTED_OUTPUTS
         expert_request.main_duties_and_responsibilities = SHELTER_KEY_DUTIES
         expert_request.other_relevant_information = SHELTER_OTHER_RELEVANT_INFO
+        expert_request.background_information = SHELTER_BACKGROUND_INFO
 
 
 def get_person_by_username(username):

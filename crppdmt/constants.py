@@ -53,13 +53,15 @@ ORGANIZATION_TYPE_REQUESTED = "REQUESTED"
 
 BACKGROUND_INFORMATION_HELP_TEXT = \
     "Current situation in country, existing programme strategies and mechanism, " \
-    "current internal staffing capacity, staffing plans, other relevant information"
+    "current internal staffing capacity, staffing plans, other relevant information."
+
+PLEASE_DETAIL_HELP_TEXT = "Please describe"
 
 IF_OTHER_THAN_SUPERVISOR_HELP_TEXT = "Do not inform if same as supervisor"
 
 PROFILE_SHELTER = "Shelter"
 
-ToR_FIELDS_VALIDATION_ERROR = "All ToR fields must be informed."
+ToR_FIELDS_VALIDATION_ERROR = "All ToR fields must be filled."
 
 ################################################
 #
@@ -103,12 +105,12 @@ EMAIL_ADDRESS_NORCAP = "NRC@XXX.COM"
 # Trace actions
 #
 ################################################
-TRACE_CREATE_REQUEST = "CREATE_REQUEST"
+TRACE_CREATE_REQUEST = "CREATE REQUEST"
 TRACE_EDIT_REQUEST = "EDIT REQUEST"
 TRACE_VALIDATED_REQUEST = "VALIDATED REQUEST"
 TRACE_NOT_VALIDATED_REQUEST = "NOT VALIDATED REQUEST"
 TRACE_REQUEST_TO_SUPERVISOR = "REQUEST TO SUPERVISOR"
-TRACE_VALIDATED_REQUEST_TO_SUPERVISOR = "VALIDATED_REQUEST_TO_SUPERVISOR"
+TRACE_VALIDATED_REQUEST_TO_SUPERVISOR = "VALIDATED REQUEST TO SUPERVISOR"
 TRACE_VALIDATED_REQUEST_TO_NORCAP = "VALIDATED REQUEST TO NORCAP"
 TRACE_REQUEST_TO_VALIDATION = "REQUEST TO VALIDATION"
 

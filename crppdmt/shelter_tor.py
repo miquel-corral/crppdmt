@@ -5,7 +5,9 @@
 # Constants file for Shelter Experts ToR
 #
 ############################################
-SHELTER_OBJECTIVES = "Please detail"
+from crppdmt.constants import BACKGROUND_INFORMATION_HELP_TEXT, PLEASE_DETAIL_HELP_TEXT
+
+SHELTER_OBJECTIVES = PLEASE_DETAIL_HELP_TEXT
 
 SHELTER_EXPERT_PROFILE = \
     "1. Technical background (Architect, Engineer, Construction Manager) is mandatory\n" \
@@ -21,7 +23,7 @@ SHELTER_EXPERT_PROFILE = \
     "10. Strong commitment to humanitarianism and the people who work in the sector\n"
 
 
-SHELTER_EXPECTED_OUTPUTS = "Please detail"
+SHELTER_EXPECTED_OUTPUTS = PLEASE_DETAIL_HELP_TEXT
 
 SHELTER_KEY_DUTIES = \
     "Under the overall guidance of the Country Programme Manager and direct supervision of the Emergency Coordinator, "\
@@ -48,3 +50,5 @@ SHELTER_OTHER_DUTIES = \
     "This job description is intended as a guide and is not intended to provide an exhaustive list of activities " \
     "and areas of responsibility. The incumbent will be expected to undertake other tasks and roles on a needs " \
     "basis and as directed by the Emergency Coordinator."
+
+SHELTER_BACKGROUND_INFO = BACKGROUND_INFORMATION_HELP_TEXT + "\n" + PLEASE_DETAIL_HELP_TEXT

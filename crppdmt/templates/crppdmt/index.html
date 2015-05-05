@@ -16,107 +16,110 @@
 {% block content %}
 <div id="content-main">
 
-<div id="list" style="float:left;width:75%;">
-
-    <div class="module request">
-        <table style="width:100%;">
-            <thead>
-            <tr style="width:100%;">
-                <th style="width:12%;">Title</th>
-                <th style="width:12%;">Project Name</th>
-                <th style="width:12%;">Project Code</th>
-                <th style="width:12%;">Duty Station</td>
-                <th style="width:12%;">Date of Request</td>
-                <th style="width:12%;">Request Status</th>
-                <th style="width:12%;">Alerts</th>
-                <th style="width:16%;">Actions</th>
-            </tr>
-            </thead>
-            {% if request_list %}
-            {% for request in request_list %}
-            <tr class="section-{{ section.object_name|lower }}" style="width:100%;">
-                    <td style="width:12%;">{{ request.title }}</td>
-                    <td style="width:12%;">{{ request.project_name }}</td>
-                    <td style="width:12%;">{{ request.project_code }}</td>
-                    <td style="width:12%;">{{ request.duty_station }}</td>
-                    <td style="width:12%;">{{ request.date_of_request_sent|default_if_none:'' }}</td>
-                    <td style="width:12%;">{{ request.status.name }}</td>
-                    <td style="width:16%;"></td>
-                    <td style="">
-                        {% if request.request_creator == person and request.status.name == "Preparation" %}
-                            <a href="{% url 'edit_request' request_id=request.id%}" style="display:inline;"><img src="{% static 'crppdmt/img/icon_changelink.gif' %}" alt="Edit" title="Edit Request"/></a>
-                        {% endif %}
-                        {% if request.supervisor == person and request.status.name == "Supervision" %}
-                            <a href="{% url 'edit_request' request_id=request.id%}" style="display:inline;"><img src="{% static 'crppdmt/img/icon_changelink.gif' %}" alt="Review" title="Review Request"/></a>
-                        {% endif %}
-                        {% if request.country_representative == person and request.status.name = "Validation" %}
-                            <a href="{% url 'summary_checklist' expert_request_id=request.id%}" style="display:inline;"><img src="{% static 'crppdmt/img/icon_validate.png' %}" alt="Validate" title="Validate Request"/></a>
-                        {% endif %}
-                        <a href="{% url 'generate_letter_pdf' expert_request_id=request.id%}" target="_blank" style="display: inline;"><img src="{% static 'crppdmt/img/pdf.png' %}" alt="Letter of Request" title="Letter of Request"/></a>
-                        <a href="{% url 'generate_tor_pdf' expert_request_id=request.id%}" target="_blank" style="display: inline;"><img src="{% static 'crppdmt/img/pdf.png' %}" alt="ToR" title="ToR"/></a>
-                    </td>
-            </tr>
-            {% endfor %}
-        </table>
-            {% if request_list.paginator %}
-                <p class="paginator">
-                        {% if request_list.has_previous %}
-                        <span class="">
-                            <a href="?page={{ request_list.previous_page_number }}"> Previous </a>
-                        </span>
-                        {% endif %}
-
-                        <span class="this-page">
-                            Page {{ request_list.number }} of {{ request_list.paginator.num_pages }}.
-                        </span>
-
-                        {% if request_list.has_next %}
-                        <span class="">
-                            <a href="?page={{ request_list.next_page_number }}"> Next </a>
-                        </span>
-                        {% endif %}
-                </p>
-            {% endif %}
-            {% else %}
-        <table style="width:100%;">
-            <tr class="section-{{ section.object_name|lower }}" style="width:100%;">
-                <td colspan="6">No related Expert Requests found.</td>
-            </tr>
-        </table>
-            {% endif %}
-
-
-    </div>
-
-    <br>
-
-</div>
-
-<div id="col_right" style="float:right;width:20%;margin-right:15px;">
-    <div class="module unh-docs">
-        <table style="width:100%;">
-        <caption class="title-unh-docs">
-            <div class="section">Actions</div>
-            <div style="float:right;padding-right:18px;"></div>
-        </caption>
-        <tr><td>{% if person.can_create %}<a class="addlink" href="{% url 'new_request' %}" title="New Request">New Request</a>{% endif %}</td></tr>
-        </table>
-
-
-        <table style="width:100%;">
+    <div id="col_right" style="float:left;width:20%;margin-left:5px;">
+        <div class="module unh-docs">
+            <table style="width:100%;">
             <caption class="title-unh-docs">
-                <div class="section">Documentation UN-HABITAT</div>
+                <div class="section">Actions</div>
                 <div style="float:right;padding-right:18px;"></div>
             </caption>
-            <tr><td><a href="{% url 'retrieve_file' remote_folder='UN-HABITAT' remote_file='MOU_NRC_UN-Habitat.pdf'  %}" target="blank">MoU NRC - UN-Habitat</a></td></tr>
-            <tr><td><a href="{% url 'retrieve_file' remote_folder='UN-HABITAT' remote_file='MOU_NRC_UN-Habitat_Checklist.pdf'  %}" target="blank">MoU NRC - UN-Habitat Checklist</a></td></tr>
-            <tr><td><a href="{% url 'retrieve_file' remote_folder='UN-HABITAT' remote_file='MOU_NRC_UN-Habitat_Summary.pdf'  %}" target="blank">MoU NRC - UN-Habitat Summary</a></td></tr>
-            <tr><td><a href="{% url 'retrieve_file' remote_folder='UN-HABITAT' remote_file='UN-Convention_Privileges_and_Immunities.pdf'  %}" target="blank">Privileges and Immunities</a></td></tr>
-            <tr><td><a href="{% url 'retrieve_file' remote_folder='UN-HABITAT' remote_file='Consultants_and_Individual_Contractors_ST-AI-1999-7.pdf'  %}" target="blank">Consultants and Individual Contractors</a></td></tr>
-            <tr><td><a href="{% url 'retrieve_file' remote_folder='UN-HABITAT' remote_file='Gratis_personnel_ST-AI-1999-6.pdf'  %}" target="blank">Gratis Personnel</a></td></tr>
-        </table>
+            <tr><td>{% if person.can_create %}<a class="addlink" href="{% url 'new_request' %}" title="New Request">New Request</a>{% endif %}</td></tr>
+            </table>
+
+
+            <table style="width:100%;">
+                <caption class="title-unh-docs">
+                    <div class="section">Documentation UN-HABITAT</div>
+                    <div style="float:right;padding-right:18px;"></div>
+                </caption>
+                <tr><td><a href="{% url 'retrieve_file' remote_folder='UN-HABITAT' remote_file='MOU_NRC_UN-Habitat.pdf'  %}" target="blank">MoU NRC - UN-Habitat</a></td></tr>
+                <tr><td><a href="{% url 'retrieve_file' remote_folder='UN-HABITAT' remote_file='MOU_NRC_UN-Habitat_Checklist.pdf'  %}" target="blank">MoU NRC - UN-Habitat Checklist</a></td></tr>
+                <tr><td><a href="{% url 'retrieve_file' remote_folder='UN-HABITAT' remote_file='MOU_NRC_UN-Habitat_Summary.pdf'  %}" target="blank">MoU NRC - UN-Habitat Summary</a></td></tr>
+                <tr><td><a href="{% url 'retrieve_file' remote_folder='UN-HABITAT' remote_file='UN-Convention_Privileges_and_Immunities.pdf'  %}" target="blank">Privileges and Immunities</a></td></tr>
+                <tr><td><a href="{% url 'retrieve_file' remote_folder='UN-HABITAT' remote_file='Consultants_and_Individual_Contractors_ST-AI-1999-7.pdf'  %}" target="blank">Consultants and Individual Contractors</a></td></tr>
+                <tr><td><a href="{% url 'retrieve_file' remote_folder='UN-HABITAT' remote_file='Gratis_personnel_ST-AI-1999-6.pdf'  %}" target="blank">Gratis Personnel</a></td></tr>
+            </table>
+        </div>
     </div>
-</div>
+
+    <div id="list" style="float:left;width:78%;margin-left:9px;">
+
+        <div class="module request">
+            <table style="width:100%;">
+                <thead>
+                <tr style="width:100%;">
+                    <th style="width:12%;">Title</th>
+                    <th style="width:12%;">Project Name</th>
+                    <th style="width:12%;">Project Code</th>
+                    <th style="width:12%;">Duty Station</td>
+                    <th style="width:12%;">Date of Request</td>
+                    <th style="width:12%;">Request Status</th>
+                    <th style="width:12%;">Alerts</th>
+                    <th colspan="2" style="width:16%;text-align:center;">Actions</th>
+                </tr>
+                </thead>
+                {% if request_list %}
+                {% for request in request_list %}
+                <tr class="section-{{ section.object_name|lower }}" style="width:100%;">
+                        <td style="width:12%;">{{ request.title }}</td>
+                        <td style="width:12%;">{{ request.project_name }}</td>
+                        <td style="width:12%;">{{ request.project_code }}</td>
+                        <td style="width:12%;">{{ request.duty_station }}</td>
+                        <td style="width:12%;">{{ request.date_of_request_sent|default_if_none:'' }}</td>
+                        <td style="width:12%;">{{ request.status.name }}</td>
+                        <td style="width:12%;"></td>
+                        <td style="width:6%">
+                            <a href="{% url 'generate_letter_pdf' expert_request_id=request.id%}" target="_blank" style="display: inline;">Letter</a>
+                            <a href="{% url 'generate_tor_pdf' expert_request_id=request.id%}" target="_blank" style="display: inline;">ToR</a>
+                        </td>
+                        <td style="width:6%">
+                            {% if request.country_representative == person and request.status.name = "Validation" %}
+                                <a href="{% url 'summary_checklist' expert_request_id=request.id%}" style="display:inline;"><img src="{% static 'crppdmt/img/icon_validate.png' %}" alt="Validate" title="Validate Request"/></a>
+                            {% endif %}
+                            {% if request.request_creator == person and request.status.name == "Preparation" %}
+                                <a href="{% url 'edit_request' request_id=request.id%}" style="display:inline;"><img src="{% static 'crppdmt/img/icon_changelink.gif' %}" alt="Edit" title="Edit Request"/></a>
+                            {% endif %}
+                            {% if request.supervisor == person and request.status.name == "Supervision" %}
+                                <a href="{% url 'edit_request' request_id=request.id%}" style="display:inline;"><img src="{% static 'crppdmt/img/icon_changelink.gif' %}" alt="Review" title="Review Request"/></a>
+                            {% endif %}
+                        </td>
+                </tr>
+                {% endfor %}
+            </table>
+                {% if request_list.paginator %}
+                    <p class="paginator">
+                            {% if request_list.has_previous %}
+                            <span class="">
+                                <a href="?page={{ request_list.previous_page_number }}"> Previous </a>
+                            </span>
+                            {% endif %}
+
+                            <span class="this-page">
+                                Page {{ request_list.number }} of {{ request_list.paginator.num_pages }}.
+                            </span>
+
+                            {% if request_list.has_next %}
+                            <span class="">
+                                <a href="?page={{ request_list.next_page_number }}"> Next </a>
+                            </span>
+                            {% endif %}
+                    </p>
+                {% endif %}
+                {% else %}
+            <table style="width:100%;">
+                <tr class="section-{{ section.object_name|lower }}" style="width:100%;">
+                    <td colspan="6">No related Expert Requests found.</td>
+                </tr>
+            </table>
+                {% endif %}
+
+
+        </div>
+
+        <br>
+
+    </div>
+
 </div>
 
 {% endblock %}

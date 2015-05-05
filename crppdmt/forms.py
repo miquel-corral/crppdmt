@@ -51,7 +51,7 @@ class EditRequestForm(BasicRequestForm):
 
 class GeneralCheckListForm(forms.Form):
     # initial force always return boolean field
-    check_field = forms.BooleanField(required=True, initial=False, label="Acknowledgment of the above commitments")
+    check_field = forms.BooleanField(required=True, initial=False, label="I have read the above commitments")
 
 class SummaryCheckListForm(forms.Form):
     # initial force always return boolean field
