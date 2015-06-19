@@ -2,8 +2,9 @@ import sys
 import os
 from django.core.mail import EmailMultiAlternatives
 from crppdmt.settings import EMAIL_HOST_USER, BASE_DIR
-from crppdmt.settings_private import SECONDMENTS_MAIL_LIST
+from crppdmt.settings_private import SECONDMENTS_MAIL_LIST, NORCAP_FOCAL_POINTS
 from easy_pdf.rendering import render_to_pdf
+from crppdmt.constants import SMT_URL
 
 
 class MyMail():
@@ -31,7 +32,10 @@ class MyMail():
 
         # attachments stuff
         if attach_letter or attach_tor:
-            context = {'expert_request': expert_request, 'pagesize': 'A4', 'BASE_DIR': BASE_DIR, 'test_env': test}
+            context = {'expert_request': expert_request, 'pagesize': 'A4', 'BASE_DIR': BASE_DIR, 'test_env': test,
+                       'SMT_URL': SMT_URL, 'NORCAP_FOCAL_POINT': \
+                        NORCAP_FOCAL_POINTS[expert_request.expert_profile_type],
+                       'SECONDMENTS_EMAIL': SECONDMENTS_MAIL_LIST[0]}
             try:
                 tor_pdf = render_to_pdf('crppdmt/pdf/tor.html', context)
                 letter_pdf = render_to_pdf('crppdmt/pdf/letter_of_request.html', context)

@@ -55,7 +55,7 @@
                     <th style="width:12%;">Date of Request</td>
                     <th style="width:12%;">Request Status</th>
                     <th style="width:12%;">Alerts</th>
-                    <th colspan="2" style="width:16%;text-align:center;">Actions</th>
+                    <th colspan="3" style="width:16%;text-align:center;">Actions</th>
                 </tr>
                 </thead>
                 {% if request_list %}
@@ -73,8 +73,8 @@
                             <a href="{% url 'generate_tor_pdf' expert_request_id=request.id%}" target="_blank" style="display: inline;">ToR</a>
                         </td>
                         <td style="width:6%">
-                            {% if request.country_representative == person and request.status.name = "Validation" %}
-                                <a href="{% url 'summary_checklist' expert_request_id=request.id%}" style="display:inline;"><img src="{% static 'crppdmt/img/icon_validate.png' %}" alt="Validate" title="Validate Request"/></a>
+                            {% if request.country_representative == person and request.status.name = "Certification" %}
+                                <a href="{% url 'summary_checklist' expert_request_id=request.id%}" style="display:inline;"><img src="{% static 'crppdmt/img/icon_validate.png' %}" alt="Certify" title="Certify Request"/></a>
                             {% endif %}
                             {% if request.request_creator == person and request.status.name == "Preparation" %}
                                 <a href="{% url 'edit_request' request_id=request.id%}" style="display:inline;"><img src="{% static 'crppdmt/img/icon_changelink.gif' %}" alt="Edit" title="Edit Request"/></a>
@@ -82,6 +82,10 @@
                             {% if request.supervisor == person and request.status.name == "Supervision" %}
                                 <a href="{% url 'edit_request' request_id=request.id%}" style="display:inline;"><img src="{% static 'crppdmt/img/icon_changelink.gif' %}" alt="Review" title="Review Request"/></a>
                             {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'copy_request' expert_request_id=request.id%}">Copy</a>
+                            <a href="{% url 'extend_request' expert_request_id=request.id%}">Extend</a>
                         </td>
                 </tr>
                 {% endfor %}

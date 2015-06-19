@@ -1,14 +1,17 @@
+# ###############################################
+#
+# Choices
+#
+################################################
 CHOICES_YES_NO = (
     ("YES", "YES"),
     ("NO", "NO")
 )
 
-
 CHOICES_DUTIES = (
     ("Key", "Key"),
     ("Other", "Other")
 )
-
 
 CHOICES_RECOMMENDATION = (
     ("SAME_TASKS", "Deployments with the same type of tasks as this one"),
@@ -17,7 +20,6 @@ CHOICES_RECOMMENDATION = (
     ("DIFFERENT_AREA", "Tasks in a different technical area")
 )
 
-
 CHOICES_CONTACT_FREQUENCY = (
     ("Daily", "Daily"),
     ("Weekly", "Weekly"),
@@ -25,6 +27,18 @@ CHOICES_CONTACT_FREQUENCY = (
     ("Less frequently", "Less frequently"),
 )
 
+# ###############################################
+#
+# URL Application
+#
+################################################
+SMT_URL = "https://crppdmt.herokuapps.com/"
+
+# ###############################################
+#
+# User roles
+#
+################################################
 ROLES = {
     "ROLE_CREATOR": 'Creator',
     "ROLE_COUNTRY_REPRESENTATIVE": 'Country Representative',
@@ -41,11 +55,18 @@ ROLE_HQ_FOCAL_POINT_ITEM = "ROLE_HQ_FOCAL_POINT"
 ROLE_FIELD_FOCAL_POINT_ITEM = "ROLE_FIELD_FOCAL_POINT"
 ROLE_EXPERT_ITEM = "ROLE_EXPERT"
 
+
+# ###############################################
+#
+# Organization types
+#
+################################################
+
 ORGANIZATION_TYPE_REQUESTING = "REQUESTING"
 ORGANIZATION_TYPE_REQUESTED = "REQUESTED"
 
 
-################################################
+# ###############################################
 #
 # Help texts for forms
 #
@@ -62,6 +83,32 @@ IF_OTHER_THAN_SUPERVISOR_HELP_TEXT = "Do not inform if same as supervisor"
 PROFILE_SHELTER = "Shelter"
 
 ToR_FIELDS_VALIDATION_ERROR = "All ToR fields must be filled."
+
+################################################
+#
+# Profile Types
+#
+################################################
+PROFILE_FOOD_SECURITY = "Food Security"
+PROFILE_DRR = "DRR"
+PROFILE_SHELTER = "Shelter"
+PROFILE_ENGINEERING = "Engineering"
+PROFILE_WATER = "Water"
+PROFIlE_EDUCATION ="Education"
+PROFILE_SANITATON = "Sanitation"
+PROFILE_NUTRITION = "Nutrition"
+PROFILE_HEALTH = "Health"
+PROFILE_COMMUNICATION = "Communication"
+PROFILE_COORDINATION = "Coordination"
+PROFILE_STATISTICS = "Statistics"
+PROFILE_CHILD_PROTECTION = "Child Protection"
+PROFILE_GENDER = "Gender"
+PROFILE_CAMP_COORDINATION = "Camp Coordination"
+PROFILE_HOUSING = "Housing"
+PROFILE_ICT = "ICT"
+PROFILE_LOGISTICS = "Logistics"
+PROFILE_INFORMATION_MANAGEMENT = "Information Management"
+
 
 ################################################
 #
@@ -84,7 +131,7 @@ ToR_FIELDS = 'ToR_fields'
 #
 ################################################
 ACTION_TO_SUPERVISOR = "to_supervisor"
-ACTION_TO_VALIDATION = "to_validation"
+ACTION_TO_CERTIFICATION = "to_certification"
 
 ################################################
 #
@@ -92,12 +139,12 @@ ACTION_TO_VALIDATION = "to_validation"
 #
 ################################################
 MAIL_REQUEST_TO_REVIEW = "MAIL_REQUEST_TO_REVIEW"
-MAIL_REQUEST_TO_VALIDATE  = "MAIL_REQUEST_TO_VALIDATE"
-MAIL_REQUEST_VALIDATED_SUPERVISOR = "MAIL_REQUEST_VALIDATED_SUPERVISOR"
-MAIL_REQUEST_VALIDATED_NORCAP = "MAIL_REQUEST_VALIDATED_NORCAP"
-MAIL_REQUEST_NOT_VALIDATED = "MAIL_REQUEST_NOT_VALIDATED"
+MAIL_REQUEST_TO_CERTIFY = "MAIL_REQUEST_TO_CERTIFY"
+MAIL_REQUEST_CERTIFIED = "MAIL_REQUEST_CERTIFIED"
+MAIL_REQUEST_NOT_REVIEWED = "MAIL_REQUEST_NOT_REVIEWED"
+MAIL_REQUEST_NOT_CERTIFIED = "MAIL_REQUEST_NOT_CERTIFIED"
 
-EMAIL_ADDRESS_NORCAP = "NRC@XXX.COM"
+
 
 
 ################################################
@@ -112,7 +159,7 @@ TRACE_NOT_VALIDATED_REQUEST = "NOT VALIDATED REQUEST"
 TRACE_REQUEST_TO_SUPERVISOR = "REQUEST TO SUPERVISOR"
 TRACE_VALIDATED_REQUEST_TO_SUPERVISOR = "VALIDATED REQUEST TO SUPERVISOR"
 TRACE_VALIDATED_REQUEST_TO_NORCAP = "VALIDATED REQUEST TO NORCAP"
-TRACE_REQUEST_TO_VALIDATION = "REQUEST TO VALIDATION"
+TRACE_REQUEST_TO_CERTIFICATION = "REQUEST TO CERTIFICATION"
 
 ################################################
 #
@@ -121,7 +168,7 @@ TRACE_REQUEST_TO_VALIDATION = "REQUEST TO VALIDATION"
 ################################################
 STATUS_PREPARATION = "Preparation"
 STATUS_SUPERVISION = "Supervision"
-STATUS_VALIDATION = "Validation"
+STATUS_CERTIFICATION = "Certification"
 STATUS_CANDIDATE_APPROVAL = "Candidate Approval"
 STATUS_DEPLOYMENT = "Deployment"
 STATUS_MISSION_EXECUTION = "Mission Execution"

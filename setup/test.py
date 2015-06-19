@@ -19,6 +19,8 @@ from crppdmt.settings import BASE_DIR
 from crppdmt.my_ftp import MyFTP
 from crppdmt.my_mail import MyMail
 from crppdmt.models import ExpertRequest
+from crppdmt.settings import NORCAP_EMAILS, SECONDMENTS_MAIL_LIST
+from crppdmt.constants import PROFILE_SHELTER
 
 def test_ftp():
     my_FTP = MyFTP()
@@ -70,11 +72,15 @@ def test_encryption():
     print(hashlib.sha224("password").hexdigest());
 
 
+def test_NORCAP_emails():
+    print("SHELTER: " + NORCAP_EMAILS[PROFILE_SHELTER])
+    print("SECONDMENTS_MAIL_LIST[0]: " + SECONDMENTS_MAIL_LIST[0])
 
 if __name__ == "__main__":
     #test_ftp()
     #test_mail()
     #test_expert_request()
     #test_render_to_pdf()
-    test_encryption()
+    #test_encryption()
+    test_NORCAP_emails()
 

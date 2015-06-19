@@ -20,7 +20,6 @@ django.setup()
 
 from django.contrib.auth.models import User, Group
 from crppdmt.models import *
-from crppdmt.my_old_ftp import MyFTP
 
 def load_users_file():
     """
@@ -233,7 +232,7 @@ def load_organizations():
 
 
 if __name__ == "__main__":
-    load_entity_single_field_name("countries.tsv", Role)
+    load_entity_single_field_name("countries.tsv", Country)
     load_entity_single_field_name("roles.tsv", Role)
     load_organizations()
     load_users_file()
@@ -244,7 +243,6 @@ if __name__ == "__main__":
     load_entity_single_field_name("request_status.tsv", RequestStatus)
     load_entity_single_field_name("expert_profile_type.tsv", ExpertProfileType)
     load_general_checklist()
-    load_entity_single_field_name("countries.tsv", Country)
 
 
 

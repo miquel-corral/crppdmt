@@ -15,7 +15,7 @@
 <div class="breadcrumbs">
     <a href="{% url 'index' %}">Home</a> &rsaquo; {{ expert_request_name }} &rsaquo;
     {% if action == ACTION_TO_SUPERVISOR %} Send to Supervisor {% endif %}
-    {% if action == ACTION_TO_VALIDATION %} Send to Validation {% endif %}
+    {% if action == ACTION_TO_CERTIFICATION %} Send to Certification {% endif %}
 </div>
 {% endblock %}
 
@@ -98,8 +98,8 @@
         {% if action == ACTION_TO_SUPERVISOR %}
             <input class="default" type="submit" name="_save" value="Send to Supervisor" required="True"></input>
         {% endif %}
-        {% if action == ACTION_TO_VALIDATION %}
-            <input class="default" type="submit" name="_save" value="Send to Validation" required="True"></input>
+        {% if action == ACTION_TO_CERTIFICATION %}
+            <input class="default" type="submit" name="_save" value="Send to Certification" required="True"></input>
         {% endif %}
     </div>
     </form>

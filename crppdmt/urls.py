@@ -56,6 +56,13 @@ urlpatterns = patterns('',
     # url to summary checklist page
     url(r'^summary_checklist/(?P<expert_request_id>\d+)/$', 'crppdmt.views.summary_checklist', name='summary_checklist'),
 
+    # url to copy request
+    url(r'^copy_request/(?P<expert_request_id>\d+)/$', 'crppdmt.views.copy_request', name='copy_request'),
+
+    # url to extend request
+    url(r'^extend_request/(?P<expert_request_id>\d+)/$', 'crppdmt.views.extend_request', name='extend_request'),
+
+
     #url to error page
     #url(r'^error/', 'crppdmt.views.error', name='error'),
 
