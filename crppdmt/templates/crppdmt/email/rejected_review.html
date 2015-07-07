@@ -1,10 +1,14 @@
 <p style="font-size:100%">
 
-    Dear {{ expert_request.supervisor.first_name }},<br><br>
+    Dear {{ expert_request.request_creator.first_name }},<br><br>
 
-    You have a new expert request with the profile: {{ expert_request.expert_profile_type }} ready to be reviewed at <a href="{{ SMT_URL }}" target="top">{{ SMT_URL }}</a><br><br>
+    The expert request with the profile: {{ expert_request.expert_profile_type }} has been rejected for the supervisor.<br><br>
 
-    Please make sure to read carefully the requirements and the information related to the request before validating it.<br><br>
+    The reason of rejection is:<br><br>
+
+    {{ expert_request.rejected_review_reason }}<br><br>
+
+    You can review again the request at <a href="{{ SMT_URL }}" target="top">{{ SMT_URL }}</a><br><br>
 
     Thank you.<br>
 </p>

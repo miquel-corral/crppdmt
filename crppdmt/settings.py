@@ -26,9 +26,10 @@ SECRET_KEY = 'urk$y)-v%z=65jf@e@7_zg*h=ne)s3c^&14plbw(#hrctdpxnm'
 # SECURITY WARNING: don't run with debug turned on in production!
 if "LOCAL" == deploy_env:
     DEBUG = True
+    SMT_URL = "http://localhost:5000/"
 else:
     DEBUG = False
-
+    SMT_URL = "https://crppdmt.herokuapps.com/"
 
 
 TEMPLATE_DEBUG = True
@@ -49,6 +50,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'crppdmt',
     'easy_pdf',
+    'captcha',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -102,3 +104,8 @@ STATIC_ROOT = os.path.join(PROJECT_PATH, 'staticfiles')
 DATE_INPUT_FORMATS = (
     '%d/%m/%Y',  # '25/10/2006'
 )
+
+# captcha application
+SOUTH_MIGRATION_MODULES = {
+    'captcha': 'captcha.south_migrations',
+}

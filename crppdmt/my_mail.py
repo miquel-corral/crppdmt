@@ -1,10 +1,9 @@
 import sys
 import os
 from django.core.mail import EmailMultiAlternatives
-from crppdmt.settings import EMAIL_HOST_USER, BASE_DIR
+from crppdmt.settings import EMAIL_HOST_USER, BASE_DIR, SMT_URL
 from crppdmt.settings_private import SECONDMENTS_MAIL_LIST, NORCAP_FOCAL_POINTS
 from easy_pdf.rendering import render_to_pdf
-from crppdmt.constants import SMT_URL
 
 
 class MyMail():
@@ -13,7 +12,8 @@ class MyMail():
         pass
 
     @staticmethod
-    def send_mail(subject, html_content, text_content, recipients, expert_request, attach_tor=False, attach_letter=False):
+    def send_mail(subject, html_content, text_content, recipients, expert_request=None, attach_tor=False,
+                  attach_letter=False):
 
         # control of environment
         deploy_env = os.environ.get('DEPLOY_ENV','LOCAL')

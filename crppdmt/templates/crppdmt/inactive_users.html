@@ -1,0 +1,88 @@
+{% extends "crppdmt/base_site.html" %}
+{% load i18n admin_static %}
+
+{% load is_true %}
+
+{% load admin_list %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "crppdmt/css/dashboard.css" %}" />{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}dashboard{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'index' %}">Home</a> &rsaquo;
+    {{ section.name }}
+</div>
+
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+
+    <div id="list" style="float:left;width:78%;margin-left:9px;">
+
+        <div class="module request">
+            <table style="width:100%;">
+                <thead>
+                <tr style="width:100%;">
+                    <th style="width:12%;">User</th>
+                    <th style="width:12%;">Email</th>
+                    <th style="width:12%;">Title</th>
+                    <th style="width:12%;">Date Created</th>
+                    <th style="width:12%;">Actions</td>
+                </tr>
+                </thead>
+                {% if users_list %}
+                    {% for person in users_list %}
+                    <tr class="section-{{ section.object_name|lower }}" style="width:100%;">
+                            <td style="width:12%;">{{ person.name }}</td>
+                            <td style="width:12%;">{{ person.email }}</td>
+                            <td style="width:12%;">{{ person.title }}</td>
+                            <td style="width:12%;">{{ person.user.date_joined }}</td>
+                            <td style="width:6%">
+                                <a href="{% url 'validate_user' person_id=person.id%}" style="display: inline;">Validate / Reject</a>
+                            </td>
+                    </tr>
+                    {% endfor %}
+            </table>
+                {% if users_list.paginator %}
+                <p class="paginator">
+                        {% if users_list.has_previous %}
+                            <span class="">
+                                <a href="?page={{ users_list.previous_page_number }}"> Previous </a>
+                            </span>
+                            {% endif %}
+
+                            <span class="this-page">
+                                Page {{ users_list.number }} of {{ users_list.paginator.num_pages }}.
+                            </span>
+
+                            {% if users_list.has_next %}
+                            <span class="">
+                                <a href="?page={{ users_list.next_page_number }}"> Next </a>
+                            </span>
+                        {% endif %}
+                </p>
+                {% endif %}
+                {% else %}
+                    <table style="width:100%;">
+                    <tr class="section-{{ section.object_name|lower }}" style="width:100%;">
+                        <td colspan="6">No users to validate found.</td>
+                    </tr>
+                    </table>
+                {% endif %}
+        </div>
+
+        <br>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block sidebar %}
+{% endblock %}

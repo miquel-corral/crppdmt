@@ -1,8 +1,10 @@
 import time
 
 from django import forms
+from django.contrib.auth.models import User
 from constants import *
 from crppdmt.models import ExpertRequest, Person, Role, Organization
+from captcha.fields import CaptchaField
 
 class BasicRequestForm(forms.ModelForm):
 
@@ -44,7 +46,6 @@ class CreateRequestForm(BasicRequestForm):
     pass
 
 
-
 class EditRequestForm(BasicRequestForm):
     send_to_supervisor = forms.BooleanField(required=False, initial=False)  # initial force always return boolean field
 
@@ -53,10 +54,57 @@ class GeneralCheckListForm(forms.Form):
     # initial force always return boolean field
     check_field = forms.BooleanField(required=True, initial=False, label="I have read the above commitments")
 
+
 class SummaryCheckListForm(forms.Form):
     # initial force always return boolean field
     validate_request = forms.BooleanField(required=True, initial=False, label="Acknowledgment of the above commitments")
 
+
+class RejectRequestForm(BasicRequestForm):
+
+    def __init__(self, *args, **kwargs):
+        super(BasicRequestForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = ExpertRequest
+        exclude = []
+
+
+class UserRegistrationForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(UserRegistrationForm, self).__init__(*args, **kwargs)
+        # set widget for roles as multiplehiddeninput
+        self.fields['roles'].widget = forms.MultipleHiddenInput()
+        # possible supervisors to certify registration
+        user_ids = Person.objects.filter(roles__name=ROLES[ROLE_COUNTRY_REPRESENTATIVE_ITEM]).values_list('user_id',
+                                                                                                          flat=True)
+        users = User.objects.filter(id=-1)
+        for user_id in user_ids:
+            users = users | User.objects.filter(id=user_id)
+        self.fields['certifier'].queryset = users
+
+
+    captcha = CaptchaField()
+
+    class Meta:
+        model = Person
+        exclude = []
+
+
+class UserValidationForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(UserValidationForm, self).__init__(*args, **kwargs)
+        self.fields['rejection_reason'].widget = forms.Textarea()
+
+    supervisor_role = forms.BooleanField(required=False)
+    rejection_reason = forms.CharField(required=False)
+    rejected = forms.BooleanField(required=False)
+
+    class Meta:
+        model = Person
+        exclude = []
 
 
 

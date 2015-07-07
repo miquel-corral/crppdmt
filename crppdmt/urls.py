@@ -62,6 +62,20 @@ urlpatterns = patterns('',
     # url to extend request
     url(r'^extend_request/(?P<expert_request_id>\d+)/$', 'crppdmt.views.extend_request', name='extend_request'),
 
+    # url to reject request
+    url(r'^reject_request/(?P<expert_request_id>\d+)/$', 'crppdmt.views.reject_request', name='reject_request'),
+
+    # url to new user registration page
+    url(r'^user_registration/', 'crppdmt.views.user_registration', name='user_registration'),
+
+    # url to user registration informative page
+    url(r'^user_registered/', 'crppdmt.views.user_registered', name='user_registered'),
+
+    # url to inactive users list
+    url(r'^inactive_users/', 'crppdmt.views.inactive_users', name='inactive_users'),
+
+    # url to validate / reject user form
+    url(r'^validate_user/(?P<person_id>\d+)/$', 'crppdmt.views.validate_user', name='validate_user'),
 
     #url to error page
     #url(r'^error/', 'crppdmt.views.error', name='error'),
@@ -74,5 +88,8 @@ urlpatterns = patterns('',
 
     # Necessary to get widgets from admin running OK
     (r'^crppdmt/jsi18n/', 'django.views.i18n.javascript_catalog'),
+
+    # url for captcha application
+    url(r'^captcha/', include('captcha.urls')),
 )
 

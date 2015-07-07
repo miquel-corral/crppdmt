@@ -26,17 +26,24 @@ function bindSelectFirstRequest(){
 
 function setFocusFirstElemForm(){
   if(document.forms){
-    form = document.forms[0];
-    if(form){
-       if(form.elements){
-          form.elements[0].focus();
-       }
-    }
+     form = document.forms[0];
+     if(form){
+        if(form.elements){
+            for(i=0; i<form.length;i++){
+               if(form[i].readOnly == false && form[i].type != 'hidden'){
+                        form[i].focus();
+                        return;
+               }
+            }
+        }
+     }
   }
 }
 
 function setUploadButton(){
-  document.getElementById("id_form-0-send_to_supervisor").style.display='none';
+  sendToSupervisorElement = document.getElementById("id_form-0-send_to_supervisor");
+  if(sendToSupervisorElement)
+    sendToSupervisorElement.style.display='none';
   document.getElementById("id_form-0-project_document").onchange = function () {
     document.getElementById("labelFile").value = document.getElementById('id_form-0-project_document').value;
     document.getElementById("linkFile").style.display='none';
@@ -57,6 +64,19 @@ function sendToSupervisorAndSave(){
     }
 }
 
+function rejectRequest(SMT_URL, expert_request_id){
+    location.href= SMT_URL + "reject_request/" + expert_request_id;
+}
+
+function rejectUser(){
+    document.getElementById('id_form-0-rejected').checked=true
+    if(document.forms){
+        form = document.forms[0];
+        if(form){
+            form.submit();
+        }
+    }
+}
 
 
 

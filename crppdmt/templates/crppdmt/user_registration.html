@@ -1,0 +1,131 @@
+{% extends "crppdmt/base_site.html" %}
+{% load i18n admin_static %}
+{% load set_context_var %}
+{% load get_context_var %}
+{% load get_filename %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "crppdmt/css/forms.css" %}"/>{% endblock %}
+
+{% block coltype %}colM{% endblock %}
+
+{% block bodyclass %}{{ assessment.name }} change-form{% endblock %}
+
+{% if not is_popup %}
+{% block breadcrumbs %}
+
+<div class="breadcrumbs">
+    <a href="{% url 'index' %}">Home</a> &rsaquo;
+    {{ section.name }}
+</div>
+{% endblock %}
+{% endif %}
+
+
+{% block content %}
+<div id="content-main">
+
+
+
+<form name="crppdmtform" action="" method="post" id="_form" enctype="multipart/form-data">{% csrf_token %}{% block form_top %}{% endblock %}
+<div>
+{{ formset.management_form }}
+
+<fieldset class="module aligned">
+<!--  to render formsetv -->
+        {% for form in formset %}
+        {%comment%}
+            preparing the form to be printed
+            need to print form.id to avoid errors in post request
+            rest of hiden fields
+        {%endcomment%}
+        {{form.id}}
+
+        {% comment %}
+        {% for field in form %}
+            {% if field.errors %}
+                {{field.label_tag}}
+                {{field.errors}}
+            {% endif %}
+        {% endfor %}
+        {% endcomment %}
+
+
+        <div class="module" style="float:center;width:100%;">
+            <table style="width:100%;">
+            <caption>
+                <div class="section">User Registration</div>
+            </caption>
+            <tr>
+                <td>
+                    {{form.first_name.errors}}
+                    <span class="required" style="display:inline;">{{ form.first_name.label_tag }}{{ form.first_name }}</span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.last_name.errors}}
+                    <span class="required" style="display:inline;">{{ form.last_name.label_tag }}{{ form.last_name }}</span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.title.errors}}
+                    <div class="required" style="display:inline;">{{ form.title.label_tag }}{{ form.title }}</div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.email.errors}}
+                    <div class="required" style="display:inline;">{{ form.email.label_tag }}{{ form.email }}</div>
+                    <div class="helptext">If the email is already used in the systems please send email to: {{ SECONDMENTS_EMAIL }}</div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.certifier.errors}}
+                    <div class="required" style="display:inline;">{{ form.certifier.label_tag }}{{ form.certifier }}</div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.phone_no.errors}}
+                    <div style="display:inline;">{{ form.phone_no.label_tag }}{{ form.phone_no }}</div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.un_habitat_number.errors}}
+                    <div style="display:inline;">{{ form.un_habitat_number.label_tag }}{{ form.un_habitat_number }}</div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{form.captcha.errors}}
+                    <div class="required" style="display:inline;">{{ form.captcha.label_tag }}{{ form.captcha }}</div>
+                </td>
+            </tr>
+            </table>
+        </div>
+        <div style="">
+            {{ form.organization.as_hidden }}
+            {{ form.name.as_hidden }}
+            {{ form.roles.as_hidden }}
+            {{ form.user.as_hidden }}
+        </div>
+
+
+        {% endfor %}
+
+
+</fieldset>
+</div> <!-- form div -->
+
+<div class="submit-row">
+    <input class="default" type="submit" name="_save" value="Register"></input>
+</div> <!-- submit row div -->
+
+</div> <!-- content.main -->
+{% endblock %}
+
+
+

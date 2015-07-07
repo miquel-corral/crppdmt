@@ -27,12 +27,6 @@ CHOICES_CONTACT_FREQUENCY = (
     ("Less frequently", "Less frequently"),
 )
 
-# ###############################################
-#
-# URL Application
-#
-################################################
-SMT_URL = "https://crppdmt.herokuapps.com/"
 
 # ###############################################
 #
@@ -83,6 +77,7 @@ IF_OTHER_THAN_SUPERVISOR_HELP_TEXT = "Do not inform if same as supervisor"
 PROFILE_SHELTER = "Shelter"
 
 ToR_FIELDS_VALIDATION_ERROR = "All ToR fields must be filled."
+REJECT_REASON_VALIDATION_ERROR = "Rejection Reason must be filled"
 
 ################################################
 #
@@ -124,6 +119,7 @@ ITEMS_PER_PAGE = 15
 #
 ################################################
 ToR_FIELDS = 'ToR_fields'
+REJECT_REASON = 'reject_reason'
 
 ################################################
 #
@@ -143,8 +139,9 @@ MAIL_REQUEST_TO_CERTIFY = "MAIL_REQUEST_TO_CERTIFY"
 MAIL_REQUEST_CERTIFIED = "MAIL_REQUEST_CERTIFIED"
 MAIL_REQUEST_NOT_REVIEWED = "MAIL_REQUEST_NOT_REVIEWED"
 MAIL_REQUEST_NOT_CERTIFIED = "MAIL_REQUEST_NOT_CERTIFIED"
-
-
+MAIL_USER_REGISTERED = "MAIL_USER_REGISTERED"
+MAIL_USER_VALIDATED = "MAIL_USER_VALIDATED"
+MAIL_USER_REJECTED = "MAIL_USER_REJECTED"
 
 
 ################################################
@@ -160,6 +157,13 @@ TRACE_REQUEST_TO_SUPERVISOR = "REQUEST TO SUPERVISOR"
 TRACE_VALIDATED_REQUEST_TO_SUPERVISOR = "VALIDATED REQUEST TO SUPERVISOR"
 TRACE_VALIDATED_REQUEST_TO_NORCAP = "VALIDATED REQUEST TO NORCAP"
 TRACE_REQUEST_TO_CERTIFICATION = "REQUEST TO CERTIFICATION"
+TRACE_COPIED_REQUEST = "REQUEST COPIED"
+TRACE_EXTENDED_REQUEST = "REQUEST EXTENDED"
+TRACE_REJECTED_REVIEW_REQUEST = "REQUEST REVIEW REJECTED"
+TRACE_REJECTED_CERTIFICATION_REQUEST = "REQUEST CERTIFICATION REJECTED"
+TRACE_USER_REGISTERED = "USER REGISTERED"
+TRACE_USER_VALIDATED = "USER VALIDATED"
+TRACE_USER_REJECTED = "USER REJECTED"
 
 ################################################
 #

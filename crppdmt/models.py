@@ -1,8 +1,11 @@
 import django.db.models
 from django.contrib.auth.models import User, Group
 from django.core.exceptions import ValidationError
-from crppdmt.validators import *
+from django.core.validators import validate_email
+from datetime import datetime
+from django.utils import timezone
 
+from crppdmt.validators import *
 from crppdmt.constants import *
 
 
@@ -58,15 +61,17 @@ class Person(BasicName):
     """
     title = django.db.models.CharField(max_length=100, null=True, blank=True)
     phone_no = django.db.models.CharField(max_length=50, null=True, blank=True)
-    email = django.db.models.CharField(max_length=100, null=False, blank=False)
+    email = django.db.models.CharField(max_length=100, null=False, blank=False,validators=[validate_email,])
+                                                                                      # validate_email_does_not_exist])
     organization = django.db.models.ForeignKey(Organization)
     organization_number = django.db.models.CharField(max_length=20, null=True, blank=True)
-    un_habitat_number = django.db.models.CharField(max_length=20, null=True, blank=True)
+    un_habitat_number = django.db.models.CharField(max_length=20, null=True, blank=True, verbose_name='UN-Habitat ID')
     roles = django.db.models.ManyToManyField(Role)
     user = django.db.models.ForeignKey(User)
     first_name = django.db.models.CharField(max_length=100, null=False, blank=False)
     last_name = django.db.models.CharField(max_length=100, null=True, blank=True)
     personal_title = django.db.models.CharField(max_length=5, null=True, blank=True)
+    certifier = django.db.models.ForeignKey(User, null=True, blank=True, related_name='Certifier')
 
     def can_create(self):
         ret = False
@@ -84,6 +89,13 @@ class Person(BasicName):
                 break
         return ret
 
+    def can_validate_user(self):
+        ret = False
+        for role in self.roles.all():  # everyone has at least one role
+            if role.name == ROLES[ROLE_COUNTRY_REPRESENTATIVE_ITEM]:
+                ret = True
+                break
+        return ret
 
 
 class RequestStatus(BasicName):
@@ -143,6 +155,11 @@ class ExpertRequest(BasicName):
     expected_outputs = django.db.models.TextField(null=True, blank=True)
     main_duties_and_responsibilities = django.db.models.TextField(null=True, blank=True)
     other_relevant_information = django.db.models.TextField(null=True, blank=True)
+    # Rejection
+    rejected_review_date = django.db.models.DateField(null=True, blank=True)
+    rejected_review_reason = django.db.models.TextField(null=True, blank=True)
+    rejected_certification_date = django.db.models.DateField(null=True, blank=True)
+    rejected_certification_reason = django.db.models.TextField(null=True, blank=True)
 
     def clean(self):
         # Control supervisor and country representative not the same person
@@ -320,6 +337,9 @@ class TraceAction(Common):
     """
     action = django.db.models.CharField(max_length=50, null=False, blank=False)
     description = django.db.models.TextField(null=False, blank=False)
-    expert_request = django.db.models.ForeignKey(ExpertRequest)
     person = django.db.models.ForeignKey(Person)
+    date = django.db.models.DateTimeField(default=timezone.now, null=False, blank=False)
+    expert_request = django.db.models.ForeignKey(ExpertRequest, null=True, blank=True)
+
+
 

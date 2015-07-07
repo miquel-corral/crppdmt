@@ -15,7 +15,6 @@
 
 <div class="breadcrumbs">
     <a href="{% url 'index' %}">Home</a> &rsaquo;
-    {{ section.name }}
 </div>
 {% endblock %}
 {% endif %}
@@ -28,7 +27,7 @@
 <div class="module">
     <table style="width:100%">
         <caption class="title_indexcard">
-            <div class="section">Edit Request </div>
+            <div class="section">Reject Request </div>
             <div style="float:right;padding-right:18px;"></div>
         </caption>
     </table>
@@ -120,20 +119,24 @@
             <tr>
                 <td>
                     {{form.expert_profile_type.errors}}
-                    <span class="required" style="display:inline;">{{ form.expert_profile_type.label_tag }}{{ expert_request.expert_profile_type.name }}</span>
+                    <span class="required" style="display:inline;">{{ form.expert_profile_type.label_tag }}
+                        {{ expert_request.expert_profile_type.name }}</span>
                 </td>
             </tr>
 
             <tr>
                 <td>
                     {{form.project_name.errors}}
-                    <span class="required" style="display:inline;">{{ form.project_name.label_tag }}{{ form.project_name }}</span>
+                    <span class="required" style="display:inline;">{{ form.project_name.label_tag }}</span>
+                        {{ form.project_name.as_hidden }}{{expert_request.project_name}}
                 </td>
             </tr>
             <tr>
                 <td>
                     {{form.project_code.errors}}
-                    <div class="required" style="display:inline;">{{ form.project_code.label_tag }}{{ form.project_code }}</div>
+                    <div class="required" style="display:inline;">{{ form.project_code.label_tag }}
+                        {{ form.project_code.as_hidden }}{{ expert_request.project_code }}
+                    </div>
 
                 </td>
             </tr>
@@ -141,16 +144,7 @@
                 <td>
                     {{form.project_document.errors}}
                     <span class="required">{{ form.project_document.label_tag }}</span>
-                    <input id="chooseFile" class="uploadFile" type="button" name="upload" value="Choose File"></input>
-                    {% if expert_request.project_document %}
-                        <a id="linkFile" href="{% url 'retrieve_file' remote_folder=expert_request.name remote_file=expert_request.project_document|get_filename  %}" target="top">{{expert_request.project_document}}</a>
-                        <input id="labelFile" disabled style="display:none;"></input>
-                    {% else %}
-                        <input id="labelFile" disabled></input>
-                    {% endif %}
-                    {{ form.project_document }}
-                    <br>
-                    <span class="helptext">Please provide PDF files not bigger than 2MB.</span>
+                    {{ form.project_document.as_hidden }} {{ expert_request.project_document }}
                 </td>
             </tr>
             </table>
@@ -173,57 +167,57 @@
             <tr>
                 <td>
                     {{form.title.errors}}
-                    <span class="required" style="display:inline;">{{ form.title.label_tag }}{{ form.title }}</span>
+                    <span class="required" style="display:inline;">{{ form.title.label_tag }}{{ expert_request.title }}{{ form.title.as_hidden }}</span>
                 </td>
             </tr>
             <tr>
                 <td>
                     {{form.country.errors}}
                     <span class="required">{{ form.country.label_tag }}</span>
-                    {{ form.country }}
+                    {{ form.country.as_hidden }} {{ expert_request.country }}
                 </td>
             </tr>
             <tr>
                 <td>
                     {{form.duty_station.errors}}
                     <span class="required">{{ form.duty_station.label_tag }}</span>
-                    {{ form.duty_station }}
+                    {{ form.duty_station.as_hidden }} {{ expert_request.duty_station }}
                 </td>
             </tr>
             <tr>
                 <td>
                     {{form.requested_date_of_deployment.errors}}
                     <span class="required">{{ form.requested_date_of_deployment.label_tag }}</span>
-                    {{ form.requested_date_of_deployment }}
-                    <span class="datetimeshortcuts"></span><br>
-                    <span class="helptext">Date format: YYYY-MM-DD</span>
+                    {{ form.requested_date_of_deployment.as_hidden }} {{ expert_request.requested_date_of_deployment }}
                 </td>
             </tr>
             <tr>
                 <td>
                     {{form.security_phase_in_duty_station.errors}}
                     <span class="required">{{ form.security_phase_in_duty_station.label_tag }}</span>
-                    {{ form.security_phase_in_duty_station }}
+                    {{ form.security_phase_in_duty_station.as_hidden }} {{ expert_request.security_phase_in_duty_station }}
                 </td>
             </tr>
             <tr>
                 <td>
                     {{form.requested_length_of_deployment.errors}}
                     <span class="required">{{ form.requested_length_of_deployment.label_tag }}</span>
-                    {{ form.requested_length_of_deployment }}
+                    {{ form.requested_length_of_deployment.as_hidden }}{{ expert_request.requested_length_of_deployment }}
                 </td>
             </tr>
             <tr>
                 <td>
                     {{form.first_request.errors}}
-                    <span class="required">{{ form.first_request.label_tag }}{{ form.first_request }}</span>
+                    <span class="required">{{ form.first_request.label_tag }}
+                        {{ form.first_request.as_hidden }}
+                        {{ expert_request.first_request }}</span>
                 </td>
             </tr>
             <tr>
                 <td>
                     {{form.extension.errors}}
                     <span class="required">{{ form.extension.label_tag }}</span>
-                    {{ form.extension }}
+                    {{ form.extension.as_hidden }} {{ expert_request.extension}}
                 </td>
             </tr>
         </table>
@@ -238,28 +232,28 @@
                 <td>
                     {{form.supervisor.errors}}
                     <span class="required">{{ form.supervisor.label_tag }}</span>
-                    {{ form.supervisor }}
+                    {{ form.supervisor.as_hidden }} {{ expert_request.supervisor.name }}
                 </td>
             </tr>
             <tr>
                 <td>
                     {{form.country_representative.errors}}
                     <span class="required">{{ form.country_representative.label_tag }}</span>
-                    {{ form.country_representative }}
+                    {{ form.country_representative.as_hidden }} {{ expert_request.country_representative.name }}
                 </td>
             </tr>
             <tr>
                 <td>
                     {{form.agency_hq_focal_point.errors}}
-                    <span class="required">{{ form.agency_hq_focal_point.label_tag }}</span>&nbsp;<span class="help">{{ IF_OTHER_THAN_SUPERVISOR_HELP_TEXT }}</span>
-                    {{ form.agency_hq_focal_point }}
+                    <span class="required">{{ form.agency_hq_focal_point.label_tag }}</span>
+                    {{ form.agency_hq_focal_point.as_hidden }} {{ expert_request.agency_hq_focal_point.name }}
                 </td>
             </tr>
             <tr>
                 <td>
                     {{form.agency_field_focal_point.errors}}
-                    <span class="required">{{ form.agency_field_focal_point.label_tag }}</span>&nbsp;<span class="help">{{ IF_OTHER_THAN_SUPERVISOR_HELP_TEXT }}</span>
-                    {{ form.agency_field_focal_point }}
+                    <span class="required">{{ form.agency_field_focal_point.label_tag }}</span>
+                    {{ form.agency_field_focal_point.as_hidden }} {{ expert_request.agency_field_focal_point.name }}
                 </td>
             </tr>
             </table>
@@ -270,66 +264,59 @@
         <div class="module" style="float:left;width:100%;;">
             <table style="width:100%;">
             <caption>
-                <div class="section">ToR</div>
+                <div class="section">Rejection</div>
             </caption>
+
+            {% if expert_request.status.name = 'Supervision' %}
             <tr>
-                <td style="width:40%;">
-                    {{form.background_information.errors}}
-                    {{ form.background_information.label_tag }}
-                    {{ form.background_information }}
-                </td>
-                <td style="width:40%;">
-                    {{form.objectives_and_scope.errors}}
-                    <label>Specific objectives assigned to expert</label>
-                    {{ form.objectives_and_scope }}
+                <td style="width:100%;">
+                    <span class="required">
+                    {{ form.rejected_review_reason.label_tag }}
+                    </span>
                 </td>
             </tr>
+            {% if form.rejected_review_reason.errors %}
             <tr>
-                <td style="width:40%;">
-                    {{form.expert_profile.errors}}
-                    {{ form.expert_profile.label_tag }}
-                    {{ form.expert_profile }}
-                </td>
-                <td style="width:40%;">
-                    {{form.expected_outputs.errors}}
-                    {{ form.expected_outputs.label_tag }}
-                    {{ form.expected_outputs }}
+                <td style="width:100%;">
+
+                    <span class="errornote">
+                    {{ form.rejected_review_reason.errors }}
+                    </span>
                 </td>
             </tr>
+            {% endif %}
             <tr>
-                <td style="width:40%;">
-                    {{form.main_duties_and_responsibilities.errors}}
-                    {{ form.main_duties_and_responsibilities.label_tag }}
-                    {{ form.main_duties_and_responsibilities }}
-                </td>
-                <td style="width:40%;">
-                    {{form.other_relevant_information.errors}}
-                    {{ form.other_relevant_information.label_tag }}
-                    {{ form.other_relevant_information }}
+                <td style="width:100%;">
+                    {{ form.rejected_review_reason }}
                 </td>
             </tr>
+            {% endif%}
+            {% if expert_request.status.name = 'Certification' %}
+            <tr>
+                <td style="width:100%;">
+                    <span class="required">
+                    {{ form.rejected_certification_reason.label_tag }}
+                    </span>
+                </td>
+            </tr>
+            {% if form.rejected_certification_reason.errors %}
+            <tr>
+                <td style="width:100%;">
+                    <span class="errornote">
+                    {{ form.rejected_certification_reason.errors }}
+                    </span>
+                </td>
+            </tr>
+            {% endif %}
+            <tr>
+                <td style="width:100%;">
+                    {{ form.rejected_certification_reason }}
+                </td>
+            </tr>
+            {% endif%}
+
             </table>
         </div>
-
-        <div style="clear:both;"></div>
-
-      <div style="width:100%;">
-            <table style="width:100%;">
-                <tr>
-                    <td colspan="2" style="text-align:right;">
-                        {{ form.send_to_supervisor.errors }}
-                    </td>
-                </tr>
-                <tr>
-                    <td style="width:88%;"></td>
-                    <td class="required" style="width:10%;text-align:right;vertical-align:middle;">
-                    </td>
-                    <td style="width:2%;vertical-align:middle;">
-                        {{ form.send_to_supervisor }}
-                    </td>
-                </tr>
-            </table>
-       </div>
 
         {% endfor %}
 
@@ -338,17 +325,8 @@
 </div> <!-- form div -->
 
 <div class="submit-row">
-    <input class="default" type="submit" name="_save" value="Save"></input>
+    <input class="default" type="submit" name="_save" value="Reject"></input>
     &nbsp;&nbsp;
-    {% if expert_request.status.name = 'Preparation' %}
-        <input class="default" type="button" name="_save1" value="Save and Send to Supervisor" onclick="sendToSupervisorAndSave();"></input>
-    {% endif %}
-    {% if expert_request.status.name = 'Supervision' %}
-        <input class="default" type="button" name="_save1" value="Save and Send to Certifier" onclick="sendToSupervisorAndSave();"></input>
-    {% endif %}
-    {% if expert_request.status.name = 'Supervision' or expert_request.status.name = 'Certification' %}
-        <input class="default" type="button" name="reject" value="Reject" onclick="rejectRequest('{{SMT_URL}}',{{expert_request.id}});"></input>
-    {% endif %}
 </div> <!-- submit row div -->
 
 </div> <!-- content.main -->

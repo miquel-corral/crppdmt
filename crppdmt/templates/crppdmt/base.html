@@ -53,7 +53,7 @@
 </head>
 {% load i18n %}
 
-<body class="{% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}" onload="bindSelectFirstRequest();">
+<body class="{% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}" onload="bindSelectFirstRequest();setFocusFirstElemForm();">
 
 <!-- Container -->
 <div id="container">

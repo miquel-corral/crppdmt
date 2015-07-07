@@ -1,0 +1,13 @@
+Dear {{ certifier.first_name }},
+
+You have received a request to validate the registration of the user {{ person.name }} in the Secondments Management Portal.
+
+You can validate the request at the Secondment Management Portal: {{ SMT_URL }}
+
+Thank you.
+
+
+This is an automatic email. If necessary you can contact UN-Habitat Secondment Management Team at: {{ SECONDMENTS_EMAIL }}
+
+Confidential Notice:
+The information contained in this email and its attachments is only for the use of the intended recipients, and may be strictly confidential and/or legally privileged. If the reader of this message is not the intended recipient, or employee or agent responsible to deliver it to the intended recipient, any unauthorised review, use, disclosure or distribution of the information is prohibited. If you have received this e-mail in error, please destroy all copies of the original message and any attachments.

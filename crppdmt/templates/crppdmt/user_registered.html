@@ -1,0 +1,30 @@
+{% extends "crppdmt/base_site.html" %}
+{% load i18n admin_static %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "crppdmt/css/login.css" %}" />{% endblock %}
+
+
+{% block bodyclass %}
+{{ block.super }}
+ login
+{% endblock %}
+
+
+{% block nav-global %}{% endblock %}
+
+{% block content_title %}{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+   <div id="content" class="colM" style="width:100%;">
+        <h1>User registered</h1>
+        <p></p>
+        <p>You will be notified by email when your registration is approved.</p>
+        <p>Please do send any comment to: secondments@cityresilience.org</p>
+        <br class="clear">
+        <div id="footer" style="padding:0px;"><h4><a href="{% url 'my_copyright' %}">Copyright © 2015</a>, City Resilience Profiling Programme</h4></div>
+    </div>
+    <!-- END Content -->
+</div>
+{% endblock %}

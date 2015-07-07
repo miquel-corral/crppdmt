@@ -24,6 +24,7 @@
                 <div style="float:right;padding-right:18px;"></div>
             </caption>
             <tr><td>{% if person.can_create %}<a class="addlink" href="{% url 'new_request' %}" title="New Request">New Request</a>{% endif %}</td></tr>
+            <tr><td>{% if person.can_validate_user %}<a class="addlink" href="{% url 'inactive_users' %}" title="Validate Users">Validate Users</a>{% endif %}</td></tr>
             </table>
 
 
@@ -75,13 +76,16 @@
                         <td style="width:6%">
                             {% if request.country_representative == person and request.status.name = "Certification" %}
                                 <a href="{% url 'summary_checklist' expert_request_id=request.id%}" style="display:inline;"><img src="{% static 'crppdmt/img/icon_validate.png' %}" alt="Certify" title="Certify Request"/></a>
+                                <a href="{% url 'reject_request' expert_request_id=request.id%}" style="display:inline;">Reject</a>
                             {% endif %}
                             {% if request.request_creator == person and request.status.name == "Preparation" %}
                                 <a href="{% url 'edit_request' request_id=request.id%}" style="display:inline;"><img src="{% static 'crppdmt/img/icon_changelink.gif' %}" alt="Edit" title="Edit Request"/></a>
                             {% endif %}
                             {% if request.supervisor == person and request.status.name == "Supervision" %}
                                 <a href="{% url 'edit_request' request_id=request.id%}" style="display:inline;"><img src="{% static 'crppdmt/img/icon_changelink.gif' %}" alt="Review" title="Review Request"/></a>
+                                <a href="{% url 'reject_request' expert_request_id=request.id%}" style="display:inline;">Reject</a>
                             {% endif %}
+
                         </td>
                         <td>
                             <a href="{% url 'copy_request' expert_request_id=request.id%}">Copy</a>

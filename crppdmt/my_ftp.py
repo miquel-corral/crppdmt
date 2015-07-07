@@ -16,6 +16,11 @@ class MyFTP():
             # cd base folder
             f.cd(FTP_BASE_DIR)
             # put the file
+
+            print("local_file_path: " +  local_file_path)
+            print("remote_folder: " + remote_folder)
+            print("remote_file_name: " + remote_file_name)
+
             f.put(local_file_path, remote_folder + "/" + remote_file_name)
         except:
             print("Unexpected error:", sys.exc_info())
