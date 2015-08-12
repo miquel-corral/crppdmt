@@ -17,6 +17,10 @@ def selected_option_text(bound_field, field_value):
 
     field = bound_field.field
 
-    print dict(field.choices)
-    print(field_value)
-    return hasattr(field, 'choices') and dict(field.choices).get(field_value,'') or field_value
+    #print dict(field.choices)
+    #print("."+str(field_value)+".")
+    #print(hasattr(field, 'choices'))
+    #print(dict(field.choices).get(field_value, ''))
+
+    # OBS: forced to int as key type to avoid random problems in getting option values
+    return hasattr(field, 'choices') and dict(field.choices).get(int(field_value),'') or field_value

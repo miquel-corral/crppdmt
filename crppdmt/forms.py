@@ -3,7 +3,7 @@ import time
 from django import forms
 from django.contrib.auth.models import User
 from constants import *
-from crppdmt.models import ExpertRequest, Person, Role, Organization
+from crppdmt.models import ExpertRequest, Person, ExpertMessage, Organization, PersonalDocument
 from captcha.fields import CaptchaField
 
 class BasicRequestForm(forms.ModelForm):
@@ -107,7 +107,53 @@ class UserValidationForm(forms.ModelForm):
         exclude = []
 
 
+class LinkCandidateForm(forms.Form):
 
+    def __init__(self, *args, **kwargs):
+        super(LinkCandidateForm, self).__init__(*args, **kwargs)
+
+        # filter people with role expert and set widget
+        experts = Person.objects.filter(roles__name=ROLES[ROLE_EXPERT_ITEM]).order_by('name')
+        expert_choices = [(-1, "--")]
+        for expert in experts:
+            expert_choices.extend([(expert.id, expert.name)])
+        self.fields['candidate'].choices = expert_choices
+        self.fields['candidate'].initial = [1]
+
+    candidate = forms.ChoiceField(widget=forms.Select, required=False)
+
+
+class CandidateApprovalForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(CandidateApprovalForm, self).__init__(*args, **kwargs)
+        # set organization NORCAP by default
+        self.fields['organization'].initial = Organization.objects.get(name='NORCAP').id
+
+    class Meta:
+        model = Person
+        exclude = []
+
+
+class UploadPersonalInfoForm(forms.ModelForm):
+
+    class Meta:
+        model = PersonalDocument
+        exclude = []
+
+class ExpertMessageForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(ExpertMessageForm, self).__init__(*args, **kwargs)
+        # set widgets
+        self.fields['message'].widget = forms.Textarea()
+        self.fields['expert_request_id'].widget = forms.HiddenInput()
+
+    expert_request_id = forms.CharField(required=False)
+
+    class Meta:
+        model = ExpertMessage
+        exclude = []
 
 
 

@@ -1,13 +1,6 @@
-Dear {{ person.first_name }},
+This is a message from {{ person.first_name }}, sent trough the Secondments Management Portal.<br><br>
 
-Your application to register into the Secondments Management Portal has been validated.
-
-Your username is {{ person.user.username }}, and your password is "0304{{ person.last_name }}"
-
-You can change your password once logged into the Secondment Management Portal at {{ SMT_URL }}
-
-Thank you.
-
+{{expert_message.message}}
 
 This is an automatic email. If necessary you can contact UN-Habitat Secondment Management Team at: {{ SECONDMENTS_EMAIL }}
 

@@ -19,13 +19,13 @@ from crppdmt.settings import BASE_DIR
 from crppdmt.my_ftp import MyFTP
 from crppdmt.my_mail import MyMail
 from crppdmt.models import ExpertRequest
-from crppdmt.settings import NORCAP_EMAILS, SECONDMENTS_MAIL_LIST
+from crppdmt.settings import NORCAP_EMAILS, SECONDMENTS_MAIL_LIST, NORCAP_FOCAL_POINTS
 from crppdmt.constants import PROFILE_SHELTER
 
 def test_ftp():
     my_FTP = MyFTP()
-    my_FTP.upload_file("TEST.txt", "TEST_DIR", "TEST.txt")
-    my_FTP.download_file("TEST_DIR", "TEST.txt", "TESTOS.txt")
+    my_FTP.upload_file("Calendari2015.pdf", "mai.mani", "Calendari2015.pdf")
+    #my_FTP.download_file("TEST_DIR", "TEST.txt", "TESTOS.txt")
 
 def test_mail():
     try:
@@ -74,13 +74,16 @@ def test_encryption():
 
 def test_NORCAP_emails():
     print("SHELTER: " + NORCAP_EMAILS[PROFILE_SHELTER])
+    print("SHELTER: " + NORCAP_FOCAL_POINTS[PROFILE_SHELTER])
     print("SECONDMENTS_MAIL_LIST[0]: " + SECONDMENTS_MAIL_LIST[0])
 
+
+
 if __name__ == "__main__":
-    #test_ftp()
+    test_ftp()
     #test_mail()
     #test_expert_request()
     #test_render_to_pdf()
     #test_encryption()
-    test_NORCAP_emails()
+    #test_NORCAP_emails()
 

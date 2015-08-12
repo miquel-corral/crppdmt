@@ -1,6 +1,6 @@
 Dear {{ person.first_name }},
 
-Your application to register into the Secondments Management Portal has been validated.
+You have been registered into the UN-Habitat Secondments Management Portal.
 
 Your username is {{ person.user.username }}, and your password is "0304{{ person.last_name }}"
 

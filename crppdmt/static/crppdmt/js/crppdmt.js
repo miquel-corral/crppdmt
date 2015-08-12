@@ -16,6 +16,8 @@ var setExtension = function() {
 
 function bindSelectFirstRequest(){
     firstRequest = document.getElementById('id_form-0-first_request');
+    if (!firstRequest)
+        return;
     if (firstRequest.addEventListener) {
         firstRequest.addEventListener('change', setExtension ,false);
     }
@@ -23,6 +25,8 @@ function bindSelectFirstRequest(){
         firstRequest.attachEvent('onchange', setExtension);
     }
 }
+
+
 
 function setFocusFirstElemForm(){
   if(document.forms){
@@ -40,17 +44,37 @@ function setFocusFirstElemForm(){
   }
 }
 
-function setUploadButton(){
+function setUploadButtonRequest(){
   sendToSupervisorElement = document.getElementById("id_form-0-send_to_supervisor");
   if(sendToSupervisorElement)
     sendToSupervisorElement.style.display='none';
-  document.getElementById("id_form-0-project_document").onchange = function () {
-    document.getElementById("labelFile").value = document.getElementById('id_form-0-project_document').value;
-    document.getElementById("linkFile").style.display='none';
-    document.getElementById("labelFile").style.display='inline';
-  };
-  document.getElementById("chooseFile").onclick = function() {
-    document.getElementById('id_form-0-project_document').click();
+
+  projectDocument = document.getElementById("id_form-0-project_document")
+  if(projectDocument){
+      labelFile = document.getElementById("labelFile")
+      projectDocument.onchange = function () {
+        labelFile.value = projectDocument.value;
+        document.getElementById("linkFile").style.display='none';
+        labelFile.style.display='inline';
+      };
+      document.getElementById("chooseFile").onclick = function() {
+        projectDocument.click();
+      }
+  }
+}
+
+
+function setUploadButtonExpert(){
+  file_name_element = document.getElementById("id_form-0-file_name")
+  if (file_name_element){
+      document.getElementById("id_form-0-file_name").onchange = function () {
+        document.getElementById("labelFile").value = file_name_element.value;
+        document.getElementById("linkFile").style.display='none';
+        document.getElementById("labelFile").style.display='inline';
+      };
+      document.getElementById("chooseFile").onclick = function() {
+        file_name_element.click();
+      }
   }
 }
 

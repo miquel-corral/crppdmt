@@ -77,6 +77,31 @@ urlpatterns = patterns('',
     # url to validate / reject user form
     url(r'^validate_user/(?P<person_id>\d+)/$', 'crppdmt.views.validate_user', name='validate_user'),
 
+    # url to candidate approval form
+    url(r'^candidate_approval/(?P<expert_request_id>\d+)/$', 'crppdmt.views.candidate_approval', name='candidate_approval'),
+
+    # url to link candidate form
+    url(r'^link_candidate/(?P<expert_request_id>\d+)/$', 'crppdmt.views.link_candidate', name='link_candidate'),
+
+    # url to expert_profile
+    url(r'^expert_profile/', 'crppdmt.views_expert.expert_profile', name='expert_profile'),
+
+    # url to upload personal info form
+    url(r'^upload_personal_info/', 'crppdmt.views_expert.upload_personal_info', name='upload_personal_info'),
+
+    # url to communication form
+    url(r'^communicate/', 'crppdmt.views_expert.communicate', name='communicate'),
+    url(r'^report_issue/(?P<expert_request_id>\d+)/$', 'crppdmt.views_expert.communicate', name='report_issue'),
+
+    # url to deployment date form
+    url(r'^deployment_date/(?P<expert_id>\d+)/(?P<expert_request_id>\d+)/$', 'crppdmt.views_expert.deployment_date', name='deployment_date'),
+
+    # url to deployment date form
+    url(r'^inception_report/(?P<expert_id>\d+)/(?P<expert_request_id>\d+)/$', 'crppdmt.views_expert.inception_report', name='inception_report'),
+
+    # url to per form
+    url(r'^per/(?P<expert_id>\d+)/(?P<expert_request_id>\d+)/$', 'crppdmt.views_expert.per', name='per'),
+
     #url to error page
     #url(r'^error/', 'crppdmt.views.error', name='error'),
 

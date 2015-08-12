@@ -1,0 +1,123 @@
+{% extends "crppdmt/base_site.html" %}
+{% load i18n admin_static %}
+
+{% load is_true %}
+
+{% load admin_list %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "crppdmt/css/dashboard.css" %}" />{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}dashboard{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'expert_profile' %}">Home</a> &rsaquo; Communication &rsaquo;
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+
+    <div id="col_right" style="float:left;width:20%;margin-left:5px;">
+        <div class="module unh-docs">
+            <table style="width:100%;">
+            <caption class="title-unh-docs">
+                <div class="section">Actions</div>
+                <div style="float:right;padding-right:18px;"></div>
+            </caption>
+            {% if person.is_expert %}
+                <tr><td><a href="{% url 'upload_personal_info' %}" title="Upload Personal Documentation">Upload Personal Documentation</a></td></tr>
+                <tr><td><a href="{% url 'communicate' %}" title="Communicate">Communicate</a></td></tr>
+            {% endif %}
+            </table>
+
+
+            <table style="width:100%;">
+                <caption class="title-unh-docs">
+                    <div class="section">Documentation UN-Habitat</div>
+                    <div style="float:right;padding-right:18px;"></div>
+                </caption>
+                <tr><td><a href="{% url 'retrieve_file' remote_folder='UN-HABITAT' remote_file='SMP-UserGuide-v1.0.pdf'  %}" target="blank">Secondments Management - User Guide</a></td></tr>
+                <tr><td><a href="{% url 'retrieve_file' remote_folder='UN-HABITAT' remote_file='MOU_NRC_UN-Habitat.pdf'  %}" target="blank">MoU NRC - UN-Habitat</a></td></tr>
+                <tr><td><a href="{% url 'retrieve_file' remote_folder='UN-HABITAT' remote_file='MOU_NRC_UN-Habitat_Checklist.pdf'  %}" target="blank">MoU NRC - UN-Habitat Checklist</a></td></tr>
+                <tr><td><a href="{% url 'retrieve_file' remote_folder='UN-HABITAT' remote_file='MOU_NRC_UN-Habitat_Summary.pdf'  %}" target="blank">MoU NRC - UN-Habitat Summary</a></td></tr>
+                <tr><td><a href="{% url 'retrieve_file' remote_folder='UN-HABITAT' remote_file='UN-Convention_Privileges_and_Immunities.pdf'  %}" target="blank">Privileges and Immunities</a></td></tr>
+                <tr><td><a href="{% url 'retrieve_file' remote_folder='UN-HABITAT' remote_file='Consultants_and_Individual_Contractors_ST-AI-1999-7.pdf'  %}" target="blank">Consultants and Individual Contractors</a></td></tr>
+                <tr><td><a href="{% url 'retrieve_file' remote_folder='UN-HABITAT' remote_file='Gratis_personnel_ST-AI-1999-6.pdf'  %}" target="blank">Gratis Personnel</a></td></tr>
+            </table>
+
+            <table style="width:100%;">
+                <caption class="title-unh-docs">
+                    <div class="section">Personal Information</div>
+                    <div style="float:right;padding-right:18px;"></div>
+                </caption>
+                {% if personal_docs %}
+                    {% for doc in personal_docs %}
+                        <tr><td><a href="{% url 'retrieve_file' remote_folder=person.user.username remote_file=doc.name  %}" target="blank">{{ doc.title }}</a></td></tr>
+                    {% endfor %}
+                {% else %}
+                    <tr><td>No related documents found.</td></tr>
+                {% endif %}
+            </table>
+        </div>
+    </div>
+
+    <div id="list" style="float:left;width:78%;margin-left:9px;">
+
+         <form name="crppdmtform" action="" method="post" id="_form" enctype="multipart/form-data">{% csrf_token %}{% block form_top %}{% endblock %}
+            {{ formset.management_form }}
+            <div>
+            <fieldset class="module aligned">
+            <!--  to render formsetv -->
+                {% for form in formset %}
+                {{form.id}}
+
+                <div class="module" style="float:center;width:100%;">
+                    <table style="width:100%;">
+                    <caption>
+                        <div class="section">Communication/Report Issues</div>
+                    </caption>
+                    <tr>
+                        <td width="5%">
+                            {{form.subject.errors}}
+                            <span class="required" style="display:inline;">{{ form.subject.label_tag }}</span>
+                        </td>
+                        <td width="95%">
+                            {{ form.subject }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="5%">
+                            {{form.message.errors}}
+                            <span class="required" style="display:inline;">{{ form.message.label_tag }}</span>
+                        </td>
+                        <td width="95%">
+                            {{ form.message }}
+                        </td>
+                    </tr>
+                </table>
+                <div>{{form.expert.as_hidden}}</div>
+                </div>
+                {% endfor %}
+
+            </fieldset>
+            </div> <!-- form div -->
+
+
+
+            <div class="submit-row">
+                <input class="default" type="submit" name="_save" value="Send"></input>
+                <input class="default" type="button" name="_save1" value="Back" onclick="window.history.back();"></input>
+            </div> <!-- submit row div -->
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block sidebar %}
+{% endblock %}

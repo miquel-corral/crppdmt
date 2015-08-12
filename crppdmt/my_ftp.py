@@ -3,7 +3,6 @@ from ftpretty import ftpretty
 from settings_private import *
 
 
-
 class MyFTP():
 
     def __init__(self):
@@ -11,6 +10,7 @@ class MyFTP():
 
     def upload_file(self, local_file_path, remote_folder, remote_file_name):
         try:
+            ret = 0
             # open connection
             f = ftpretty(FTP_HOST, FTP_USER, FTP_PASS)
             # cd base folder
@@ -21,12 +21,14 @@ class MyFTP():
             print("remote_folder: " + remote_folder)
             print("remote_file_name: " + remote_file_name)
 
-            f.put(local_file_path, remote_folder + "/" + remote_file_name)
+            ret = f.put(local_file_path, remote_folder + "/" + remote_file_name)
+            return ret
         except:
             print("Unexpected error:", sys.exc_info())
         finally:
             if f:
                 f.close()
+            return ret
 
 
     def download_file(self, remote_folder, remote_file_name, local_file_path):

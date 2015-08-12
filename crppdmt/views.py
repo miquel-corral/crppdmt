@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys
 import time
-import os
 import datetime
 
 from django.http import HttpResponse
@@ -16,26 +15,29 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.core.paginator import Paginator
-from django.core import serializers
+from django.forms.util import ErrorList
+from django.forms.forms import NON_FIELD_ERRORS
 
 from easy_pdf.views import PDFTemplateView
 from easy_pdf.rendering import render_to_pdf_response, render_to_pdf
 
 from crppdmt.settings import *
 
-from crppdmt.models import Person, ExpertRequest, GeneralCheckList, TraceAction, RequestStatus, Organization, Role
+from crppdmt.models import Person, ExpertRequest, GeneralCheckList, RequestStatus, Organization, Role
 
 from crppdmt.forms import CreateRequestForm, EditRequestForm, GeneralCheckListForm, SummaryCheckListForm, \
-    RejectRequestForm, UserRegistrationForm, UserValidationForm
+    RejectRequestForm, UserRegistrationForm, UserValidationForm, CandidateApprovalForm, LinkCandidateForm
 
 from crppdmt.constants import *
 
-from crppdmt.shelter_tor import *
 
-from crppdmt.my_ftp import *
-from crppdmt.my_mail import *
+from crppdmt.mail_utils import *
 
 import crppdmt.summary_checklist
+
+from crppdmt.business_utils import *
+from crppdmt.document_utils import *
+from crppdmt.trace import *
 
 @ensure_csrf_cookie
 def my_login(request):
@@ -54,7 +56,12 @@ def my_login(request):
                 if user.is_active:
                     login_response = login(request, user)
                     request.session['username'] = username
-                    return redirect('/index/')
+                    # control if UN-Habitat or expert staff
+                    person = get_person_by_user(user)
+                    if person.has_role(ROLE_EXPERT_ITEM):
+                        return redirect('/expert_profile/')
+                    else:
+                        return redirect('/index/')
                 else:
                     # Return a 'disabled account' error message
                     context = {'form': form}
@@ -261,7 +268,7 @@ def edit_request(request, request_id=None):
                     # upload file to ftp. OBS: check existence of project doc. file to avoid errors if doc.
                     # has not changed while modifying the request
                     if os.path.isfile(str(expert_request.project_document)):
-                        upload_project_document(expert_request.name, str(expert_request.project_document))
+                        upload_file(expert_request.name, str(expert_request.project_document))
                     else:
                         pass  # file not modified while editing the request
                 # save form
@@ -352,7 +359,7 @@ def create_request(request, request_id=None):
                     "_" + time.strftime("%Y%m%d%H%M%S")
 
                 # upload file to ftp. OBS: after save to avoid problems with document name (duplicates)
-                upload_project_document(expert_request.name, str(expert_request.project_document))
+                upload_file(expert_request.name, str(expert_request.project_document))
 
                 # save expert request
                 formset.save()
@@ -512,15 +519,10 @@ def summary_checklist(request, expert_request_id):
                     expert_request.save()
                     # trace
                     trace_action(TRACE_VALIDATED_REQUEST,expert_request, person)
-                    # send email to validator and supervisor
-                    send_request_email_to(expert_request, MAIL_REQUEST_CERTIFIED)
-                    # trace
-                    trace_action(TRACE_VALIDATED_REQUEST_TO_SUPERVISOR,expert_request, person)
-                    # send email to NORCAP
+                    # send email to NORCAP, supervisor and certifier (if other than supervisor)
                     send_request_email_to(expert_request, MAIL_REQUEST_CERTIFIED)
                     # trace
                     trace_action(TRACE_VALIDATED_REQUEST_TO_NORCAP,expert_request, person)
-
                 # back to request list page
                 return redirect("/index/", context_instance=RequestContext(request))
             else:
@@ -622,9 +624,6 @@ def reject_request(request, expert_request_id):
         expert_request = ExpertRequest.objects.get(id=expert_request_id)
         # get person
         person = get_person(request)
-
-        print("Person: " + person.name)
-
         #
         query_set = None
         request_form_set = modelformset_factory(ExpertRequest, form=RejectRequestForm, max_num=1, exclude=[], \
@@ -639,15 +638,9 @@ def reject_request(request, expert_request_id):
 
         if request.method == 'POST':
             formset = request_form_set(request.POST, request.FILES)
-
-            print("BEFORE IS VALID")
-
             if formset.is_valid():
                 # get instance
                 expert_request = formset[0].save(commit=False)
-
-                print("expert_request: " + expert_request.name)
-
                 # actions according status
                 if expert_request.status.name == STATUS_SUPERVISION:
                     # control of reject reason
@@ -687,10 +680,6 @@ def reject_request(request, expert_request_id):
 
                 return redirect("/index/", context_instance=RequestContext(request))
             else:
-
-                for error in formset.errors:
-                    print("ERROR: " + str(error))
-
                 if format(len(formset.errors) > 0):
                     num_errors = len(formset.errors[0])
         else:
@@ -892,10 +881,121 @@ def validate_user(request, person_id):
             query_set = Person.objects.filter(pk=person_id)
             formset = form_set(queryset=query_set)
 
-            return render_to_response("crppdmt/validate_user.html",
-                                      {"person": person,
-                                       "formset": formset,},
+    except:
+        if DEBUG:
+            raise
+        else:
+            return render_to_response("crppdmt/error.html",
+                                      {"error_description": str(sys.exc_traceback),},
                                       context_instance=RequestContext(request))
+
+@ensure_csrf_cookie
+@login_required
+def link_candidate(request, expert_request_id):
+    """
+    View for expert request candidate approval
+    :param request:
+    :param expert_request_id:
+    :return:
+    """
+    try:
+        if request.method == 'POST':
+            # initialization section: query_set, form_set, person, user, other
+            form_link_candidate = None
+            expert_request = ExpertRequest.objects.get(id=expert_request_id)
+            query_set = Person.objects.filter(pk=-1)
+            form_set = modelformset_factory(Person, max_num=1, form=CandidateApprovalForm, exclude=[])
+            # process request
+            form_link_candidate = LinkCandidateForm(request.POST)
+            if form_link_candidate.is_valid():
+                # treatment to link candidate to request
+                if form_link_candidate.cleaned_data['candidate']:
+                    # control expert is set
+                    if str(form_link_candidate.cleaned_data['candidate']) == "-1":
+                        errors = form_link_candidate._errors.setdefault("candidate", ErrorList())
+                        errors.append(u"The candidate is not set.")
+                        formset = form_set(queryset=query_set)
+                        return render_to_response("crppdmt/candidate_approval.html",
+                                                  {"formset": formset, "form_link_candidate": form_link_candidate,
+                                                   "expert_request": expert_request},
+                                                  context_instance=RequestContext(request))
+                    link_expert_id_to_request(expert_request,form_link_candidate.cleaned_data['candidate'])
+                    # return to home page
+                    return redirect("/index/", context_instance=RequestContext(request))
+                else:
+                    print("candidate not set")
+            else:
+                if format(len(form_link_candidate.errors) > 0):
+                    num_errors = len(form_link_candidate.errors[0])
+    except:
+        if DEBUG:
+            raise
+        else:
+            return render_to_response("crppdmt/error.html",
+                                      {"error_description": str(sys.exc_traceback),},
+                                      context_instance=RequestContext(request))
+@ensure_csrf_cookie
+@login_required
+def candidate_approval(request, expert_request_id):
+    """
+    View for expert request candidate approval
+    :param request:
+    :param expert_request_id:
+    :return:
+    """
+    try:
+        # initialization section: query_set, form_set, person, user, other
+        form_link_candidate = None
+        query_set = None
+        form_set = modelformset_factory(Person, form=CandidateApprovalForm, max_num=1, exclude=[])
+        expert_request = ExpertRequest.objects.get(id=expert_request_id)
+        # control person is supervisor
+        person = get_person(request)
+        if person != expert_request.supervisor:
+            return render_to_response("crppdmt/error.html", {"error_description": "Permission denied.",},
+                                      context_instance=RequestContext(request))
+
+        if request.method == 'POST':
+            # treatment to create new expert and link to request
+            formset = form_set(data=request.POST)
+            if formset[0].has_changed():
+                if formset.is_valid():
+                    # get person data
+                    person = formset[0].save(commit=False)
+                    # check existence of user with same first and last names
+                    user_exists = User.objects.filter(first_name=person.first_name, last_name=person.last_name)
+                    if user_exists:
+                        formset[0].add_error('first_name', "User with same first and last name already registered.")
+                        formset[0].cleaned_data['organization'] = Organization.objects.get(name='NORCAP').id
+                    else:
+                        # assign expert to request
+                        create_person_and_user(person, role=Role.objects.get(name=ROLES[ROLE_EXPERT_ITEM]), is_active=True)
+                        # link to request and change status
+                        link_expert_to_request(expert_request, person)
+                        return redirect("/index/", context_instance=RequestContext(request))
+                else:
+                    if format(len(formset.errors) > 0):
+                        num_errors = len(formset.errors[0])
+            else:
+                formset[0].add_error('first_name', "You have to inform empty fields.")
+                formset[0].fields['organization'].value = Organization.objects.get(name='NORCAP').id
+        else:
+            # return empty form - new expert
+            query_set = Person.objects.filter(pk=None)
+            formset = form_set(queryset=query_set)
+            # treatment to validate without having already create the user
+            formset[0].fields['name'].initial = ' '  # just blank name for now, will change in POST treatement
+            # roles initial is a list because of ManyToMany Field. Initial = Creator
+            formset[0].fields['roles'].initial = [Role.objects.get(name=ROLES[ROLE_CREATOR_ITEM])]
+            formset[0].fields['user'].initial = 1  # will change in POST treatment
+
+        # return empty form - link expert
+        form_link_candidate = LinkCandidateForm()
+
+        return render_to_response("crppdmt/candidate_approval.html", {"formset": formset,
+                                                                      "form_link_candidate": form_link_candidate,
+                                                                      "expert_request": expert_request},
+                                  context_instance=RequestContext(request))
     except:
         if DEBUG:
             raise
@@ -911,8 +1011,29 @@ def test(request):
     :param request:
     :return:
     """
-    return render_to_response("crppdmt/test.html",
+    try:
+        # initialization section: query_set, form_set, person, user, other
+        #query_set = None
+        form_set = modelformset_factory(Person, max_num=1, form=UserValidationForm, exclude=[])
+
+        if request.method == 'POST':
+            formset = form_set(request.POST, request.FILES)
+            if formset.is_valid():
+                # actions to process request data
+                pass
+        else:
+            # return empty form
+            pass
+
+        return render_to_response("crppdmt/test.html",
                               context_instance=RequestContext(request))
+    except:
+        if DEBUG:
+            raise
+        else:
+            return render_to_response("crppdmt/error.html",
+                                      {"error_description": str(sys.exc_traceback),},
+                                      context_instance=RequestContext(request))
 
 @ensure_csrf_cookie
 @login_required
@@ -1005,304 +1126,7 @@ def retrieve_file(request, remote_folder, remote_file):
 
 
 
-############################################################
-#
-# Utilities functions
-#
-#############################################################
-
-# Helper functions
-def get_person(request):
-    """
-    Get person from request
-    :param request:
-    :return:
-    """
-    # get username
-    username = request.session.get('username')
-    return get_person_by_username(username)
-
-
-def get_user_by_username(username):
-    """
-    Get person by username
-    :param username:
-    :return:
-    """
-    try:
-        user = User.objects.get(username=username)
-    except:
-        user = None
-    return user
-
-
-############################################################
-#
-# Expert Request functions
-#
-#############################################################
-def set_template_values(expert_request):
-    """
-    sets template values as a function of expert type
-    :param expert_request:
-    :return:
-    """
-    if expert_request.expert_profile_type.name == PROFILE_SHELTER:
-        expert_request.objectives_and_scope = SHELTER_OBJECTIVES
-        expert_request.expert_profile = SHELTER_EXPERT_PROFILE
-        expert_request.expected_outputs = SHELTER_EXPECTED_OUTPUTS
-        expert_request.main_duties_and_responsibilities = SHELTER_KEY_DUTIES
-        expert_request.other_relevant_information = SHELTER_OTHER_RELEVANT_INFO
-        expert_request.background_information = SHELTER_BACKGROUND_INFO
-
-
-def get_person_by_username(username):
-    """
-    Get person by username
-    :param username:
-    :return:
-    """
-    user = get_user_by_username(username)
-    if user:
-        try:
-            person = Person.objects.get(user=user)
-        except:
-            person = None
-        return person
-    else:
-        return None
-
-
-def upload_project_document(request_name, document_name):
-
-    # remove document in local file system
-    try:
-
-        print("FTP. document_name: " + document_name)
-
-        my_ftp = MyFTP()
-        my_ftp.upload_file(document_name, request_name, document_name)
-        os.remove(document_name)
-    except:
-        print("Error uploading project file: " + document_name)
-        print(sys.exc_info())
-        pass  # silent remove
-
-
-def get_ftp_file_content(remote_folder, remote_file):
-    file_content = None
-    try:
-        my_ftp = MyFTP()
-        file_content = my_ftp.get_binary_file(remote_folder, remote_file)
-    except:
-        print("Error getting ftp file: " + remote_file)
-        pass  # silent remove
-    finally:
-        return file_content
-
-
-def send_user_validation_email(person, rejection_reason=None):
-    try:
-        if rejection_reason:
-            rejected = True
-        else:
-            rejected = False
-
-        my_mail = MyMail()
-        recipients = [person.email]
-        if rejected:
-            subject = "SMT - User Registration Rejected"
-            html_template = loader.get_template('crppdmt/email/user_rejected.html')
-            html_content = html_template.render(Context({'person': person, 'SMT_URL': SMT_URL}))
-            text_template = loader.get_template('crppdmt/email/user_rejected.txt')
-            text_content = text_template.render(Context({'person': person, 'SMT_URL': SMT_URL}))
-            action = MAIL_USER_REJECTED
-        else:
-            subject = "SMT - User Registration Validated"
-            html_template = loader.get_template('crppdmt/email/user_validated.html')
-            html_content = html_template.render(Context({'person': person, 'SMT_URL': SMT_URL}))
-            text_template = loader.get_template('crppdmt/email/user_validated.txt')
-            text_content = text_template.render(Context({'person': person, 'SMT_URL': SMT_URL}))
-            action = MAIL_USER_VALIDATED
-
-        my_mail.send_mail(subject, html_content, text_content, recipients)
-
-        # trace after email sent
-        trace_action(MAIL_USER_REJECTED, None, person)
-
-    except:
-        print("Error sending user validated email. Person:" + person.name)
-        print("Error: " + str(sys.exc_info()))
-        pass  # silent remove
-    finally:
-        pass
-
-
-def send_user_registration_email(person, certifier):
-    try:
-        my_mail = MyMail()
-        recipients = [certifier.email, person.email]
-        subject = "SMT - New User Registered"
-        html_template = loader.get_template('crppdmt/email/user_registered.html')
-        html_content = html_template.render(Context({'person': person, 'certifier':certifier, 'SMT_URL': SMT_URL}))
-        text_template = loader.get_template('crppdmt/email/user_registered.txt')
-        text_content = text_template.render(Context({'person': person, 'certifier':certifier, 'SMT_URL': SMT_URL}))
-        my_mail.send_mail(subject, html_content, text_content, recipients)
-        trace_action(MAIL_USER_REGISTERED, None, person)
-
-    except:
-        print("Error sending user registration email. Person:" + person.name)
-        print("Error: " + str(sys.exc_info()))
-        pass  # silent remove
-    finally:
-        pass
-
-
-def send_request_email_to(expert_request, action):
-    try:
-        my_mail = MyMail()
-        recipients = [expert_request.supervisor.user.email]
-
-        if action == MAIL_REQUEST_TO_REVIEW:
-            subject = "SMT - New Expert Request to Review"
-            html_template = loader.get_template('crppdmt/email/review.html')
-            html_content = html_template.render(Context({'expert_request': expert_request, 'SMT_URL': SMT_URL}))
-            text_template = loader.get_template('crppdmt/email/review.txt')
-            text_content = text_template.render(Context({'expert_request': expert_request, 'SMT_URL': SMT_URL}))
-            if expert_request.supervisor is not expert_request.request_creator:
-                recipients = recipients + [expert_request.request_creator.user.email]
-            # send email
-            my_mail.send_mail(subject, html_content, text_content, recipients, expert_request)
-
-        if action == MAIL_REQUEST_TO_CERTIFY:
-            subject = "SMT - New Expert Request to Certify"
-            html_template = loader.get_template('crppdmt/email/certify.html')
-            html_content = html_template.render(Context({'expert_request': expert_request, 'SMT_URL': SMT_URL}))
-            text_template = loader.get_template('crppdmt/email/certify.txt')
-            text_content = text_template.render(Context({'expert_request': expert_request, 'SMT_URL': SMT_URL}))
-            if expert_request.country_representative is not expert_request.supervisor:
-                recipients = recipients + [expert_request.country_representative.user.email]
-            # send email
-            my_mail.send_mail(subject, html_content, text_content, recipients, expert_request)
-
-        if action == MAIL_REQUEST_CERTIFIED:
-            subject = "UN-HABITAT - New Expert Request"
-            html_template = loader.get_template('crppdmt/email/certified.html')
-            html_content = html_template.render(Context({'expert_request': expert_request, 'SMT_URL': SMT_URL}))
-            text_template = loader.get_template('crppdmt/email/certified.txt')
-            text_content = text_template.render(Context({'expert_request': expert_request, 'SMT_URL': SMT_URL}))
-            if expert_request.country_representative is not expert_request.supervisor:
-                recipients = recipients + [expert_request.country_representative.user.email]
-            # send email
-            my_mail.send_mail(subject, html_content, text_content, recipients, expert_request)
-            # add requested agency email address
-            if "HEROKU" == deploy_env:
-                recipients = recipients + NORCAP_EMAILS[expert_request.expert_profile_type]
-                for recipient in recipients:
-                    print("Recipient: " + str(recipient))
-            else:
-                # TODO: review
-                recipients = recipients + [EMAIL_ADDRESS_NORCAP]
-
-            # send email
-            my_mail.send_mail(subject, html_content, text_content, recipients, expert_request, attach_tor=True,
-                              attach_letter=True)
-
-        if action == MAIL_REQUEST_NOT_REVIEWED:
-            subject = "Expert request rejected for supervisor"
-            html_template = loader.get_template('crppdmt/email/rejected_review.html')
-            html_content = html_template.render(Context({'expert_request': expert_request, 'SMT_URL': SMT_URL}))
-            text_template = loader.get_template('crppdmt/email/rejected_review.txt')
-            text_content = text_template.render(Context({'expert_request': expert_request, 'SMT_URL': SMT_URL}))
-            if expert_request.supervisor is not expert_request.request_creator:
-                recipients = recipients + [expert_request.request_creator.user.email]
-            # send email
-            my_mail.send_mail(subject, html_content, text_content, recipients, expert_request)
-
-        if action == MAIL_REQUEST_NOT_CERTIFIED:
-            subject = "Expert request rejected for supervisor"
-            html_template = loader.get_template('crppdmt/email/rejected_certification.html')
-            html_content = html_template.render(Context({'expert_request': expert_request, 'SMT_URL': SMT_URL}))
-            text_template = loader.get_template('crppdmt/email/rejected_certification.txt')
-            text_content = text_template.render(Context({'expert_request': expert_request, 'SMT_URL': SMT_URL}))
-            if expert_request.country_representative is not expert_request.supervisor:
-                recipients = recipients + [expert_request.country_representative.user.email]
-            # send email
-            my_mail.send_mail(subject, html_content, text_content, recipients, expert_request)
-
-        trace_action(action, expert_request, expert_request.supervisor)
-
-    except:
-        print("Error sending email. Request: " + expert_request.name + ", ACTION: " + action)
-        print("Error: " + str(sys.exc_info()))
-        pass  # silent remove
-    finally:
-        pass
-
-
-def trace_action(action_name, expert_request, person):
-    try:
-        new_log = TraceAction()
-        new_log.action = action_name
-        new_log.expert_request = expert_request
-        if expert_request:
-            new_log.description = serializers.serialize('xml', [expert_request])
-        new_log.person = person
-        new_log.save()
-    except:
-        print("Error tracing action: " + action_name)
-        print("Error: " + str(sys.exc_info()))
 
 
 
-# Form utilities
-def set_form_hidden_fields(formset, fields_to_show):
-    """
-    Function to set hidden fields and show fields of each form in formset
-    :param formset:
-    :param files_to_show:
-    :return:
-    """
-    for form in formset:
-        for field in form.fields:
-            if not any(field in s for s in fields_to_show):
-                form.fields[field].widget = forms.HiddenInput()
-
-
-def set_form_hidden_fields_hidden_fields(formset, fields_to_hide):
-    """
-    Function to set hidden fields and show fields of each form in formset
-    :param formset:
-    :param files_to_show:
-    :return:
-    """
-    for form in formset:
-        for field in form.fields:
-            if field in fields_to_hide:
-                form.fields[field].widget = forms.HiddenInput()
-
-
-def set_form_readonly_fields(formset, read_only_fields):
-    """
-    Function to set readonly fields of each form in formset
-    :param formset:
-    :return:
-    """
-    for form in formset:
-        for field in form.fields:
-            print(field)
-            if any(field in s for s in read_only_fields):
-                print(field)
-                form.fields[field].widget.attrs['disabled'] = True
-
-
-def set_form_country_select(formset):
-    for form in formset:
-        for field in form.fields:
-            print(field)
-            fields_to_change = ('country')
-            if any (field in s for s in fields_to_change):
-                #form.fields[field] = forms.MultipleChoiceField(choices=CHOICES_YES_NO, blank=True)
-                # This works to change choices: form.fields[field].widget.attrs['choices'] = CHOICES_YES_NO
-                form.fields[field].widget = forms.Select(choices=CHOICES_YES_NO)
 

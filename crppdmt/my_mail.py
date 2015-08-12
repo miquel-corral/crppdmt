@@ -26,16 +26,13 @@ class MyMail():
             test = True
 
         msg = EmailMultiAlternatives(subject, text_content, EMAIL_HOST_USER, recipients, bcc=SECONDMENTS_MAIL_LIST)
-
         msg.attach_alternative(html_content, "text/html")
         msg.mixed_subtype = 'related'
 
         # attachments stuff
         if attach_letter or attach_tor:
-            context = {'expert_request': expert_request, 'pagesize': 'A4', 'BASE_DIR': BASE_DIR, 'test_env': test,
-                       'SMT_URL': SMT_URL, 'NORCAP_FOCAL_POINT': \
-                        NORCAP_FOCAL_POINTS[expert_request.expert_profile_type],
-                       'SECONDMENTS_EMAIL': SECONDMENTS_MAIL_LIST[0]}
+            context = {'expert_request': expert_request, 'pagesize': 'A4',
+                       'BASE_DIR': os.path.join(BASE_DIR, 'crppdmt/static/'), 'test_env': test,}
             try:
                 tor_pdf = render_to_pdf('crppdmt/pdf/tor.html', context)
                 letter_pdf = render_to_pdf('crppdmt/pdf/letter_of_request.html', context)

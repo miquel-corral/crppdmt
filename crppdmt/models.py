@@ -62,7 +62,6 @@ class Person(BasicName):
     title = django.db.models.CharField(max_length=100, null=True, blank=True)
     phone_no = django.db.models.CharField(max_length=50, null=True, blank=True)
     email = django.db.models.CharField(max_length=100, null=False, blank=False,validators=[validate_email,])
-                                                                                      # validate_email_does_not_exist])
     organization = django.db.models.ForeignKey(Organization)
     organization_number = django.db.models.CharField(max_length=20, null=True, blank=True)
     un_habitat_number = django.db.models.CharField(max_length=20, null=True, blank=True, verbose_name='UN-Habitat ID')
@@ -96,6 +95,20 @@ class Person(BasicName):
                 ret = True
                 break
         return ret
+
+    def has_role(self, role_name):
+        ret = False
+        for role in self.roles.all():  # everyone has at least one role
+            if role.name == ROLES[role_name]:
+                ret = True
+                break
+        return ret
+
+    def is_supervisor(self):
+        return self.has_role(ROLE_SUPERVISOR_ITEM)
+
+    def is_expert(self):
+        return self.has_role(ROLE_EXPERT_ITEM)
 
 
 class RequestStatus(BasicName):
@@ -196,6 +209,22 @@ class ExpertRequest(BasicName):
             return True
         return False
 
+    def is_in_status(self, status_name):
+        ret = False
+        for status in self.status.all():
+            if status.name == status_name:
+                ret = True
+                break
+        return ret
+
+    def is_in_status_execution(self):
+        return self.is_in_status(STATUS_MISSION_EXECUTION)
+
+    def is_in_status_deployment(self):
+        return self.is_in_status(STATUS_DEPLOYMENT)
+
+    def is_in_status_closed(self):
+        return self.is_in_status(STATUS_CLOSED)
 
 
 class Duty(BasicName):
@@ -342,4 +371,21 @@ class TraceAction(Common):
     expert_request = django.db.models.ForeignKey(ExpertRequest, null=True, blank=True)
 
 
+class PersonalDocument(Common):
+    """
+    Represents a personal document from an expert
+    """
+    file_name = django.db.models.FileField(null=False, blank=False, validators=[validate_file_extension,
+                                                                                validate_file_size])
+    document_title = django.db.models.CharField(max_length=50, null=True, blank=True)
+    expert = django.db.models.ForeignKey(Person, null=False, blank=False)
 
+
+class ExpertMessage(Common):
+    """
+    Represents a personal document from an expert
+    """
+    subject = django.db.models.CharField(max_length=50, null=False, blank=False)
+    message = django.db.models.CharField(max_length=500, null=False, blank=False)
+    expert = django.db.models.ForeignKey(Person, null=False, blank=False)
+    expert_request = django.db.models.ForeignKey(ExpertRequest, null=True, blank=True)
