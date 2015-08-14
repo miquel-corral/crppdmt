@@ -21,13 +21,6 @@ TEST = os.getenv("TEST", OFF)
 EMAIL = os.getenv("EMAIL", ON)
 FTP = os.getenv("FTP", ON)
 
-print("DEPLOY_ENV: " + DEPLOY_ENV)
-print("MY_DEBUG: " + MY_DEBUG)
-print("TEST: " + TEST)
-print("EMAIL: " + EMAIL)
-print("FTP: " + FTP)
-
-
 # watch ALLOWED_HOSTS in production mode
 if DEPLOY_ENV == REMOTE:
     SMT_URL = "https://crppdmt.herokuapp.com/"
