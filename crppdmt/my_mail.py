@@ -2,7 +2,7 @@ import sys
 import os
 from django.core.mail import EmailMultiAlternatives
 from crppdmt.settings import EMAIL_HOST_USER, BASE_DIR, SMT_URL
-from crppdmt.settings_private import SECONDMENTS_MAIL_LIST, NORCAP_FOCAL_POINTS
+from crppdmt.settings import SECONDMENTS_MAIL_LIST, NORCAP_FOCAL_POINTS
 from crppdmt.env_utils import *
 from easy_pdf.rendering import render_to_pdf
 

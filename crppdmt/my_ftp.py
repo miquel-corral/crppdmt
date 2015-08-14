@@ -1,6 +1,6 @@
 import sys
 from ftpretty import ftpretty
-from settings_private import *
+from settings import FTP_HOST, FTP_USER, FTP_PASS, FTP_BASE_DIR
 
 
 class MyFTP():
