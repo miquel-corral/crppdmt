@@ -20,8 +20,6 @@ TEMPLATE_DEBUG = True
 
 TEMPLATE_DIRS = (BASE_DIR + "/templates/crppdmt",)
 
-ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -68,9 +66,6 @@ USE_TZ = True
 
 # Honor the 'X-Forwarded-Proto' header for request.is_secure()
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
-# Allow all host headers
-ALLOWED_HOSTS = [SMT_URL]
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
