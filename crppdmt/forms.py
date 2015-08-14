@@ -2,6 +2,7 @@ import time
 
 from django import forms
 from django.contrib.auth.models import User
+from django.forms.extras.widgets import SelectDateWidget
 from constants import *
 from crppdmt.models import ExpertRequest, Person, ExpertMessage, Organization, PersonalDocument
 from captcha.fields import CaptchaField
@@ -141,6 +142,7 @@ class UploadPersonalInfoForm(forms.ModelForm):
         model = PersonalDocument
         exclude = []
 
+
 class ExpertMessageForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
@@ -155,6 +157,14 @@ class ExpertMessageForm(forms.ModelForm):
         model = ExpertMessage
         exclude = []
 
+class DeploymentDateForm(forms.Form):
 
+    def __init__(self, *args, **kwargs):
+        super(DeploymentDateForm, self).__init__(*args, **kwargs)
+        # set widgets
+        self.fields['expert_request_id'].widget = forms.HiddenInput()
+        self.fields['deployment_date'].widget = forms.TextInput(attrs={'class':'vDateField'})
 
+    deployment_date = forms.DateField()
+    expert_request_id = forms.CharField(required=False)
 

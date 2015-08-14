@@ -51,7 +51,7 @@
                 </caption>
                 {% if personal_docs %}
                     {% for doc in personal_docs %}
-                        <tr><td><a href="{% url 'retrieve_file' remote_folder=person.user.username remote_file=doc.name  %}" target="blank">{{ doc.title }}</a></td></tr>
+                        <tr><td><a href="{% url 'retrieve_file' remote_folder=person.user.username remote_file=doc.file_name  %}" target="blank">{{ doc.document_title }}</a></td></tr>
                     {% endfor %}
                 {% else %}
                     <tr><td>No related documents found.</td></tr>
@@ -81,18 +81,20 @@
                         <td style="width:12%;">{{ request.title }}</td>
                         <td style="width:12%;">{{ request.project_name }}</td>
                         <td style="width:12%;">{{ request.duty_station }}</td>
-                        <td style="width:12%;">{{ request.date_of_deployment|default_if_none:'' }}</td>
+                        <td style="width:12%;">{{ request.effective_date_of_deployment|default_if_none:'' }}</td>
                         <td style="width:12%;">{{ request.status.name }}</td>
                         <td style="width:12%;"></td>
                         <td style="width:6%">
                             {% if person.is_expert %}
-                                {% if not expert_request.is_in_status_closed %}
-                                    {% if expert_request.is_in_status_deployment %}
-                                        <a href="{% url 'deployment_date' expert_request_id=request.id expert_id=person.id%}" target="_blank" style="display: inline;">Set Deployment Date</a>
+                                {% if not request.is_in_status_closed %}
+                                    {% if request.is_in_status_deployment %}
+                                        <a href="{% url 'deployment_date' expert_request_id=request.id %}" style="display: inline;">Set Deploy Date</a>
                                     {% endif%}
-                                    <a href="{% url 'report_issue' expert_request_id=request.id%}" target="_blank" style="display: inline;">Report Issue</a>
-                                    <a href="{% url 'inception_report' expert_request_id=request.id expert_id=person.id%}" target="_blank" style="display: inline;">Inception Report</a>
-                                    <a href="{% url 'per' expert_request_id=request.id expert_id=person.id%}" target="_blank" style="display: inline;">PER</a>
+                                    <a href="{% url 'report_issue' expert_request_id=request.id%}" style="display: inline;">Report Issue</a>
+                                    {% comment %}
+                                    <a href="{% url 'inception_report' expert_request_id=request.id expert_id=person.id%}" style="display: inline;">Inception Report</a>
+                                    <a href="{% url 'per' expert_request_id=request.id expert_id=person.id%}" style="display: inline;">PER</a>
+                                    {% endcomment %}
                                 {% endif %}
                             {% endif %}
                         </td>

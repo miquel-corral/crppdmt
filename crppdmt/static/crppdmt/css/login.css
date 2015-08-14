@@ -38,7 +38,7 @@ body.login {
 
 /* miquel */
 .login .form-row #id_username, .login .form-row #id_password, .login .form-row #id_old_password,
-.login .form-row #id_new_password1, .login .form-row #id_new_password2 {
+.login .form-row #id_new_password1, .login .form-row #id_new_password2 , .login .form-row #id_old_password,{
     clear: both;
     padding: 6px;
     width: 100%;

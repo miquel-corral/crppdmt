@@ -10,9 +10,8 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.core.paginator import Paginator
 from django.forms.models import modelformset_factory
 
-from crppdmt.settings import DEBUG
 from crppdmt.models import PersonalDocument, ExpertMessage
-from crppdmt.forms import UploadPersonalInfoForm, ExpertMessageForm
+from crppdmt.forms import UploadPersonalInfoForm, ExpertMessageForm, DeploymentDateForm
 from crppdmt.document_utils import *
 
 
@@ -59,7 +58,7 @@ def expert_profile(request, expert_id=None):
         })
         return HttpResponse(template.render(context))
     except:
-        if DEBUG:
+        if debug_is_on():
             raise
         else:
             return render_to_response("crppdmt/error.html",
@@ -84,7 +83,8 @@ def upload_personal_info(request):
         # initialization
         request_form_set = modelformset_factory(PersonalDocument, form=UploadPersonalInfoForm, max_num=1, exclude=[])
         query_set = None
-
+        # get personal documents list
+        personal_docs = PersonalDocument.objects.filter(expert = person)
         # POST & GET processing
         if request.method == 'POST':
             formset = request_form_set(request.POST, request.FILES)
@@ -96,6 +96,8 @@ def upload_personal_info(request):
                 doc_filename = str(personal_doc.file_name)
                 if personal_doc.document_title.strip() == '':
                     personal_doc.document_title = str(personal_doc.file_name)[0:len(doc_filename)-4]
+                # before ftp
+                personal_doc.save()
                 # upload doc to ftp
                 size = upload_file(person.user.username, str(personal_doc.file_name))
                 print("size: " + str(size))
@@ -103,10 +105,8 @@ def upload_personal_info(request):
                 if size == 0:
                     formset[0].add_error('file_name',"Error uploading file. Try it again later.")
                 else:
-                    # BBDD
-                    personal_doc.save()
                     # return to list
-                    return redirect("/upload_personal_info/", context_instance=RequestContext(request))
+                    return redirect("/expert_profile/", context_instance=RequestContext(request))
             else:
                 # return to form
                 print(formset[0].errors)
@@ -121,10 +121,10 @@ def upload_personal_info(request):
 
         # return
         html_template = loader.get_template('crppdmt/expert/personal_info.html')
-        context = RequestContext(request, {"person": person, "formset": formset,})
+        context = RequestContext(request, {"person": person, "formset": formset, 'personal_docs': personal_docs})
         return HttpResponse(html_template.render(context))
     except:
-        if DEBUG:
+        if debug_is_on():
             raise
         else:
             return render_to_response("crppdmt/error.html",
@@ -150,6 +150,9 @@ def communicate(request, expert_request_id=None):
         request_form_set = modelformset_factory(ExpertMessage, form=ExpertMessageForm, max_num=1, exclude=[])
         query_set = None
         expert_request = None
+        # get personal documents list
+        personal_docs = PersonalDocument.objects.filter(expert = person)
+
 
         # POST & GET processing
         if request.method == 'POST':
@@ -183,11 +186,11 @@ def communicate(request, expert_request_id=None):
 
         # return
         html_template = loader.get_template('crppdmt/expert/communication.html')
-        context = RequestContext(request, {"person": person, "formset": formset,})
+        context = RequestContext(request, {"person": person, "formset": formset, 'personal_docs': personal_docs,})
         return HttpResponse(html_template.render(context))
 
     except:
-        if DEBUG:
+        if debug_is_on():
             raise
         else:
             return render_to_response("crppdmt/error.html",
@@ -196,7 +199,7 @@ def communicate(request, expert_request_id=None):
 
 @ensure_csrf_cookie
 @login_required
-def deployment_date(request, expert_id, expert_request_id=None):
+def deployment_date(request, expert_request_id):
     """
     View for the expert to set the deployment date
     :param request:
@@ -204,9 +207,40 @@ def deployment_date(request, expert_id, expert_request_id=None):
     :return:
     """
     try:
-        pass
+        # get person from request
+        person = get_person(request)
+        if not (person.is_supervisor() or person.is_expert()):
+            return render_to_response("crppdmt/error.html", {"error_description": "Permission denied.",},
+                                      context_instance=RequestContext(request))
+        # initialization
+        expert_request = None
+        form = None
+
+        # POST & GET processing
+        if request.method == 'POST':
+            form = DeploymentDateForm(data=request.POST)
+            if form.is_valid():
+                expert_request = ExpertRequest.objects.get(id=expert_request_id)
+                expert_request.effective_date_of_deployment = form.cleaned_data['deployment_date']
+                expert_request.save()
+                trace_action(TRACE_DEPLOYMENT_DATE_SET,expert_request,person)
+                if person.is_supervisor():
+                    return redirect("/index/", context_instance=RequestContext(request))
+                if person.is_expert():
+                    return redirect("/expert_profile/", context_instance=RequestContext(request))
+            else:
+                pass
+        else:
+            form = DeploymentDateForm()
+            form.fields['expert_request_id'].initial = expert_request_id
+
+        # return
+        html_template = loader.get_template('crppdmt/expert/deployment_date.html')
+        context = RequestContext(request, {"person": person, "form": form, 'is_logout': "logout"})
+        return HttpResponse(html_template.render(context))
+
     except:
-        if DEBUG:
+        if debug_is_on():
             raise
         else:
             return render_to_response("crppdmt/error.html",
@@ -225,7 +259,7 @@ def inception_report(request, expert_id, expert_request_id=None):
     try:
         pass
     except:
-        if DEBUG:
+        if debug_is_on():
             raise
         else:
             return render_to_response("crppdmt/error.html",
@@ -244,7 +278,7 @@ def per(request, expert_id, expert_request_id=None):
     try:
         pass
     except:
-        if DEBUG:
+        if debug_is_on():
             raise
         else:
             return render_to_response("crppdmt/error.html",

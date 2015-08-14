@@ -1,0 +1,32 @@
+diff --git a/crppdmt/static/crppdmt/css/base.css b/crppdmt/static/crppdmt/css/base.css
+index 88efe3b..2ecbc82 100644
+--- a/crppdmt/static/crppdmt/css/base.css
++++ b/crppdmt/static/crppdmt/css/base.css
+@@ -437,6 +437,13 @@ textarea, select, .vTextField {
+     border: 1px solid #ccc;
+ }
+ 
++.CRPP input[type=text], input[type=password], input[type=email], input[type=url], input[type=number],
++textarea, select, .vTextField {
++    border: 1px solid #ccc;
++    /* miquel */
++    width:80%;
++}
++
+ /* miquel treatement upload button */
+ 
+ input[type=file] {
+@@ -463,7 +470,7 @@ select {
+ 
+ /* FORM BUTTONS */
+ 
+-.button, input[type=submit], .submit-row input {
++.button, input[type=submit], input[type=button], .submit-row input {
+     background: #fff url(../img/nav-bg.gif) bottom repeat-x;
+     padding: 3px 5px;
+     color: black;
+@@ -932,3 +939,4 @@ div.number_environment {
+ 
+ 
+ 
++

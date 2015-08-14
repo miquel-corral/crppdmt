@@ -2,7 +2,7 @@ Dear {{ person.first_name }},
 
 You have been registered into the UN-Habitat Secondments Management Portal.
 
-Your username is {{ person.user.username }}, and your password is "0304{{ person.last_name }}"
+Your username is {{ person.user.username }}, and your password is 0304{{ person.last_name }}
 
 You can change your password once logged into the Secondment Management Portal at {{ SMT_URL }}
 

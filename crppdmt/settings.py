@@ -1,9 +1,7 @@
 """
 Django settings for crppdmt project.
-
 For more information on this file, see
 https://docs.djangoproject.com/en/1.7/topics/settings/
-
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.7/ref/settings/
 """
@@ -14,23 +12,9 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
 
-# Control execution environment
-deploy_env = os.environ.get('DEPLOY_ENV','LOCAL')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'urk$y)-v%z=65jf@e@7_zg*h=ne)s3c^&14plbw(#hrctdpxnm'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-if "LOCAL" == deploy_env:
-    DEBUG = True
-    SMT_URL = "http://localhost:5000/"
-else:
-    DEBUG = False
-    SMT_URL = "https://crppdmt.herokuapps.com/"
-
 
 TEMPLATE_DEBUG = True
 
@@ -68,7 +52,6 @@ ROOT_URLCONF = 'crppdmt.urls'
 WSGI_APPLICATION = 'crppdmt.wsgi.application'
 
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/1.7/topics/i18n/
 
@@ -87,7 +70,7 @@ USE_TZ = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Allow all host headers
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [SMT_URL]
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.7/howto/static-files/

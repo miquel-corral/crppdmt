@@ -17,22 +17,34 @@ def create_person_and_user(person, role=None, is_active=False, initial_pwd=True)
     :param initial_pwd:
     :return:
     """
+
+    print(person.name)
+    print(person.last_name)
+    print(person.title)
+
+    person.first_name = person.first_name.replace(" ", "_")
+    person.last_name = person.last_name.replace(" ", "_")
     # set person additional information
     person.name = person.last_name + ", " + person.first_name
     # create user deactivated, person after and then set role creator
-    user = User()
-    user.username = (person.first_name + "." + person.last_name).replace(" ", "")
+    username = (person.first_name.lower().strip() + "." + person.last_name.lower().strip()).replace(" ", "")
+
+    if initial_pwd:
+        password = "0304" + person.last_name
+    else:
+        password=None
+
+    user = User.objects.create_user(username, person.email, password)
     user.first_name = person.first_name
     user.last_name = person.last_name
-    if initial_pwd:
-        user.password = "0304" + person.last_name
     user.email = person.email
-    user.is_active = True
+    user.is_active = is_active
     user.is_staff = False
     user.is_superuser = False
     user.save()
     person.user = user
     person.save()
+
     if role:
         person.roles.add(role)
     person.save()

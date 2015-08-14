@@ -94,7 +94,7 @@ urlpatterns = patterns('',
     url(r'^report_issue/(?P<expert_request_id>\d+)/$', 'crppdmt.views_expert.communicate', name='report_issue'),
 
     # url to deployment date form
-    url(r'^deployment_date/(?P<expert_id>\d+)/(?P<expert_request_id>\d+)/$', 'crppdmt.views_expert.deployment_date', name='deployment_date'),
+    url(r'^deployment_date/(?P<expert_request_id>\d+)/$', 'crppdmt.views_expert.deployment_date', name='deployment_date'),
 
     # url to deployment date form
     url(r'^inception_report/(?P<expert_id>\d+)/(?P<expert_request_id>\d+)/$', 'crppdmt.views_expert.inception_report', name='inception_report'),

@@ -22,7 +22,6 @@ class MyFTP():
             print("remote_file_name: " + remote_file_name)
 
             ret = f.put(local_file_path, remote_folder + "/" + remote_file_name)
-            return ret
         except:
             print("Unexpected error:", sys.exc_info())
         finally:

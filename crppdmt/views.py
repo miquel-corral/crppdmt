@@ -22,7 +22,7 @@ from easy_pdf.views import PDFTemplateView
 from easy_pdf.rendering import render_to_pdf_response, render_to_pdf
 
 from crppdmt.settings import *
-
+from crppdmt.env_utils import *
 from crppdmt.models import Person, ExpertRequest, GeneralCheckList, RequestStatus, Organization, Role
 
 from crppdmt.forms import CreateRequestForm, EditRequestForm, GeneralCheckListForm, SummaryCheckListForm, \
@@ -113,7 +113,7 @@ def my_change_password(request):
                 }
             return TemplateResponse(request, 'crppdmt/change_password.html', context)
     except:
-        if DEBUG:
+        if debug_is_on():
             raise
         else:
             return redirect("/index/", context_instance=RequestContext(request))
@@ -147,7 +147,7 @@ def index(request):
         try:
 
             # get the requests/missions for each role
-            request_list = ExpertRequest.objects.filter(expert=None)  # Dirty to get empty QuerySet
+            request_list = ExpertRequest.objects.filter(id=None)  # Dirty to get empty QuerySet
 
             for role in person.roles.all():  # everyone has at least one role
                 if role.name == ROLES[ROLE_SUPERVISOR_ITEM]:
@@ -197,7 +197,7 @@ def index(request):
         })
         return HttpResponse(template.render(context))
     except:
-        if DEBUG:
+        if debug_is_on():
             raise
         else:
             return render_to_response("crppdmt/error.html",
@@ -264,6 +264,9 @@ def edit_request(request, request_id=None):
                 if not expert_request.agency_field_focal_point:
                         expert_request.agency_field_focal_point = expert_request.supervisor
 
+                # save form
+                formset.save()
+
                 if expert_request.project_document:
                     # upload file to ftp. OBS: check existence of project doc. file to avoid errors if doc.
                     # has not changed while modifying the request
@@ -271,8 +274,7 @@ def edit_request(request, request_id=None):
                         upload_file(expert_request.name, str(expert_request.project_document))
                     else:
                         pass  # file not modified while editing the request
-                # save form
-                formset.save()
+
                 # trace action
                 trace_action(TRACE_EDIT_REQUEST, expert_request, person)
                 # check send to supervisor. Tricky validation in python. Check Action!!!
@@ -318,7 +320,7 @@ def edit_request(request, request_id=None):
                                    "SMT_URL": SMT_URL},
                                   context_instance=RequestContext(request))
     except:
-        if DEBUG:
+        if debug_is_on():
             raise
         else:
             return render_to_response("crppdmt/error.html",
@@ -358,11 +360,11 @@ def create_request(request, request_id=None):
                 expert_request.name = expert_request.project_name + "_" + expert_request.expert_profile_type.name + \
                     "_" + time.strftime("%Y%m%d%H%M%S")
 
-                # upload file to ftp. OBS: after save to avoid problems with document name (duplicates)
-                upload_file(expert_request.name, str(expert_request.project_document))
-
-                # save expert request
+                # save expert request. Before ftp to not load docs
                 formset.save()
+
+                # upload file to ftp.
+                upload_file(expert_request.name, str(expert_request.project_document))
 
                 # trace action
                 trace_action(TRACE_CREATE_REQUEST, expert_request, person)
@@ -392,7 +394,7 @@ def create_request(request, request_id=None):
                                    "IF_OTHER_THAN_SUPERVISOR_HELP_TEXT": IF_OTHER_THAN_SUPERVISOR_HELP_TEXT },
                                   context_instance=RequestContext(request))
     except:
-        if DEBUG:
+        if debug_is_on():
             raise
         else:
             return render_to_response("crppdmt/error.html",
@@ -484,7 +486,7 @@ def general_checklist(request, action, expert_request_id):
                                    "error_required_ack":error_required_ack},
                                   context_instance=RequestContext(request))
     except:
-        if DEBUG:
+        if debug_is_on():
             raise
         else:
             return render_to_response("crppdmt/error.html",
@@ -539,7 +541,7 @@ def summary_checklist(request, expert_request_id):
                                    "summary_literals": crppdmt.summary_checklist ,},
                                    context_instance=RequestContext(request))
     except:
-        if DEBUG:
+        if debug_is_on():
             raise
         else:
             return render_to_response("crppdmt/error.html",
@@ -570,7 +572,7 @@ def copy_request(request, expert_request_id):
         # return to index
         return redirect('/index/')
     except:
-        if DEBUG:
+        if debug_is_on():
             raise
         else:
             return render_to_response("crppdmt/error.html",
@@ -603,7 +605,7 @@ def extend_request(request, expert_request_id):
         # return to index
         return redirect('/index/')
     except:
-        if DEBUG:
+        if debug_is_on():
             raise
         else:
             return render_to_response("crppdmt/error.html",
@@ -639,12 +641,12 @@ def reject_request(request, expert_request_id):
         if request.method == 'POST':
             formset = request_form_set(request.POST, request.FILES)
             if formset.is_valid():
-                # get instance
-                expert_request = formset[0].save(commit=False)
+                # get instance to perform checks, but editing agains the whole instance to avoid loosing data
+                form_expert_request = formset[0].save(commit=False)
                 # actions according status
-                if expert_request.status.name == STATUS_SUPERVISION:
+                if form_expert_request.status.name == STATUS_SUPERVISION:
                     # control of reject reason
-                    if expert_request.rejected_review_reason.strip() == '':
+                    if form_expert_request.rejected_review_reason.strip() == '':
                         formset.errors[0]['rejected_review_reason'] = REJECT_REASON_VALIDATION_ERROR
                         return render_to_response("crppdmt/reject_request.html",
                                                   {"person": person,
@@ -658,9 +660,9 @@ def reject_request(request, expert_request_id):
                         trace_action(TRACE_REJECTED_REVIEW_REQUEST, expert_request, person)
                         send_request_email_to(expert_request, MAIL_REQUEST_NOT_REVIEWED)
 
-                if expert_request.status.name == STATUS_CERTIFICATION:
+                if form_expert_request.status.name == STATUS_CERTIFICATION:
                     # control of reject reason
-                    if expert_request.rejected_certification_reason.strip() == '':
+                    if form_expert_request.rejected_certification_reason.strip() == '':
                         formset.errors[0]['rejected_certification_reason'] = REJECT_REASON_VALIDATION_ERROR
                         return render_to_response("crppdmt/reject_request.html",
                                                   {"person": person,
@@ -676,7 +678,7 @@ def reject_request(request, expert_request_id):
                         send_request_email_to(expert_request, MAIL_REQUEST_NOT_CERTIFIED)
 
                 # save expert request
-                formset.save()
+                expert_request.save()
 
                 return redirect("/index/", context_instance=RequestContext(request))
             else:
@@ -694,7 +696,7 @@ def reject_request(request, expert_request_id):
                                       context_instance=RequestContext(request))
 
     except:
-        if DEBUG:
+        if debug_is_on():
             raise
         else:
             return render_to_response("crppdmt/error.html",
@@ -723,22 +725,7 @@ def user_registration(request):
                 if user_exists:
                     formset[0].add_error('first_name',"User with same first and last name already registered.")
                 else:
-                    # set person additional information
-                    person.name = person.last_name + ", " + person.first_name
-                    # create user deactivated, person after and then set role creator
-                    user = User()
-                    user.username = (person.first_name + "." + person.last_name).replace(" ", "")
-                    user.first_name = person.first_name
-                    user.last_name = person.last_name
-                    user.email = person.email
-                    user.is_active = False
-                    user.is_staff = False
-                    user.is_superuser = False
-                    user.save()
-                    person.user = user
-                    person.save()
-                    person.roles.add(Role.objects.get(name=ROLES[ROLE_CREATOR_ITEM]))
-                    person.save()
+                    create_person_and_user(person, role=Role.objects.get(name=ROLES[ROLE_CREATOR_ITEM]), is_active=False, initial_pwd=True)
                     # trace
                     trace_action(TRACE_USER_REGISTERED, None,person)
                     # send email
@@ -764,7 +751,7 @@ def user_registration(request):
                                   context_instance=RequestContext(request))
 
     except:
-        if DEBUG:
+        if debug_is_on():
             raise
         else:
             return render_to_response("crppdmt/error.html",
@@ -813,7 +800,7 @@ def inactive_users(request):
         return HttpResponse(template.render(context))
 
     except:
-        if DEBUG:
+        if debug_is_on():
             raise
         else:
             return render_to_response("crppdmt/error.html",
@@ -837,8 +824,8 @@ def validate_user(request, person_id):
         if request.method == 'POST':
             formset = form_set(request.POST, request.FILES)
             if formset.is_valid():
-                # get person data
-                person = formset[0].save(commit=False)
+                # do not get person data from form, only informative
+                # form_person = formset[0].save(commit=False)
                 # get action validated or rejected
                 if formset[0].cleaned_data['rejected'] and formset[0].cleaned_data['rejected'] is True:
                     # check rejected reason
@@ -881,8 +868,14 @@ def validate_user(request, person_id):
             query_set = Person.objects.filter(pk=person_id)
             formset = form_set(queryset=query_set)
 
+        return render_to_response("crppdmt/validate_user.html",
+                                  {"person": person,
+                                   "formset": formset,},
+                                  context_instance=RequestContext(request))
+
+
     except:
-        if DEBUG:
+        if debug_is_on():
             raise
         else:
             return render_to_response("crppdmt/error.html",
@@ -928,7 +921,7 @@ def link_candidate(request, expert_request_id):
                 if format(len(form_link_candidate.errors) > 0):
                     num_errors = len(form_link_candidate.errors[0])
     except:
-        if DEBUG:
+        if debug_is_on():
             raise
         else:
             return render_to_response("crppdmt/error.html",
@@ -969,7 +962,8 @@ def candidate_approval(request, expert_request_id):
                         formset[0].cleaned_data['organization'] = Organization.objects.get(name='NORCAP').id
                     else:
                         # assign expert to request
-                        create_person_and_user(person, role=Role.objects.get(name=ROLES[ROLE_EXPERT_ITEM]), is_active=True)
+                        create_person_and_user(person, role=Role.objects.get(name=ROLES[ROLE_EXPERT_ITEM]),
+                                               is_active=True, initial_pwd=True)
                         # link to request and change status
                         link_expert_to_request(expert_request, person)
                         return redirect("/index/", context_instance=RequestContext(request))
@@ -997,7 +991,7 @@ def candidate_approval(request, expert_request_id):
                                                                       "expert_request": expert_request},
                                   context_instance=RequestContext(request))
     except:
-        if DEBUG:
+        if debug_is_on():
             raise
         else:
             return render_to_response("crppdmt/error.html",
@@ -1028,7 +1022,7 @@ def test(request):
         return render_to_response("crppdmt/test.html",
                               context_instance=RequestContext(request))
     except:
-        if DEBUG:
+        if debug_is_on():
             raise
         else:
             return render_to_response("crppdmt/error.html",
@@ -1046,11 +1040,7 @@ def generate_letter_of_request_pdf(request, expert_request_id):
     """
     try:
         expert_request = ExpertRequest.objects.get(pk=expert_request_id)
-        test = False
-        deploy_env = os.environ.get('DEPLOY_ENV','LOCAL')
-        if "HEROKU" != deploy_env:
-            test = True
-
+        test = test_is_on()
         context = {'expert_request': expert_request,
                    'pagesize': 'A4',
                    'BASE_DIR': os.path.join(BASE_DIR, 'crppdmt/static/'),
@@ -1058,7 +1048,7 @@ def generate_letter_of_request_pdf(request, expert_request_id):
                 }
         return render_to_pdf_response(request, "crppdmt/pdf/letter_of_request.html", context, filename=None, encoding=u'utf-8')
     except:
-        if DEBUG:
+        if debug_is_on():
             raise
         else:
             return render_to_response("crppdmt/error.html",
@@ -1077,10 +1067,7 @@ def generate_tor_pdf(request, expert_request_id):
     """
     try:
         expert_request = ExpertRequest.objects.get(pk=expert_request_id)
-        test = False
-        deploy_env = os.environ.get('DEPLOY_ENV','LOCAL')
-        if "HEROKU" != deploy_env:
-            test = True
+        test = test_is_on()
 
         context = {'expert_request': expert_request,
                    'pagesize': 'A4',
@@ -1089,7 +1076,7 @@ def generate_tor_pdf(request, expert_request_id):
                 }
         return render_to_pdf_response(request, "crppdmt/pdf/tor.html", context, filename=None, encoding=u'utf-8')
     except:
-        if DEBUG:
+        if debug_is_on():
             raise
         else:
             return render_to_response("crppdmt/error.html",
@@ -1107,6 +1094,11 @@ def retrieve_file(request, remote_folder, remote_file):
     :return:
     """
     try:
+        # check ftp
+        if ftp_is_off():
+            return render_to_response("crppdmt/error.html",
+                                      {"error_description": "Service temporary unavailable.",},
+                                      context_instance=RequestContext(request))
         # get the file
         file_content = get_ftp_file_content(remote_folder, remote_file)
         if file_content is None:
@@ -1117,7 +1109,7 @@ def retrieve_file(request, remote_folder, remote_file):
             response['Content-Disposition'] = 'inline;filename=' + remote_file
             return response
     except:
-        if DEBUG:
+        if debug_is_on():
             raise
         else:
             return render_to_response("crppdmt/error.html",

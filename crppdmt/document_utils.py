@@ -1,5 +1,6 @@
 import os
 from crppdmt.my_ftp import *
+from crppdmt.env_utils import *
 
 ############################################################
 #
@@ -9,8 +10,9 @@ from crppdmt.my_ftp import *
 
 
 def upload_file(remote_folder, document_name):
-
-    # remove document in local file system
+    # control of execution
+    if ftp_is_off():
+        return 1 # lying to avoid problems in presentation
     try:
         ret = 0
         print("FTP. document_name: " + document_name)
@@ -18,7 +20,7 @@ def upload_file(remote_folder, document_name):
         my_ftp = MyFTP()
         ret = my_ftp.upload_file(document_name, remote_folder, document_name)
 
-        os.remove(document_name)
+        os.remove('./' + document_name)
         return ret
     except:
         print("Error uploading project file: " + document_name)
@@ -28,6 +30,9 @@ def upload_file(remote_folder, document_name):
 
 
 def get_ftp_file_content(remote_folder, remote_file):
+    # control of execution
+    if ftp_is_off():
+        return
     file_content = None
     try:
         my_ftp = MyFTP()

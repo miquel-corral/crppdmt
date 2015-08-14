@@ -437,6 +437,17 @@ textarea, select, .vTextField {
     border: 1px solid #ccc;
 }
 
+.CRPP>.input[type=text], input[type=password], input[type=email], input[type=url], input[type=number],
+textarea, select, .vTextField {
+    border: 1px solid #ccc;
+    /* miquel */
+    width:80%;
+}
+
+.CRPP .form-row #id_username, .form-row #id_password{
+   width:97%;
+}
+
 /* miquel treatement upload button */
 
 input[type=file] {
@@ -463,12 +474,19 @@ select {
 
 /* FORM BUTTONS */
 
-.button, input[type=submit], .submit-row input {
+.button, input[type=submit], input[type=button], .submit-row input {
+    border: 2px solid #5b80b2;
+    background: #7CA0C7 url(../img/default-bg.gif) bottom repeat-x;
+    font-weight: bold;
+    color: #fff;
+
+    /*
     background: #fff url(../img/nav-bg.gif) bottom repeat-x;
     padding: 3px 5px;
     color: black;
     border: 1px solid #bbb;
     border-color: #ddd #aaa #aaa #ddd;
+    */
 }
 
 .button:active, input[type=submit]:active, input[type=button]:active {
@@ -929,6 +947,7 @@ caption.title_environment {
 div.number_environment {
     background-image: url("/static/crppdmt/img/6_CCFF99.jpg");
 }
+
 
 
 

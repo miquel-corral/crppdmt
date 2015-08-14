@@ -55,7 +55,7 @@
                 </caption>
                 {% if personal_docs %}
                     {% for doc in personal_docs %}
-                        <tr><td><a href="{% url 'retrieve_file' remote_folder=person.user.username remote_file=doc.name  %}" target="blank">{{ doc.title }}</a></td></tr>
+                        <tr><td><a href="{% url 'retrieve_file' remote_folder=person.user.username remote_file=doc.file_name  %}" target="blank">{{ doc.document_title }}</a></td></tr>
                     {% endfor %}
                 {% else %}
                     <tr><td>No related documents found.</td></tr>

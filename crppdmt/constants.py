@@ -169,6 +169,7 @@ TRACE_USER_VALIDATED = "USER VALIDATED"
 TRACE_USER_REJECTED = "USER REJECTED"
 TRACE_CANDIDATE_APPROVED = "CANDIDATE APPROVED"
 TRACE_EXPERT_CREATED = "EXPERT CREATED"
+TRACE_DEPLOYMENT_DATE_SET = "DEPLOYMENT_DATE_SET"
 
 ################################################
 #
@@ -183,3 +184,13 @@ STATUS_DEPLOYMENT = "Deployment"
 STATUS_MISSION_EXECUTION = "Mission Execution"
 STATUS_PER_REVISION = "PER Revision"
 STATUS_CLOSED = "Closed"
+
+################################################
+#
+# Control constants for env. and status of subsystems
+#
+################################################
+REMOTE = "REMOTE"
+LOCAL = "LOCAL"
+ON="ON"
+OFF="OFF"

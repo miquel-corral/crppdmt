@@ -1,7 +1,9 @@
 from django.template import loader, Context
+
 from crppdmt.settings import *
 from crppdmt.my_mail import *
 from crppdmt.trace import *
+from crppdmt.env_utils import *
 from crppdmt.models import ExpertRequest
 
 def send_user_validation_email(person, rejection_reason=None):
@@ -21,6 +23,9 @@ def send_user_validation_email(person, rejection_reason=None):
             text_content = text_template.render(Context({'person': person, 'SMT_URL': SMT_URL}))
             action = MAIL_USER_REJECTED
         else:
+
+            print("Person.last_name: " + person.last_name)
+
             subject = "SMT - User Registration Validated"
             html_template = loader.get_template('crppdmt/email/user_validated.html')
             html_content = html_template.render(Context({'person': person, 'SMT_URL': SMT_URL}))
@@ -145,11 +150,11 @@ def send_request_email_to(expert_request, action):
             if expert_request.country_representative is not expert_request.supervisor:
                 recipients = recipients + [expert_request.country_representative.user.email]
             # add requested agency email address
-            if "HEROKU" == deploy_env:
+            if env_is_remote():
                 recipients = recipients + [NORCAP_EMAILS[expert_request.expert_profile_type.name.strip()],]
             # send email
             my_mail.send_mail(subject, html_content, text_content, recipients, expert_request, attach_tor=True,
-                              attach_letter=True)
+                                  attach_letter=True)
 
         if action == MAIL_REQUEST_NOT_REVIEWED:
             subject = "Expert request rejected for supervisor"
@@ -183,8 +188,6 @@ def send_request_email_to(expert_request, action):
                 recipients = recipients + [expert_request.country_representative.user.email]
             # send email
             my_mail.send_mail(subject, html_content, text_content, recipients, expert_request)
-
-
 
         trace_action(action, expert_request, expert_request.supervisor)
 

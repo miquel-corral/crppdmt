@@ -92,7 +92,9 @@
                         </td>
                         <td>
                             <a href="{% url 'copy_request' expert_request_id=request.id%}">Copy</a>
+                            {% comment %}
                             <a href="{% url 'extend_request' expert_request_id=request.id%}">Extend</a>
+                            {% endcomment %}
                         </td>
                 </tr>
                 {% endfor %}

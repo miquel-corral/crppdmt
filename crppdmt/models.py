@@ -210,12 +210,7 @@ class ExpertRequest(BasicName):
         return False
 
     def is_in_status(self, status_name):
-        ret = False
-        for status in self.status.all():
-            if status.name == status_name:
-                ret = True
-                break
-        return ret
+        return self.status.name == status_name
 
     def is_in_status_execution(self):
         return self.is_in_status(STATUS_MISSION_EXECUTION)
@@ -375,8 +370,8 @@ class PersonalDocument(Common):
     """
     Represents a personal document from an expert
     """
-    file_name = django.db.models.FileField(null=False, blank=False, validators=[validate_file_extension,
-                                                                                validate_file_size])
+    file_name = django.db.models.FileField(upload_to='./', null=False, blank=False, validators=[validate_file_extension,
+                                                                                                validate_file_size])
     document_title = django.db.models.CharField(max_length=50, null=True, blank=True)
     expert = django.db.models.ForeignKey(Person, null=False, blank=False)
 

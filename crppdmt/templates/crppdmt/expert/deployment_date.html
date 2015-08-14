@@ -28,23 +28,19 @@
 
 <div id="content-main">
 <form action="{{ app_path }}" method="post" id="login-form">{% csrf_token %}
-  <span class="CRPP">
   <div class="form-row">
-    {{ form.username.errors }}
-    <label for="id_username" class="required">{{ form.username.label }}:</label><br> {{ form.username }}
+    {{ form.deployment_date.errors }}
+    <label for="id_username" class="required">{{ form.deployment_date.label }}:</label>
+    <span class="CRPP">
+                {{ form.deployment_date }}
+                <span class="datetimeshortcuts"></span><br>
+                <span class="helptext">Date format: YYYY-MM-DD</span>
+    </table>
+      {{ form.expert_request_id.as_hidden}}
   </div>
-  <div class="form-row">
-    {{ form.password.errors }}
-    <label for="id_password" class="required">{% trans 'Password:' %}</label><br> {{ form.password }}
-    <input type="hidden" name="next" value="{{ next }}" />
-  </div>
-  </span>
   <div class="submit-row-login">
-    <label>&nbsp;</label><input type="submit" value="{% trans 'Log in' %}" />
-  </div>
-  <div class="form-row">
-    <label>&nbsp;</label><a href="{% url 'user_registration' %}">Register</a>
-    <label>&nbsp;</label><a href="{% url 'password_reset' %}">Forgot password?</a>
+         <input class="default" type="button" name="_save1" value="Back" onclick="window.history.back();"></input>
+         <label>&nbsp;</label><input class"default" type="submit" value="{% trans 'Save' %}" />
   </div>
 </form>
 

@@ -3,7 +3,9 @@ import os
 from django.core.mail import EmailMultiAlternatives
 from crppdmt.settings import EMAIL_HOST_USER, BASE_DIR, SMT_URL
 from crppdmt.settings_private import SECONDMENTS_MAIL_LIST, NORCAP_FOCAL_POINTS
+from crppdmt.env_utils import *
 from easy_pdf.rendering import render_to_pdf
+
 
 
 class MyMail():
@@ -14,16 +16,19 @@ class MyMail():
     @staticmethod
     def send_mail(subject, html_content, text_content, recipients, expert_request=None, attach_tor=False,
                   attach_letter=False):
+        # control of execution
+        if email_is_off():
+            return
 
         # control of environment
-        deploy_env = os.environ.get('DEPLOY_ENV','LOCAL')
-        if "HEROKU" != deploy_env:
+        if env_is_local():
             # local env email only to secondments mail list
             recipients = SECONDMENTS_MAIL_LIST
+        if test_is_on():
             # subject with TEST
             subject = "This is a TEST email! " + subject
             # test indicator to render PDF as test sample
-            test = True
+            test = test_is_on()
 
         msg = EmailMultiAlternatives(subject, text_content, EMAIL_HOST_USER, recipients, bcc=SECONDMENTS_MAIL_LIST)
         msg.attach_alternative(html_content, "text/html")
