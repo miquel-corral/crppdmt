@@ -22,10 +22,10 @@ EMAIL = os.getenv("EMAIL", ON)
 FTP = os.getenv("FTP", ON)
 
 print("DEPLOY_ENV: " + DEPLOY_ENV)
-print("MY_DEBUG: " + DEPLOY_ENV)
-print("TEST: " + DEPLOY_ENV)
-print("EMAIL: " + DEPLOY_ENV)
-print("FTP: " + DEPLOY_ENV)
+print("MY_DEBUG: " + MY_DEBUG)
+print("TEST: " + TEST)
+print("EMAIL: " + EMAIL)
+print("FTP: " + FTP)
 
 
 # watch ALLOWED_HOSTS in production mode

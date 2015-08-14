@@ -28,6 +28,9 @@ def email_is_off():
 
 
 def ftp_is_in_state(state):
+    print("check.state: " + state)
+    print("ENV state: " + state)
+    print(state == FTP)
     return FTP == state
 
 
