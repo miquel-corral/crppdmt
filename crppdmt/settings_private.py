@@ -26,8 +26,8 @@ print("DEPLOY_ENV: " + DEPLOY_ENV)
 # watch ALLOWED_HOSTS in production mode
 if DEPLOY_ENV == REMOTE:
     SMT_URL = "https://crppdmt.herokuapp.com/"
-    DEBUG = True
-    ALLOWED_HOSTS = ["*"]
+    DEBUG = False
+    ALLOWED_HOSTS = ["https://crppdmt.herokuapp.com/"]
 else:
     SMT_URL = "http://localhost:5000/"
     DEBUG = True
