@@ -11,7 +11,7 @@ staticfiles
 *.env
 
 # ignore settings_private.py file
-settings_private.py
+#settings_private.py
 
 # ignore .pyc files
 *.pyc
