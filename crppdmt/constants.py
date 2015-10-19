@@ -103,6 +103,7 @@ PROFILE_HOUSING = "Housing"
 PROFILE_ICT = "ICT"
 PROFILE_LOGISTICS = "Logistics"
 PROFILE_INFORMATION_MANAGEMENT = "Information Management"
+PROFILE_PROJECT_FORMULATION = "Project Formulation"
 
 
 ################################################

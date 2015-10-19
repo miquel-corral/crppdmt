@@ -95,6 +95,7 @@ NORCAP_EMAILS = {
     PROFILE_ICT: "erlend.hvoslef@nrc.no",
     PROFILE_LOGISTICS: "erlend.hvoslef@nrc.no",
     PROFILE_INFORMATION_MANAGEMENT: "erlend.hvoslef@nrc.no",
+    PROFILE_PROJECT_FORMULATION: "jorn.owre@nrc.no",
 }
 
 NORCAP_FOCAL_POINTS = {
