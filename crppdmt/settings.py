@@ -87,3 +87,8 @@ DATE_INPUT_FORMATS = (
 SOUTH_MIGRATION_MODULES = {
     'captcha': 'captcha.south_migrations',
 }
+
+FILE_UPLOAD_HANDLERS = (
+    "django.core.files.uploadhandler.MemoryFileUploadHandler",
+    "django.core.files.uploadhandler.TemporaryFileUploadHandler",
+)

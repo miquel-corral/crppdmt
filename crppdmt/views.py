@@ -386,6 +386,8 @@ def create_request(request, request_id=None):
             formset[0].fields['request_creator'].initial = person.id
             # requesting agency
             formset[0].fields['requesting_agency'].initial = "UN-HABITAT"
+            # requesting agency
+            formset[0].fields['requested_agency'].initial = "1"
             # name. temporary value to not duplicate an so validate model form
             formset[0].fields['name'].initial = time.strftime("%Y%m%d%H%M%S")
 

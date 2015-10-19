@@ -3,6 +3,7 @@
 {% load set_context_var %}
 {% load get_context_var %}
 {% load get_filename %}
+{% load selected_option_text %}
 
 {% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "crppdmt/css/forms.css" %}"/>{% endblock %}
 
@@ -106,7 +107,9 @@
             <tr>
                 <td>
                     {{form.expert_profile_type.errors}}
-                    <span class="required" style="display:inline;">{{ form.expert_profile_type.label_tag }}{{ form.expert_profile_type }}</span>
+                    <span class="required" style="display:inline;">{{ form.expert_profile_type.label_tag }}{{ form.expert_profile_type }}</span>&nbsp;&nbsp;
+                    <span class="help">If the expert type desired is not listed please contact secondments@cityresilience.org</span>
+
                 </td>
             </tr>
             <tr>
@@ -133,9 +136,8 @@
                     {% else %}
                         <input id="labelFile" disabled></input>
                     {% endif %}
-                    {{ form.project_document }}
-                    <br>
-                    <span class="helptext">Please provide PDF files not bigger than 2MB.</span>
+                    {{ form.project_document }}&nbsp;
+                    <span class="help">Please provide PDF files not bigger than 2MB.</span>
                 </td>
             </tr>
             </table>
@@ -152,7 +154,9 @@
                 <td>
                     {{form.requested_agency.errors}}
                     <span class="required" style="display:inline;">
-                        {{ form.requested_agency.label_tag }}{{ form.requested_agency }}
+                        {{ form.requested_agency.label_tag }}
+                        {% selected_option_text form.requested_agency form.requested_agency.value %}
+                        {{ form.requested_agency.as_hidden }}
                     </span>
                 </td>
             </tr>
@@ -182,7 +186,7 @@
                     <span class="required">{{ form.requested_date_of_deployment.label_tag }}</span>
                     {{ form.requested_date_of_deployment }}
                     <span class="datetimeshortcuts"></span><br>
-                    <span class="helptext">Date format: YYYY-MM-DD</span>
+                    <span class="help">Date format: YYYY-MM-DD</span>
                 </td>
             </tr>
             <tr>
@@ -197,12 +201,15 @@
                     {{form.requested_length_of_deployment.errors}}
                     <span class="required">{{ form.requested_length_of_deployment.label_tag }}</span>
                     {{ form.requested_length_of_deployment }}
+                    <span class="help">&nbsp;&nbsp;Please set the length of the deployment in months.</span>
                 </td>
             </tr>
             <tr>
                 <td>
                     {{form.first_request.errors}}
-                    <span class="required">{{ form.first_request.label_tag }}{{ form.first_request }}</span>
+                    <span class="required">{{ form.first_request.label_tag }}</span>
+                    {{ form.first_request }}
+                    <span class="help">&nbsp;&nbsp;Please set yes if it is the first request for the expert in this mission.</span>
                 </td>
             </tr>
             <tr>
@@ -210,6 +217,7 @@
                     {{form.extension.errors}}
                     <span class="required">{{ form.extension.label_tag }}</span>
                     {{ form.extension }}
+                    <span class="help">&nbsp;Please do inform the duration in months of the extension (if not first request).</span>
                 </td>
             </tr>
         </table>
@@ -224,27 +232,29 @@
                 <td>
                     {{form.supervisor.errors}}
                     <span class="required">{{ form.supervisor.label_tag }}</span>
-                    {{ form.supervisor }}
+                    {{ form.supervisor }}&nbsp;&nbsp;
+                    <span class="help">Please select the Supervisor of the expert.</span>
                 </td>
             </tr>
             <tr>
                 <td>
                     {{form.country_representative.errors}}
                     <span class="required">{{ form.country_representative.label_tag }}</span>
-                    {{ form.country_representative }}
+                    {{ form.country_representative }}&nbsp;&nbsp;
+                    <span class="help">Please select the Supervisor of the Supervisor of the expert.</span>
                 </td>
             </tr>
             <tr>
                 <td>
                     {{form.agency_hq_focal_point.errors}}
-                    <span class="required">{{ form.agency_hq_focal_point.label_tag }}</span>&nbsp;<span class="help">{{ IF_OTHER_THAN_SUPERVISOR_HELP_TEXT }}</span>
+                    <span class="required">{{ form.agency_hq_focal_point.label_tag }}</span>&nbsp;&nbsp;<span class="help">{{ IF_OTHER_THAN_SUPERVISOR_HELP_TEXT }}</span>
                     {{ form.agency_hq_focal_point }}
                 </td>
             </tr>
             <tr>
                 <td>
                     {{form.agency_field_focal_point.errors}}
-                    <span class="required">{{ form.agency_field_focal_point.label_tag }}</span>&nbsp;<span class="help">{{ IF_OTHER_THAN_SUPERVISOR_HELP_TEXT }}</span>
+                    <span class="required">{{ form.agency_field_focal_point.label_tag }}</span>&nbsp;&nbsp;<span class="help">{{ IF_OTHER_THAN_SUPERVISOR_HELP_TEXT }}</span>
                     {{ form.agency_field_focal_point }}
                 </td>
             </tr>
@@ -271,7 +281,7 @@
 </div> <!-- form div -->
 
 <div class="submit-row">
-    <input class="default" type="submit" name="_save" value="Save"></input>
+    <input class="default" type="submit" name="_save" value="Initiate Request"></input>
 </div> <!-- submit row div -->
 
 </div> <!-- content.main -->

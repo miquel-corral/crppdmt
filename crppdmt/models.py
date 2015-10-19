@@ -5,8 +5,8 @@ from django.core.validators import validate_email
 from datetime import datetime
 from django.utils import timezone
 
-from crppdmt.validators import *
 from crppdmt.constants import *
+from crppdmt.validators import validate_date_greater_than_today
 
 
 class Common(django.db.models.Model):
@@ -127,6 +127,24 @@ class ExpertRequest(BasicName):
     """
     Represents a request to an external agency
     """
+
+    def validate_file_size(file_field):
+        file_size = file_field.file.size
+        megabyte_limit = 2.0
+        if file_size > megabyte_limit*1024*1024:
+            raise ValidationError("Max file size is %sMB" % str(megabyte_limit))
+
+    def validate_file_format(file_field):
+        dot_position = file_field.name.find('.')
+        if (dot_position == -1):
+            raise ValidationError(u'File type not supported! ')
+
+        ext = file_field.name[dot_position:len(file_field.name)]
+        valid_extensions = ['.pdf']
+
+        if not ext in valid_extensions:
+            raise ValidationError(u'File type not supported! ' + ext)
+
     # expert profile type
     expert_profile_type = django.db.models.ForeignKey(ExpertProfileType, null=True, blank=True)
     # control data
@@ -140,10 +158,10 @@ class ExpertRequest(BasicName):
     date_sent_to_supervisor = django.db.models.DateField(null=True, blank=True)
     date_sent_to_validation = django.db.models.DateField(null=True, blank=True)
     # basic information
-    title = django.db.models.CharField(max_length=100, null=False, blank=False)
+    title = django.db.models.CharField(max_length=100, null=False, blank=False, verbose_name="Job Title")
     project_name = django.db.models.CharField(max_length=100, null=False, blank=False)
     project_code = django.db.models.CharField("Project/Budget code", max_length=100, null=False, blank=False)
-    project_document = django.db.models.FileField(null=True, blank=True, validators=[validate_file_extension, validate_file_size])
+    project_document = django.db.models.FileField(null=True, blank=True, validators=[validate_file_format, validate_file_size], verbose_name="Project Description Document")
     requesting_agency = django.db.models.CharField(max_length=100, null=False, blank=False, default="UN-HABITAT")
     requested_agency = django.db.models.ForeignKey(Organization, null=False, blank=False, default="NORCAP")
     country = django.db.models.ForeignKey(Country, null=True, blank=True)
@@ -370,7 +388,26 @@ class PersonalDocument(Common):
     """
     Represents a personal document from an expert
     """
-    file_name = django.db.models.FileField(upload_to='./', null=False, blank=False, validators=[validate_file_extension,
+
+    def validate_file_size(file_field):
+        file_size = file_field.file.size
+        megabyte_limit = 2.0
+        if file_size > megabyte_limit*1024*1024:
+            raise ValidationError("Max file size is %sMB" % str(megabyte_limit))
+
+    def validate_file_format(file_field):
+        dot_position = file_field.name.find('.')
+        if (dot_position == -1):
+            raise ValidationError(u'File type not supported! ')
+
+        ext = file_field.name[dot_position:len(file_field.name)]
+        valid_extensions = ['.pdf']
+
+        if not ext in valid_extensions:
+            raise ValidationError(u'File type not supported! ' + ext)
+
+
+    file_name = django.db.models.FileField(upload_to='./', null=False, blank=False, validators=[validate_file_format,
                                                                                                 validate_file_size])
     document_title = django.db.models.CharField(max_length=50, null=True, blank=True)
     expert = django.db.models.ForeignKey(Person, null=False, blank=False)
