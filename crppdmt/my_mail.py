@@ -24,11 +24,11 @@ class MyMail():
         if env_is_local():
             # local env email only to secondments mail list
             recipients = SECONDMENTS_MAIL_LIST
-        if test_is_on():
+        # test indicator to render PDF as test sample
+        test = test_is_on()
+        if test:
             # subject with TEST
             subject = "This is a TEST email! " + subject
-            # test indicator to render PDF as test sample
-            test = test_is_on()
 
         msg = EmailMultiAlternatives(subject, text_content, EMAIL_HOST_USER, recipients, bcc=SECONDMENTS_MAIL_LIST)
         msg.attach_alternative(html_content, "text/html")

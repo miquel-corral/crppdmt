@@ -1,3 +1,4 @@
+import os
 import django.db.models
 from django.contrib.auth.models import User, Group
 from django.core.exceptions import ValidationError
@@ -129,21 +130,25 @@ class ExpertRequest(BasicName):
     """
 
     def validate_file_size(file_field):
-        file_size = file_field.file.size
-        megabyte_limit = 2.0
-        if file_size > megabyte_limit*1024*1024:
-            raise ValidationError("Max file size is %sMB" % str(megabyte_limit))
+        if os.path.isfile(file_field.name):
+            file_size = file_field.file.size
+            megabyte_limit = 2.0
+            if file_size > megabyte_limit*1024*1024:
+                os.remove(file_field.name)
+                raise ValidationError("Max file size is %sMB" % str(megabyte_limit))
 
     def validate_file_format(file_field):
-        dot_position = file_field.name.find('.')
-        if (dot_position == -1):
-            raise ValidationError(u'File type not supported! ')
+        if os.path.isfile(file_field.name):
+            dot_position = file_field.name.find('.')
+            if (dot_position == -1):
+                raise ValidationError(u'File type not supported! ')
 
-        ext = file_field.name[dot_position:len(file_field.name)]
-        valid_extensions = ['.pdf']
+            ext = file_field.name[dot_position:len(file_field.name)]
+            valid_extensions = ['.pdf']
 
-        if not ext in valid_extensions:
-            raise ValidationError(u'File type not supported! ' + ext)
+            if not ext in valid_extensions:
+                os.remove(file_field.name)
+                raise ValidationError(u'File type not supported! ' + ext)
 
     # expert profile type
     expert_profile_type = django.db.models.ForeignKey(ExpertProfileType, null=True, blank=True)
@@ -390,21 +395,25 @@ class PersonalDocument(Common):
     """
 
     def validate_file_size(file_field):
-        file_size = file_field.file.size
-        megabyte_limit = 2.0
-        if file_size > megabyte_limit*1024*1024:
-            raise ValidationError("Max file size is %sMB" % str(megabyte_limit))
+        if os.path.isfile(file_field.name):
+            file_size = file_field.file.size
+            megabyte_limit = 2.0
+            if file_size > megabyte_limit*1024*1024:
+                os.remove(file_field.name)
+                raise ValidationError("Max file size is %sMB" % str(megabyte_limit))
 
     def validate_file_format(file_field):
-        dot_position = file_field.name.find('.')
-        if (dot_position == -1):
-            raise ValidationError(u'File type not supported! ')
+        if os.path.isfile(file_field.name):
+            dot_position = file_field.name.find('.')
+            if (dot_position == -1):
+                raise ValidationError(u'File type not supported! ')
 
-        ext = file_field.name[dot_position:len(file_field.name)]
-        valid_extensions = ['.pdf']
+            ext = file_field.name[dot_position:len(file_field.name)]
+            valid_extensions = ['.pdf']
 
-        if not ext in valid_extensions:
-            raise ValidationError(u'File type not supported! ' + ext)
+            if not ext in valid_extensions:
+                os.remove(file_field.name)
+                raise ValidationError(u'File type not supported! ' + ext)
 
 
     file_name = django.db.models.FileField(upload_to='./', null=False, blank=False, validators=[validate_file_format,
