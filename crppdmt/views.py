@@ -849,7 +849,7 @@ def validate_user(request, person_id):
 
                 else:
                     # check if supervisor
-                    if formset[0].cleaned_data['rejected'] and formset[0].cleaned_data['rejected'] is True:
+                    if formset[0].cleaned_data['supervisor_role'] and formset[0].cleaned_data['supervisor_role'] is True:
                         person.roles.add(Role.objects.get(name=ROLES[ROLE_SUPERVISOR_ITEM]))
                     # activate user
                     person.user.is_active = True

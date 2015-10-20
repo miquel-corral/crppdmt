@@ -151,7 +151,7 @@ def send_request_email_to(expert_request, action):
                 recipients = recipients + [expert_request.country_representative.user.email]
             # add requested agency email address
             if env_is_remote():
-                recipients = recipients + [NORCAP_EMAILS[expert_request.expert_profile_type.name.strip()],]
+                recipients = recipients + [NORCAP_EMAILS[expert_request.expert_profile_type.name.strip()], EMAIL_ADDRESS_NORCAP]
             # send email
             my_mail.send_mail(subject, html_content, text_content, recipients, expert_request, attach_tor=True,
                                   attach_letter=True)

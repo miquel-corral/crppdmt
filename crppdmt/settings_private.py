@@ -72,7 +72,7 @@ FTP_BASE_DIR = "crppdmtfiles"
 # NORCAP email addresses
 #
 ################################################
-EMAIL_ADDRESS_NORCAP = "NRC@XXX.COM"
+EMAIL_ADDRESS_NORCAP = "request.norcap@nrc.no"
 
 
 NORCAP_EMAILS = {
