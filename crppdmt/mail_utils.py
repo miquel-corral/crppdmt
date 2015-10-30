@@ -139,14 +139,13 @@ def send_request_email_to(expert_request, action):
 
         if action == MAIL_REQUEST_CERTIFIED:
             subject = "UN-HABITAT - New Expert Request"
+            context = Context({'expert_request': expert_request,
+                                        'NORCAP_FOCAL_POINT': NORCAP_FOCAL_POINTS[expert_request.expert_profile_type.name.strip()],
+                                        'SMT_URL': SMT_URL, 'SECONDMENTS_EMAIL': SECONDMENTS_MAIL_LIST[0]})
             html_template = loader.get_template('crppdmt/email/certified.html')
-            html_content = html_template.render(Context({'expert_request': expert_request,
-                                        'NORCAP_FOCAL_POINT': NORCAP_FOCAL_POINTS[expert_request.expert_profile_type.name.strip()],
-                                        'SMT_URL': SMT_URL, 'SECONDMENTS_EMAIL': SECONDMENTS_MAIL_LIST[0]}))
+            html_content = html_template.render(context)
             text_template = loader.get_template('crppdmt/email/certified.txt')
-            text_content = text_template.render(Context({'expert_request': expert_request,
-                                        'NORCAP_FOCAL_POINT': NORCAP_FOCAL_POINTS[expert_request.expert_profile_type.name.strip()],
-                                        'SMT_URL': SMT_URL, 'SECONDMENTS_EMAIL': SECONDMENTS_MAIL_LIST[0]}))
+            text_content = text_template.render(context)
             if expert_request.country_representative is not expert_request.supervisor:
                 recipients = recipients + [expert_request.country_representative.user.email]
             # add requested agency email address
@@ -155,6 +154,16 @@ def send_request_email_to(expert_request, action):
             # send email
             my_mail.send_mail(subject, html_content, text_content, recipients, expert_request, attach_tor=True,
                                   attach_letter=True)
+            # send email to UN-HABITAT LIST
+            recipients = UNHABITAT_MAIL_LIST
+            subject = "INFORMATIVE EMAIL: New Expert Request sent"
+            context['INFORMATIVE_TEXT_UNHABITAT'] = "FYI: The following email has been sent"
+            html_template = loader.get_template('crppdmt/email/certified.html')
+            html_content = html_template.render(context)
+            text_template = loader.get_template('crppdmt/email/certified.txt')
+            text_content = text_template.render(context)
+            my_mail.send_mail(subject, html_content, text_content, recipients, expert_request, attach_tor=True,
+                              attach_letter=True)
 
         if action == MAIL_REQUEST_NOT_REVIEWED:
             subject = "Expert request rejected for supervisor"

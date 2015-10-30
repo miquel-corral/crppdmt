@@ -58,6 +58,8 @@ SERVER_EMAIL = 'secondments@cityresilience.org'
 EMAIL_PORT = 25
 EMAIL_USE_TLS = False
 SECONDMENTS_MAIL_LIST = ['secondments@cityresilience.org',]
+UNHABITAT_MAIL_LIST = ['Andre.Dzikus@unhabitat.org', 'David.Evans@unhabitat.org', 'Marcella.Rouweler@unhabitat.org',
+                       'Amrita.Jaidka@unhabitat.org',]
 
 
 # FTP Details

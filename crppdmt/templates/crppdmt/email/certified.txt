@@ -1,3 +1,5 @@
+{{ INFORMATIVE_TEXT_UNHABITAT }}
+
 Dear {{ expert_request.supervisor.first_name }},
     
 You have a new expert request with the profile: {{ expert_request.expert_profile_type }} ready to be certified at <a href="{{ SMT_URL }}" target="top">{{ SMT_URL }}</a>
