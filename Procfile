@@ -1,1 +1,1 @@
-web: gunicorn crppdmt.wsgi --log-file -
+web: gunicorn crppdmt.wsgi --log-file=-

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys
+from threading import Thread
 import time
 import datetime
 
@@ -299,7 +300,8 @@ def edit_request(request, request_id=None):
                                 # trace
                                 trace_action(TRACE_REQUEST_TO_CERTIFICATION, expert_request, person)
                                 # send email to validator
-                                send_request_email_to(expert_request, MAIL_REQUEST_TO_CERTIFY)
+                                t = Thread(target=send_request_email_to, args=(expert_request, MAIL_REQUEST_TO_CERTIFY))
+                                t.start()
                                 return redirect("/index", context_instance=RequestContext(request))
                 else:
                     # return to request list
@@ -444,7 +446,8 @@ def general_checklist(request, action, expert_request_id):
                     # update expert request
                     expert_request.save()
                     # send email to supervisor
-                    send_request_email_to(expert_request, MAIL_REQUEST_TO_REVIEW)
+                    t = Thread(target=send_request_email_to, args=(expert_request, MAIL_REQUEST_TO_REVIEW))
+                    t.start()
                     # trace action
                     trace_action(TRACE_REQUEST_TO_SUPERVISOR, expert_request, person)
 
@@ -454,7 +457,8 @@ def general_checklist(request, action, expert_request_id):
                     # update expert request
                     expert_request.save()
                     # send email to validator
-                    send_request_email_to(expert_request, MAIL_REQUEST_TO_CERTIFY)
+                    t = Thread(target=send_request_email_to, args=(expert_request, MAIL_REQUEST_TO_CERTIFY))
+                    t.start()
                     # trace action
                     trace_action(TRACE_REQUEST_TO_CERTIFICATION, expert_request, person)
 
@@ -524,7 +528,9 @@ def summary_checklist(request, expert_request_id):
                     # trace
                     trace_action(TRACE_VALIDATED_REQUEST,expert_request, person)
                     # send email to NORCAP, supervisor and certifier (if other than supervisor)
-                    send_request_email_to(expert_request, MAIL_REQUEST_CERTIFIED)
+                    t = Thread(target=send_request_email_to, args=(expert_request, MAIL_REQUEST_CERTIFIED))
+                    t.start()
+
                     # trace
                     trace_action(TRACE_VALIDATED_REQUEST_TO_NORCAP,expert_request, person)
                 # back to request list page
@@ -660,7 +666,8 @@ def reject_request(request, expert_request_id):
                         expert_request.reject_review_date = time.strftime("%Y%m%d%H%M%S")
                         expert_request.status = RequestStatus.objects.get(name=STATUS_PREPARATION)
                         trace_action(TRACE_REJECTED_REVIEW_REQUEST, expert_request, person)
-                        send_request_email_to(expert_request, MAIL_REQUEST_NOT_REVIEWED)
+                        t = Thread(target=send_request_email_to, args=(expert_request, MAIL_REQUEST_NOT_REVIEWED))
+                        t.start()
 
                 if form_expert_request.status.name == STATUS_CERTIFICATION:
                     # control of reject reason
@@ -677,7 +684,9 @@ def reject_request(request, expert_request_id):
                         expert_request.reject_certification_date = time.strftime("%Y%m%d%H%M%S")
                         expert_request.status = RequestStatus.objects.get(name=STATUS_SUPERVISION)
                         trace_action(TRACE_REJECTED_CERTIFICATION_REQUEST, expert_request, person)
-                        send_request_email_to(expert_request, MAIL_REQUEST_NOT_CERTIFIED)
+                        t = Thread(target=send_request_email_to, args=(expert_request, MAIL_REQUEST_NOT_CERTIFIED))
+                        t.start()
+
 
                 # save expert request
                 expert_request.save()
@@ -731,7 +740,8 @@ def user_registration(request):
                     # trace
                     trace_action(TRACE_USER_REGISTERED, None,person)
                     # send email
-                    send_user_registration_email(person, person.certifier)
+                    t = Thread(target=send_user_registration_email, args=(person, person.certifier))
+                    t.start()
                     # redirect to informative page
                     return render_to_response("crppdmt/user_registered.html",{"is_logout":'logout'},context_instance=RequestContext(request))
             else:
@@ -843,7 +853,8 @@ def validate_user(request, person_id):
                         # if rejected ok trace and send email.
                         trace_action(TRACE_USER_REJECTED, None, person)
                         #send mail
-                        send_user_validation_email(person, rejection_reason)
+                        t = Thread(target=send_user_validation_email, args=(person, rejection_reason))
+                        t.start()
                         # redirect to inactive users list
                         return redirect("/inactive_users/",context_instance=RequestContext(request))
 
@@ -859,7 +870,8 @@ def validate_user(request, person_id):
                     # trace
                     trace_action(TRACE_USER_VALIDATED, None, person)
                     # send email
-                    send_user_validation_email(person)
+                    t = Thread(target=send_user_validation_email, args=(person))
+                    t.start()
                     # redirect to inactive users list
                     return redirect("/inactive_users/",context_instance=RequestContext(request))
             else:
